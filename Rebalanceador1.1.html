@@ -1416,7 +1416,7 @@
               <button class="subtab" data-sub="portafolio-pen">PEN</button>
               <button class="subtab" data-sub="portafolio-total">Consolidado</button>
             </div>
-            <button id="btnDescargarReporte" onclick="mostrarModalFormato()" class="btn-action btn-outline" title="Descargar Reporte">
+            <button id="btnDescargarReporte" onclick="mostrarModalFormato()" class="btn-action" style="border: 1px solid var(--border-medium);" title="Descargar Reporte">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>
@@ -2971,18 +2971,21 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.addPage();
             // Logo BBVA en esquina superior derecha
             pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 247 : 160, 5, 40, 40);
-            pdf.setFontSize(14);
+            // Título en estilo Lato 26 azul (usando helvetica bold)
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
-            pdf.text(titulo, margin, 12);
+            pdf.text(titulo, margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
             
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const imgWidth = pageWidth - (margin * 2);
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             
-            const maxHeight = pageHeight - 25;
+            const maxHeight = pageHeight - (isWidescreen ? 25 : 30);
             
             if (imgHeight <= maxHeight) {
-              pdf.addImage(imgData, 'JPEG', margin, 18, imgWidth, imgHeight);
+              pdf.addImage(imgData, 'JPEG', margin, isWidescreen ? 20 : 25, imgWidth, imgHeight);
             } else {
               const scale = maxHeight / imgHeight;
               pdf.addImage(imgData, 'JPEG', margin, 18, imgWidth * scale, maxHeight);
@@ -3030,33 +3033,48 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.addImage(LOGO_BLANCO_B64, 'PNG', 15, 12, 45, 45);
           } catch(e) { console.warn('Error logo:', e); }
           
-          // Título principal - Rebalanceo Portafolio (Tamaño 54)
+          // Título principal - Rebalanceo Portafolio
           pdf.setTextColor(255, 255, 255);
-          pdf.setFontSize(54);
           pdf.setFont('times', 'bold');
-          pdf.text('Rebalanceo', 15, 95);
-          pdf.text('Portafolio', 15, 120);
+          if (isWidescreen) {
+            // 16:9: una sola línea, más arriba, tamaño ajustado
+            pdf.setFontSize(42);
+            pdf.text('Rebalanceo Portafolio', 15, 70);
+          } else {
+            // A4: dos líneas (original)
+            pdf.setFontSize(54);
+            pdf.text('Rebalanceo', 15, 95);
+            pdf.text('Portafolio', 15, 120);
+          }
           
-          // Banquero | Asesor (Tamaño 21)
-          pdf.setFontSize(21);
+          // Banquero | Asesor
           pdf.setFont('helvetica', 'normal');
           const infoLine = `Banquero: ${banquero} | Asesor: ${asesor}`;
-          pdf.text(infoLine, 15, 145);
-          
-          // Línea divisoria blanca
-          pdf.setDrawColor(255, 255, 255);
-          pdf.setLineWidth(0.3);
-          pdf.line(15, 155, 140, 155);
-          
-          // Código cliente (Tamaño 16 - bold)
-          pdf.setFontSize(16);
-          pdf.setFont('helvetica', 'bold');
-          pdf.text(`Código: ${codigo}`, 15, 166);
-          
-          // Fecha (Tamaño 12 - normal)
-          pdf.setFont('helvetica', 'normal');
-          pdf.setFontSize(12);
-          pdf.text(fechaStr, 15, 175);
+          if (isWidescreen) {
+            pdf.setFontSize(16);
+            pdf.text(infoLine, 15, 95);
+            pdf.setDrawColor(255, 255, 255);
+            pdf.setLineWidth(0.3);
+            pdf.line(15, 102, 140, 102);
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`Código: ${codigo}`, 15, 112);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(11);
+            pdf.text(fechaStr, 15, 120);
+          } else {
+            pdf.setFontSize(21);
+            pdf.text(infoLine, 15, 145);
+            pdf.setDrawColor(255, 255, 255);
+            pdf.setLineWidth(0.3);
+            pdf.line(15, 155, 140, 155);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`Código: ${codigo}`, 15, 166);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(12);
+            pdf.text(fechaStr, 15, 175);
+          }
           
           // Imagen ciudad (parte inferior)
           try {
