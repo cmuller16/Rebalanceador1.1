@@ -2970,7 +2970,7 @@ async function descargarReportePDF(formato = 'A4') {
             
             pdf.addPage();
             // Logo BBVA en esquina superior derecha
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 247 : 160, 5, 40, 40);
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 250 : 160, isWidescreen ? 6 : 5, isWidescreen ? 35 : 40, isWidescreen ? 35 : 40);
             // Título en estilo Lato 26 azul (usando helvetica bold)
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
@@ -3088,8 +3088,39 @@ async function descargarReportePDF(formato = 'A4') {
         if (isWidescreen) {
           // ========== FORMATO 16:9 - 12 DIAPOSITIVAS ==========
           
-          // Diapo 2: Resumen Asignación de Activos (Tabla + 2 gráficos)
-          await agregarSeccionAlPDF(document.getElementById('view-conf'), 'Resumen Asignación de Activos');
+          // Diapo 2: Resumen Asignación de Activos (solo tabla + 2 gráficos, sin datos cliente)
+          const diapo2Container = document.createElement('div');
+          diapo2Container.style.background = '#ffffff';
+          diapo2Container.style.padding = '10px';
+          diapo2Container.style.fontSize = '10pt';
+          
+          // Solo tabla (sin título)
+          const tablaAsignacion = document.querySelector('#tablaGuiaConsolidada');
+          if (tablaAsignacion) {
+            const tablaClone = tablaAsignacion.cloneNode(true);
+            tablaClone.style.fontSize = '10pt';
+            const tablaWrapper = document.createElement('div');
+            tablaWrapper.className = 'table-wrapper';
+            tablaWrapper.style.marginBottom = '15px';
+            tablaWrapper.appendChild(tablaClone);
+            diapo2Container.appendChild(tablaWrapper);
+          }
+          
+          // Gráficos
+          const graficosContainer = document.createElement('div');
+          graficosContainer.style.display = 'grid';
+          graficosContainer.style.gridTemplateColumns = '1fr 1fr';
+          graficosContainer.style.gap = '16px';
+          
+          const grafico1 = document.querySelector('#aaCanvasGrouped')?.closest('.card');
+          const grafico2 = document.querySelector('#aaCanvasDonut')?.closest('.card');
+          if (grafico1) graficosContainer.appendChild(grafico1.cloneNode(true));
+          if (grafico2) graficosContainer.appendChild(grafico2.cloneNode(true));
+          diapo2Container.appendChild(graficosContainer);
+          
+          document.body.appendChild(diapo2Container);
+          await agregarSeccionAlPDF(diapo2Container, 'Resumen Asignación de Activos');
+          document.body.removeChild(diapo2Container);
           
           // Diapo 3: Posición Detallada (Tabla consolidada)
           await navegarA('[data-tab="portafolio"].tab-child', '[data-sub="portafolio-total"]');
