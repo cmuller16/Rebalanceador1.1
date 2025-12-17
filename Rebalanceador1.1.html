@@ -3130,6 +3130,28 @@ async function descargarReportePDF(formato = 'A4') {
         if (isWidescreen) {
           // ========== FORMATO 16:9 - 12 DIAPOSITIVAS ==========
 
+          // Función para hacer visible un elemento y TODOS sus padres (definida al inicio)
+          const hacerVisibleConPadres = (elemento) => {
+            const elementosModificados = [];
+            let el = elemento;
+            while (el && el !== document.body) {
+              const computed = getComputedStyle(el);
+              if (computed.display === 'none' || computed.visibility === 'hidden' || el.offsetHeight === 0) {
+                elementosModificados.push({
+                  el,
+                  display: el.style.display,
+                  visibility: el.style.visibility,
+                  height: el.style.height
+                });
+                el.style.setProperty('display', 'block', 'important');
+                el.style.setProperty('visibility', 'visible', 'important');
+                if (el.offsetHeight === 0) el.style.setProperty('height', 'auto', 'important');
+              }
+              el = el.parentElement;
+            }
+            return elementosModificados;
+          };
+
           // Diapo 2: Resumen Asignación de Activos (SOLO tabla - 13px igual que otras)
           const tablaAsignacion = document.querySelector('#tablaGuiaConsolidada');
           if (tablaAsignacion) {
@@ -3246,28 +3268,6 @@ async function descargarReportePDF(formato = 'A4') {
           // FORZAR visibilidad de TODOS los padres del canvas hasta el body
           const canvasAA1 = document.getElementById('sectoresPFChartTotal');
           const canvasMaturity = document.getElementById('maturityWallPFChartTotal');
-
-          // Función para hacer visible un elemento y TODOS sus padres
-          const hacerVisibleConPadres = (elemento) => {
-            const elementosModificados = [];
-            let el = elemento;
-            while (el && el !== document.body) {
-              const computed = getComputedStyle(el);
-              if (computed.display === 'none' || computed.visibility === 'hidden' || el.offsetHeight === 0) {
-                elementosModificados.push({
-                  el,
-                  display: el.style.display,
-                  visibility: el.style.visibility,
-                  height: el.style.height
-                });
-                el.style.setProperty('display', 'block', 'important');
-                el.style.setProperty('visibility', 'visible', 'important');
-                if (el.offsetHeight === 0) el.style.setProperty('height', 'auto', 'important');
-              }
-              el = el.parentElement;
-            }
-            return elementosModificados;
-          };
 
           // Hacer visibles ambos canvas y todos sus padres
           const modificados1 = canvasAA1 ? hacerVisibleConPadres(canvasAA1) : [];
