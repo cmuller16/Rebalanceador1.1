@@ -11008,6 +11008,7 @@ const regionCols = [
         // Función helper para identificar tipo de activo
         const identificarTipo = (row) => {
           const vehiculo = String(row.vehiculo || '').toUpperCase();
+          const nombre = String(row.nombre || '').toUpperCase().trim();
           const producto = String(row.Producto || row.producto || '').toUpperCase();
           // Buscar grupo producto en todos los campos posibles
           const grupo = String(row.grupo || row.grupoproducto || row['Grupo Producto'] || row['grupoproducto'] || '').toUpperCase();
@@ -11016,8 +11017,8 @@ const regionCols = [
           if (vehiculo === 'CUENTAS' || vehiculo.includes('CUENTA')) {
             return { tipo: 'CUENTA', moneda };
           }
-          // CLN: Vehiculo BEST + Producto CUENTA VALOR + Grupo Producto CLN
-          if (vehiculo.includes('BEST') && (grupo === 'CLN' || grupo.includes('CLN'))) {
+          // CLN: Vehiculo BEST + (Grupo Producto CLN O nombre empieza con "CLN")
+          if (vehiculo.includes('BEST') && (grupo === 'CLN' || grupo.includes('CLN') || nombre.startsWith('CLN'))) {
             return { tipo: 'CLN', moneda: 'ALL' };  // CLN no agrupa por moneda
           }
           if (vehiculo.includes('SMART DEPOSIT') || vehiculo.includes('SMART_DEPOSIT') || vehiculo.includes('SMART')) {
