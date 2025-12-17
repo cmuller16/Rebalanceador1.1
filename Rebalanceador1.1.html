@@ -3130,7 +3130,7 @@ async function descargarReportePDF(formato = 'A4') {
         if (isWidescreen) {
           // ========== FORMATO 16:9 - 12 DIAPOSITIVAS ==========
 
-          // Diapo 2: Resumen Asignación de Activos (SOLO tabla - mismo tamaño que otras tablas)
+          // Diapo 2: Resumen Asignación de Activos (SOLO tabla - 13px igual que otras)
           const tablaAsignacion = document.querySelector('#tablaGuiaConsolidada');
           if (tablaAsignacion) {
             const contenedorAsignacion = document.createElement('div');
