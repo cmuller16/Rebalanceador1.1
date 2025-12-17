@@ -3159,10 +3159,10 @@ async function descargarReportePDF(formato = 'A4') {
             contenedorAsignacion.style.cssText = 'width: 900px; background: #ffffff;';
             const tablaClone = tablaAsignacion.cloneNode(true);
             tablaClone.style.width = '100%';
-            // Usar 11px para prueba
+            // Letra 9px, líneas más pegadas
             tablaClone.querySelectorAll('th, td').forEach(cell => {
-              cell.style.fontSize = '11px';
-              cell.style.padding = '10px 16px';
+              cell.style.fontSize = '9px';
+              cell.style.padding = '4px 12px';
             });
             contenedorAsignacion.appendChild(tablaClone);
             document.body.appendChild(contenedorAsignacion);
