@@ -2981,15 +2981,11 @@ async function descargarReportePDF(formato = 'A4') {
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const imgWidth = pageWidth - (margin * 2);
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            const maxHeight = pageHeight - (isWidescreen ? 25 : 30);
-            
-            if (imgHeight <= maxHeight) {
-              pdf.addImage(imgData, 'JPEG', margin, isWidescreen ? 20 : 25, imgWidth, imgHeight);
-            } else {
-              const scale = maxHeight / imgHeight;
-              pdf.addImage(imgData, 'JPEG', margin, 18, imgWidth * scale, maxHeight);
-            }
+            const startY = isWidescreen ? 20 : 25;
+
+            // Mantener tamaño de letra consistente (13px) en todas las tablas
+            // Usar siempre el ancho completo y altura proporcional
+            pdf.addImage(imgData, 'JPEG', margin, startY, imgWidth, imgHeight);
             
             return true;
           } catch (err) {
@@ -3113,13 +3109,13 @@ async function descargarReportePDF(formato = 'A4') {
           const diapo2Container = document.createElement('div');
           diapo2Container.style.background = '#ffffff';
           diapo2Container.style.padding = '10px';
-          diapo2Container.style.fontSize = '10pt';
+          diapo2Container.style.fontSize = '13px';
           
           // Solo tabla (sin título)
           const tablaAsignacion = document.querySelector('#tablaGuiaConsolidada');
           if (tablaAsignacion) {
             const tablaClone = tablaAsignacion.cloneNode(true);
-            tablaClone.style.fontSize = '10pt';
+            tablaClone.style.fontSize = '13px';
             const tablaWrapper = document.createElement('div');
             tablaWrapper.className = 'table-wrapper';
             tablaWrapper.style.marginBottom = '15px';
