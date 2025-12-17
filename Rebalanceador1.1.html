@@ -11004,11 +11004,134 @@ const regionCols = [
           return true;
         });
 
-        const totalFinal = rowsWithFinal.reduce((sum, r) => sum + (r.montoFinalUSD || r.montoFinal), 0);
+        // ========== AGRUPACIÓN EN CASCADA PARA > 15 ACTIVOS ==========
+        // Función helper para identificar tipo de activo
+        const identificarTipo = (row) => {
+          const vehiculo = String(row.vehiculo || '').toUpperCase();
+          const grupo = String(row.grupo || row.grupoproducto || '').toUpperCase();
+          const moneda = (cur === 'TOTAL') ? (row._monedaFila || row._originalMoneda || 'USD') : cur;
+
+          if (vehiculo === 'CUENTAS' || vehiculo.includes('CUENTA')) {
+            return { tipo: 'CUENTA', moneda };
+          }
+          if (vehiculo.includes('BEST') && grupo === 'CLN') {
+            return { tipo: 'CLN', moneda: 'ALL' };  // CLN no agrupa por moneda
+          }
+          if (vehiculo.includes('SMART DEPOSIT') || vehiculo.includes('SMART_DEPOSIT') || vehiculo.includes('SMART')) {
+            return { tipo: 'SMART', moneda };
+          }
+          if (vehiculo.includes('BONO')) {
+            return { tipo: 'BONO', moneda };
+          }
+          return { tipo: null, moneda };
+        };
+
+        // Función para agrupar activos por tipo y moneda
+        const agruparActivos = (rows, tipoAgrupar, nombreBase, agruparPorMoneda = true) => {
+          const result = [];
+          const grupos = {};
+
+          rows.forEach(row => {
+            const { tipo, moneda } = identificarTipo(row);
+            if (tipo === tipoAgrupar) {
+              const key = agruparPorMoneda ? moneda : 'ALL';
+              if (!grupos[key]) {
+                grupos[key] = {
+                  items: [],
+                  montoFinal: 0,
+                  montoFinalUSD: 0,
+                  rebalanceo: 0,
+                  rebalanceoUSD: 0,
+                  clase: row.clase,
+                  moneda: key
+                };
+              }
+              grupos[key].items.push(row);
+              grupos[key].montoFinal += row.montoFinal || 0;
+              grupos[key].montoFinalUSD += row.montoFinalUSD || row.montoFinal || 0;
+              grupos[key].rebalanceo += row.rebalanceo || 0;
+              grupos[key].rebalanceoUSD += row.rebalanceoUSD || row.rebalanceo || 0;
+              // Preservar la clase más común del grupo
+              if (!grupos[key].clase) grupos[key].clase = row.clase;
+            } else {
+              result.push(row);
+            }
+          });
+
+          // Crear filas agrupadas
+          Object.keys(grupos).forEach(key => {
+            const g = grupos[key];
+            if (g.items.length > 0) {
+              let nombreGrupo;
+              if (agruparPorMoneda) {
+                const monedaNombre = key === 'USD' ? 'Dólares' : (key === 'PEN' ? 'Soles' : key);
+                nombreGrupo = `${nombreBase} ${monedaNombre}`;
+              } else {
+                nombreGrupo = nombreBase;
+              }
+
+              result.push({
+                nombre: nombreGrupo,
+                vehiculo: g.items[0].vehiculo,
+                clase: g.clase,
+                montoFinal: g.montoFinal,
+                montoFinalUSD: g.montoFinalUSD,
+                rebalanceo: g.rebalanceo,
+                rebalanceoUSD: g.rebalanceoUSD,
+                _monedaFila: key === 'ALL' ? 'USD' : key,
+                _originalMoneda: key === 'ALL' ? 'USD' : key,
+                _esAgrupado: true,
+                _itemsAgrupados: g.items.length,
+                subclase: g.items[0].subclase || 'Cash y Equivalentes'
+              });
+            }
+          });
+
+          return result;
+        };
+
+        // Aplicar agrupación en cascada solo si hay más de 15 activos
+        let rowsParaRender = [...rowsWithFinal];
+        const LIMITE_ACTIVOS = 15;
+
+        // 1. Si > 15 activos, agrupar CUENTAS por moneda
+        if (rowsParaRender.length > LIMITE_ACTIVOS) {
+          const cuentasCount = rowsParaRender.filter(r => identificarTipo(r).tipo === 'CUENTA').length;
+          if (cuentasCount > 1) {
+            rowsParaRender = agruparActivos(rowsParaRender, 'CUENTA', 'Cuentas', true);
+          }
+        }
+
+        // 2. Si aún > 15, agrupar CLNs (BEST + grupo CLN)
+        if (rowsParaRender.length > LIMITE_ACTIVOS) {
+          const clnCount = rowsParaRender.filter(r => identificarTipo(r).tipo === 'CLN').length;
+          if (clnCount > 1) {
+            rowsParaRender = agruparActivos(rowsParaRender, 'CLN', 'CLNs', false);
+          }
+        }
+
+        // 3. Si aún > 15, agrupar SMART DEPOSIT por moneda
+        if (rowsParaRender.length > LIMITE_ACTIVOS) {
+          const smartCount = rowsParaRender.filter(r => identificarTipo(r).tipo === 'SMART').length;
+          if (smartCount > 1) {
+            rowsParaRender = agruparActivos(rowsParaRender, 'SMART', 'Smart Deposit', true);
+          }
+        }
+
+        // 4. Si aún > 15, agrupar BONOS por moneda
+        if (rowsParaRender.length > LIMITE_ACTIVOS) {
+          const bonosCount = rowsParaRender.filter(r => identificarTipo(r).tipo === 'BONO').length;
+          if (bonosCount > 1) {
+            rowsParaRender = agruparActivos(rowsParaRender, 'BONO', 'Pool de Bonos', true);
+          }
+        }
+        // ========== FIN AGRUPACIÓN EN CASCADA ==========
+
+        const totalFinal = rowsParaRender.reduce((sum, r) => sum + (r.montoFinalUSD || r.montoFinal), 0);
 
         // Agrupar por clase de activo
         ORDER.forEach(cls => {
-          let g = rowsWithFinal.filter(r => r.clase === cls);
+          let g = rowsParaRender.filter(r => r.clase === cls);
           if (!g.length) return;
 
           // Ordenar dentro de cada clase:
@@ -11060,70 +11183,96 @@ const regionCols = [
           g.forEach(row => {
             const peso = totalFinal > 0 ? ((row.montoFinalUSD || row.montoFinal) / totalFinal * 100) : 0;
             const monedaFila = (cur === 'TOTAL') ? (row._monedaFila || row._originalMoneda || 'USD') : cur;
-            
+
             // Obtener subclasificación (MISMA lógica que Posiciones - líneas 3000-3040)
             let subclasificacion = '-';
-            const esBonoNuevo = row._rid?.includes('-BOND-');
-            const vehiculo = String(row.vehiculo || '').toUpperCase();
-            const esNuevo = row._rid?.includes('-OA-');
-            
-            // Hardcoded: CUENTA AHORRO, CUENTA CORRIENTE y CTS
-            const sub = row._subn || '';
-            const prod = sub ? ACT.product_by_subprod_name.get(sub) : '';
-            if (prod === 'CUENTA AHORRO' || prod === 'CUENTA CORRIENTE' || prod === 'CTS') {
-              subclasificacion = 'Cash y Equivalentes';
-            } else if (vehiculo.includes('DPF') && !esNuevo) {
-              // DPF inicial: hardcoded
-              subclasificacion = 'Cash y Equivalentes';
-            } else if (esNuevo && !esBonoNuevo) {
-              // Minimodal Agregar Activos: ACTIVOS2.efsub
-              const meta = (window.ACTIVOS2 || []).find(a => {
-                if (vehiculo.includes('ETF')) return a.isin === row._isin;
-                if (vehiculo.includes('BEST')) {
-                  if (row._isin && a.isin === row._isin) return true;
-                  if (a.inst === row.nombre) return true;
-                  if (a.veh?.toUpperCase().includes('BEST') && row.grupo && a.grupo?.toUpperCase() === row.grupo?.toUpperCase()) return true;
-                  return false;
-                }
-                if (vehiculo.includes('DPF')) return a.veh?.toUpperCase().includes('DPF');
-                if (row.Producto === 'FONDOS MUTUOS') return a.codSub === row._codSub;
-                return false;
-              });
-              subclasificacion = meta?.subclasificacion || meta?.efsub || row.subclase || '-';
-            } else if (esBonoNuevo) {
-              // Bono agregado por minimodal: BONDS_RAW.subclasificación
-              const bondData = (window.BONDS_RAW || []).find(b => b.bono === row.nombre || b.isin === row._isin);
-              subclasificacion = bondData?.['subclasificación'] || '-';
-            } else {
-              // Posición inicial: ACTIVOS_RAW.subclasificación
-              let matchActivos;
-              if (row.Producto === 'FONDOS MUTUOS') {
-                // Fondos: match por codsubproducto
-                matchActivos = (window.ACTIVOS_RAW || []).find(a => a.codsubproducto === row._codSub);
+            let vehiculoDisplay = String(row.vehiculo || '');
+
+            // CASO ESPECIAL: Filas agrupadas
+            if (row._esAgrupado) {
+              // Para filas agrupadas, usar subclasificación genérica según tipo
+              const nombreLower = String(row.nombre || '').toLowerCase();
+              if (nombreLower.includes('cuenta')) {
+                subclasificacion = 'Cash y Equivalentes';
+                vehiculoDisplay = 'Cuentas';
+              } else if (nombreLower.includes('cln')) {
+                subclasificacion = 'Notas Estructuradas';
+                vehiculoDisplay = 'BEST';
+              } else if (nombreLower.includes('smart')) {
+                subclasificacion = 'Cash y Equivalentes';
+                vehiculoDisplay = 'Smart Deposit';
+              } else if (nombreLower.includes('pool de bonos')) {
+                subclasificacion = 'Bonos Corporativos';
+                vehiculoDisplay = 'Bonos';
               } else {
-                // Otros: match por ISIN
-                matchActivos = (window.ACTIVOS_RAW || []).find(a => a.isin === row._isin);
+                subclasificacion = row.subclase || '-';
               }
-              subclasificacion = matchActivos?.['subclasificación'] || row.subclase || '-';
+            } else {
+              // Lógica original para filas no agrupadas
+              const esBonoNuevo = row._rid?.includes('-BOND-');
+              const vehiculo = String(row.vehiculo || '').toUpperCase();
+              const esNuevo = row._rid?.includes('-OA-');
+
+              // Hardcoded: CUENTA AHORRO, CUENTA CORRIENTE y CTS
+              const sub = row._subn || '';
+              const prod = sub ? ACT.product_by_subprod_name.get(sub) : '';
+              if (prod === 'CUENTA AHORRO' || prod === 'CUENTA CORRIENTE' || prod === 'CTS') {
+                subclasificacion = 'Cash y Equivalentes';
+              } else if (vehiculo.includes('DPF') && !esNuevo) {
+                // DPF inicial: hardcoded
+                subclasificacion = 'Cash y Equivalentes';
+              } else if (esNuevo && !esBonoNuevo) {
+                // Minimodal Agregar Activos: ACTIVOS2.efsub
+                const meta = (window.ACTIVOS2 || []).find(a => {
+                  if (vehiculo.includes('ETF')) return a.isin === row._isin;
+                  if (vehiculo.includes('BEST')) {
+                    if (row._isin && a.isin === row._isin) return true;
+                    if (a.inst === row.nombre) return true;
+                    if (a.veh?.toUpperCase().includes('BEST') && row.grupo && a.grupo?.toUpperCase() === row.grupo?.toUpperCase()) return true;
+                    return false;
+                  }
+                  if (vehiculo.includes('DPF')) return a.veh?.toUpperCase().includes('DPF');
+                  if (row.Producto === 'FONDOS MUTUOS') return a.codSub === row._codSub;
+                  return false;
+                });
+                subclasificacion = meta?.subclasificacion || meta?.efsub || row.subclase || '-';
+              } else if (esBonoNuevo) {
+                // Bono agregado por minimodal: BONDS_RAW.subclasificación
+                const bondData = (window.BONDS_RAW || []).find(b => b.bono === row.nombre || b.isin === row._isin);
+                subclasificacion = bondData?.['subclasificación'] || '-';
+              } else {
+                // Posición inicial: ACTIVOS_RAW.subclasificación
+                let matchActivos;
+                if (row.Producto === 'FONDOS MUTUOS') {
+                  // Fondos: match por codsubproducto
+                  matchActivos = (window.ACTIVOS_RAW || []).find(a => a.codsubproducto === row._codSub);
+                } else {
+                  // Otros: match por ISIN
+                  matchActivos = (window.ACTIVOS_RAW || []).find(a => a.isin === row._isin);
+                }
+                subclasificacion = matchActivos?.['subclasificación'] || row.subclase || '-';
+              }
             }
-            
-            // Modificar nombre para DPF: incluir moneda
+
+            // Modificar nombre para DPF: incluir moneda (solo para no agrupados)
             let nombreDisplay = String(row.nombre || '');
-            const vehCheck = String(row.vehiculo || '').toUpperCase();
-            if (vehCheck.includes('DPF') && cur === 'TOTAL') {
-              const monedaDPF = row._monedaFila || row._originalMoneda || 'USD';
-              if (nombreDisplay.startsWith('DPF ')) {
-                nombreDisplay = `DPF ${monedaDPF} ` + nombreDisplay.substring(4);
-              } else if (nombreDisplay.startsWith('DPF')) {
-                nombreDisplay = `DPF ${monedaDPF}` + nombreDisplay.substring(3);
+            if (!row._esAgrupado) {
+              const vehCheck = String(row.vehiculo || '').toUpperCase();
+              if (vehCheck.includes('DPF') && cur === 'TOTAL') {
+                const monedaDPF = row._monedaFila || row._originalMoneda || 'USD';
+                if (nombreDisplay.startsWith('DPF ')) {
+                  nombreDisplay = `DPF ${monedaDPF} ` + nombreDisplay.substring(4);
+                } else if (nombreDisplay.startsWith('DPF')) {
+                  nombreDisplay = `DPF ${monedaDPF}` + nombreDisplay.substring(3);
+                }
               }
             }
-            
+
             const tr = document.createElement('tr');
             tr.classList.add('indent-2');
             tr.innerHTML = `
               <td class="left">${nombreDisplay}</td>
-              <td>${String(row.vehiculo || '')}</td>
+              <td>${vehiculoDisplay}</td>
               <td>${subclasificacion}</td>
               <td class="num center">${fmtMoney(row.montoFinal, monedaFila)}</td>
               <td class="num center">${peso === 0 ? '-' : peso.toFixed(1) + '%'}</td>
@@ -11134,7 +11283,7 @@ const regionCols = [
         });
 
         // Fila de TOTAL (siempre en USD para tab TOTAL)
-        const totalRebalanceo = rowsWithFinal.reduce((sum, r) => sum + (r.rebalanceoUSD || r.rebalanceo), 0);
+        const totalRebalanceo = rowsParaRender.reduce((sum, r) => sum + (r.rebalanceoUSD || r.rebalanceo), 0);
         const trTotal = document.createElement('tr');
         trTotal.className = 'row-total';
         trTotal.innerHTML = `
