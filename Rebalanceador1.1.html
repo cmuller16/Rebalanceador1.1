@@ -11009,16 +11009,15 @@ const regionCols = [
         const identificarTipo = (row) => {
           const vehiculo = String(row.vehiculo || '').toUpperCase();
           const nombre = String(row.nombre || '').toUpperCase().trim();
-          const producto = String(row.Producto || row.producto || '').toUpperCase();
-          // Buscar grupo producto en todos los campos posibles
-          const grupo = String(row.grupo || row.grupoproducto || row['Grupo Producto'] || row['grupoproducto'] || '').toUpperCase();
+          // Usar el nuevo campo grupoProducto que ahora viene en los holdings
+          const grupo = String(row.grupoProducto || '').toUpperCase();
           const moneda = (cur === 'TOTAL') ? (row._monedaFila || row._originalMoneda || 'USD') : cur;
 
           if (vehiculo === 'CUENTAS' || vehiculo.includes('CUENTA')) {
             return { tipo: 'CUENTA', moneda };
           }
-          // CLN: Vehiculo BEST + (Grupo Producto CLN O nombre empieza con "CLN")
-          if (vehiculo.includes('BEST') && (grupo === 'CLN' || grupo.includes('CLN') || nombre.startsWith('CLN'))) {
+          // CLN: Vehiculo BEST + (Grupo Producto = CLN O nombre empieza con "CLN")
+          if (vehiculo.includes('BEST') && (grupo === 'CLN' || nombre.startsWith('CLN'))) {
             return { tipo: 'CLN', moneda: 'ALL' };  // CLN no agrupa por moneda
           }
           if (vehiculo.includes('SMART DEPOSIT') || vehiculo.includes('SMART_DEPOSIT') || vehiculo.includes('SMART')) {
@@ -12256,6 +12255,9 @@ const regionCols = [
         const vehiculo = (subName && ACT.veh_by_subprod_name.get(subName))
                       || (isin && ACT.veh_by_isin.get(isin))
                       || pick(row,['vehiculo','vehicle']) || '';
+
+        // Grupo Producto: para identificar CLN, Autocall, Twin Win, etc.
+        const grupoProducto = pick(row, ['Grupo Producto', 'grupoproducto', 'grupo']) || '';
         
         // Región: prioridad Subproducto > ISIN > CodProd > CSV
         // Para CUENTA A PLAZO, siempre usar "Emergentes"
@@ -12301,6 +12303,7 @@ const regionCols = [
           saldoRetenido: toNum(pick(row, ['SaldoretenidoDetalleUSD', 'SaldoRetenidoDetalleUSD', 'saldoretenidodetalleusd'])),
           gp_no_realizada: u_no_real,
           vehiculo,
+          grupoProducto,  // CRÍTICO: para identificar CLN en agrupación cascada
           region,
           subclase,
           Moneda: cur,  // CRÍTICO: agregar para _montoFinalOf
