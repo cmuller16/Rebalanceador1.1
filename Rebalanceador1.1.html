@@ -1536,16 +1536,16 @@
             <!-- Gráficos: AA1 y Maturity lado a lado, AA2 horizontal abajo -->
             <div style="display: flex; flex-direction: column; gap: 24px; margin-top: 24px; margin-bottom: 16px;">
               <!-- Fila superior: AA1 y Maturity lado a lado -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+              <div id="graficos-descomposicion-total" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-bottom: 20px;">
                 <div>
                   <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #001391; border-bottom: 2px solid #001391; padding-bottom: 8px;">ASSET ALLOCATION NIVEL 1 (%)</h3>
-                  <div class="chart-wrapper" style="height:360px">
+                  <div class="chart-wrapper" style="height:460px">
                     <canvas id="sectoresPFChartTotal"></canvas>
                   </div>
                 </div>
                 <div>
                   <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #001391; border-bottom: 2px solid #001391; padding-bottom: 8px;">MATURITY WALL</h3>
-                  <div class="chart-wrapper" style="height:360px">
+                  <div class="chart-wrapper" style="height:460px">
                     <canvas id="maturityWallPFChartTotal"></canvas>
                   </div>
                 </div>
@@ -1806,6 +1806,7 @@
           <div id="renta-fija-total" class="subtab-content">
             <!-- Sección 1: Tabla + Gráficos (para PDF) -->
             <div id="rf-seccion-tabla-graficos">
+            <div id="rf-seccion-tabla">
             <div class="table-wrapper">
               <table class="data-table">
                 <thead>
@@ -1826,7 +1827,8 @@
                 <tbody id="rentaFijaBodyTotal"></tbody>
               </table>
             </div>
-            
+            </div><!-- Fin rf-seccion-tabla -->
+
             <!-- Gráficos de Ratings y Sectores Total (lado a lado) -->
             <div style="display: flex; gap: 24px; margin-top: 32px; margin-bottom: 16px;">
               <!-- Ratings -->
@@ -2936,22 +2938,25 @@ async function descargarReportePDF(formato = 'A4') {
             console.warn('Elemento no encontrado:', titulo);
             return false;
           }
-          
+
           try {
             const originalDisplay = elemento.style.display;
             const originalVisibility = elemento.style.visibility;
             elemento.style.display = 'block';
             elemento.style.visibility = 'visible';
-            
+
             await new Promise(r => setTimeout(r, 300));
-            
+
+            // LOG 1: Dimensiones del elemento original
+            console.log(`📊 [${titulo}] Elemento - offsetWidth: ${elemento.offsetWidth}px, offsetHeight: ${elemento.offsetHeight}px`);
+
             if (elemento.offsetHeight === 0) {
               console.warn('Elemento sin altura:', titulo);
               elemento.style.display = originalDisplay;
               elemento.style.visibility = originalVisibility;
               return false;
             }
-            
+
             const canvas = await html2canvas(elemento, {
               scale: 1.5,
               useCORS: true,
@@ -2959,15 +2964,18 @@ async function descargarReportePDF(formato = 'A4') {
               backgroundColor: '#ffffff',
               allowTaint: true
             });
-            
+
             elemento.style.display = originalDisplay;
             elemento.style.visibility = originalVisibility;
-            
+
+            // LOG 2: Dimensiones del canvas capturado
+            console.log(`📊 [${titulo}] Canvas - width: ${canvas.width}px, height: ${canvas.height}px`);
+
             if (canvas.width === 0 || canvas.height === 0) {
               console.warn('Canvas vacío para:', titulo);
               return false;
             }
-            
+
             pdf.addPage();
             // Logo BBVA en esquina superior derecha (alineado con el título)
             pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
@@ -2977,16 +2985,16 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.setTextColor(0, 19, 145);
             pdf.text(titulo, margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
-            
+
             const imgData = canvas.toDataURL('image/jpeg', 0.95);
             const imgWidth = pageWidth - (margin * 2);
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             const startY = isWidescreen ? 20 : 25;
 
-            // Mantener tamaño de letra consistente (13px) en todas las tablas
-            // Usar siempre el ancho completo y altura proporcional
+            // Siempre usar ancho completo para mantener tamaño de letra consistente (13px)
+            console.log(`📊 [${titulo}] PDF - imgWidth: ${imgWidth.toFixed(1)}mm, imgHeight: ${imgHeight.toFixed(1)}mm`);
             pdf.addImage(imgData, 'JPEG', margin, startY, imgWidth, imgHeight);
-            
+
             return true;
           } catch (err) {
             console.error('Error capturando:', titulo, err);
@@ -3080,7 +3088,24 @@ async function descargarReportePDF(formato = 'A4') {
         
         // 0. Carátula BBVA
         crearCaratula();
-        
+
+        // PRE-RENDERIZAR: Navegar al tab de Portafolio Final para que los gráficos existan
+        const tabPortafolio = document.querySelector('[data-tab="portafolio"].tab-child');
+        const subtabTotal = document.querySelector('[data-sub="portafolio-total"]');
+        if (tabPortafolio) tabPortafolio.click();
+        await new Promise(r => setTimeout(r, 300));
+        if (subtabTotal) subtabTotal.click();
+        await new Promise(r => setTimeout(r, 500));
+        // Forzar re-render de los gráficos
+        const perfilPre = document.getElementById('pfPerfilSel')?.value || 'Moderado';
+        if (typeof renderAssetAllocationChart === 'function' && typeof calculateAssetAllocation === 'function') {
+          renderAssetAllocationChart('sectoresPFChartTotal', calculateAssetAllocation('TOTAL', perfilPre));
+        }
+        if (typeof renderMaturityWallPFChart === 'function') {
+          await renderMaturityWallPFChart('maturityWallPFChartTotal', 'TOTAL');
+        }
+        await new Promise(r => setTimeout(r, 500));
+
         // Función auxiliar para clonar elementos con canvas preservando el contenido
         const clonarConCanvas = (element) => {
           if (!element) return null;
@@ -3105,132 +3130,626 @@ async function descargarReportePDF(formato = 'A4') {
         if (isWidescreen) {
           // ========== FORMATO 16:9 - 12 DIAPOSITIVAS ==========
 
-          // Diapo 2: Resumen Asignación de Activos (solo tabla + 2 gráficos, sin datos cliente)
-          const diapo2Container = document.createElement('div');
-          diapo2Container.style.background = '#ffffff';
-          diapo2Container.style.padding = '10px';
-          diapo2Container.style.fontSize = '13px';
-          
-          // Solo tabla (sin título)
+          // Diapo 2: Resumen Asignación de Activos (SOLO tabla - mismo tamaño que otras tablas)
           const tablaAsignacion = document.querySelector('#tablaGuiaConsolidada');
           if (tablaAsignacion) {
+            const contenedorAsignacion = document.createElement('div');
+            contenedorAsignacion.style.cssText = 'width: 900px; background: #ffffff;';
             const tablaClone = tablaAsignacion.cloneNode(true);
-            tablaClone.style.fontSize = '13px';
-            const tablaWrapper = document.createElement('div');
-            tablaWrapper.className = 'table-wrapper';
-            tablaWrapper.style.marginBottom = '15px';
-            tablaWrapper.appendChild(tablaClone);
-            diapo2Container.appendChild(tablaWrapper);
+            tablaClone.style.width = '100%';
+            // Usar 13px igual que todas las demás tablas
+            tablaClone.querySelectorAll('th, td').forEach(cell => {
+              cell.style.fontSize = '13px';
+              cell.style.padding = '10px 16px';
+            });
+            contenedorAsignacion.appendChild(tablaClone);
+            document.body.appendChild(contenedorAsignacion);
+            await agregarSeccionAlPDF(contenedorAsignacion, 'Resumen Asignación de Activos');
+            document.body.removeChild(contenedorAsignacion);
+          }
+
+          // Diapo 3: Gráficos de Asignación (AA Grouped + Donut)
+          const canvasAAGrouped = document.getElementById('aaCanvasGrouped');
+          const canvasAADonut = document.getElementById('aaCanvasDonut');
+          if (canvasAAGrouped || canvasAADonut) {
+            hacerVisibleConPadres(canvasAAGrouped);
+            hacerVisibleConPadres(canvasAADonut);
+            await new Promise(r => setTimeout(r, 300));
+
+            pdf.addPage();
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
+            pdf.setTextColor(0, 19, 145);
+            pdf.text('Distribución de Activos', margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
+
+            const chartY_AA = isWidescreen ? 25 : 30;
+            const chartWidth_AA = (pageWidth - margin * 3) / 2;
+            const FIXED_RATIO_AA = 508 / 693;
+            const imgWidth_AA = chartWidth_AA;
+            const imgHeight_AA = Math.min(chartWidth_AA * FIXED_RATIO_AA, pageHeight - chartY_AA - 15);
+
+            if (canvasAAGrouped && canvasAAGrouped.width > 0) {
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY_AA);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(margin, chartY_AA + 2, margin + chartWidth_AA, chartY_AA + 2);
+              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY_AA + 5, imgWidth_AA, imgHeight_AA);
+            }
+
+            if (canvasAADonut && canvasAADonut.width > 0) {
+              const rightX_AA = margin + chartWidth_AA + margin;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DISTRIBUCIÓN POR MONEDA (%)', rightX_AA, chartY_AA);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(rightX_AA, chartY_AA + 2, rightX_AA + chartWidth_AA, chartY_AA + 2);
+              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', rightX_AA, chartY_AA + 5, imgWidth_AA, imgHeight_AA);
+            }
           }
           
-          // Gráficos - convertir canvas a imágenes para preservar contenido
-          const graficosContainer = document.createElement('div');
-          graficosContainer.style.display = 'grid';
-          graficosContainer.style.gridTemplateColumns = '1fr 1fr';
-          graficosContainer.style.gap = '16px';
-
-          const grafico1Card = document.querySelector('#aaCanvasGrouped')?.closest('.card');
-          const grafico2Card = document.querySelector('#aaCanvasDonut')?.closest('.card');
-          const grafico1Clone = clonarConCanvas(grafico1Card);
-          const grafico2Clone = clonarConCanvas(grafico2Card);
-          if (grafico1Clone) graficosContainer.appendChild(grafico1Clone);
-          if (grafico2Clone) graficosContainer.appendChild(grafico2Clone);
-          diapo2Container.appendChild(graficosContainer);
-          
-          document.body.appendChild(diapo2Container);
-          await agregarSeccionAlPDF(diapo2Container, 'Resumen Asignación de Activos');
-          document.body.removeChild(diapo2Container);
-          
-          // Diapo 3: Posición Detallada (Tabla consolidada)
+          // Diapo 3: Posición Detallada (Tabla consolidada) - con división automática si es muy larga
           await navegarA('[data-tab="portafolio"].tab-child', '[data-sub="portafolio-total"]');
           const tablaPortafolio = document.querySelector('#portafolio-total .table-wrapper');
           if (tablaPortafolio) {
-            await agregarSeccionAlPDF(tablaPortafolio, 'Posición Detallada');
+            const tablaOriginal = tablaPortafolio.querySelector('table');
+            const filas = tablaOriginal ? tablaOriginal.querySelectorAll('tbody tr') : [];
+            const MAX_FILAS_POR_PAGINA = 23; // Límite de filas por página en 16:9
+
+            if (filas.length > MAX_FILAS_POR_PAGINA) {
+              // Dividir en 2 páginas
+              const thead = tablaOriginal.querySelector('thead');
+              const mitad = Math.ceil(filas.length / 2);
+
+              // Primera parte
+              const contenedor1 = document.createElement('div');
+              contenedor1.style.background = '#ffffff';
+              const tabla1 = document.createElement('table');
+              tabla1.className = tablaOriginal.className;
+              tabla1.style.cssText = tablaOriginal.style.cssText;
+              if (thead) tabla1.appendChild(thead.cloneNode(true));
+              const tbody1 = document.createElement('tbody');
+              for (let i = 0; i < mitad; i++) {
+                if (filas[i]) tbody1.appendChild(filas[i].cloneNode(true));
+              }
+              tabla1.appendChild(tbody1);
+              contenedor1.appendChild(tabla1);
+              document.body.appendChild(contenedor1);
+              await agregarSeccionAlPDF(contenedor1, 'Posición Detallada');
+              document.body.removeChild(contenedor1);
+
+              // Segunda parte
+              const contenedor2 = document.createElement('div');
+              contenedor2.style.background = '#ffffff';
+              const tabla2 = document.createElement('table');
+              tabla2.className = tablaOriginal.className;
+              tabla2.style.cssText = tablaOriginal.style.cssText;
+              if (thead) tabla2.appendChild(thead.cloneNode(true));
+              const tbody2 = document.createElement('tbody');
+              for (let i = mitad; i < filas.length; i++) {
+                if (filas[i]) tbody2.appendChild(filas[i].cloneNode(true));
+              }
+              tabla2.appendChild(tbody2);
+              contenedor2.appendChild(tabla2);
+              document.body.appendChild(contenedor2);
+              await agregarSeccionAlPDF(contenedor2, 'Posición Detallada Cont.');
+              document.body.removeChild(contenedor2);
+            } else {
+              // Cabe en una sola página
+              await agregarSeccionAlPDF(tablaPortafolio, 'Posición Detallada');
+            }
           }
           
           // Diapo 4: Descomposición del Portafolio (AA Nivel 1 + Maturity Wall)
-          const graficosPortafolio = document.createElement('div');
-          graficosPortafolio.style.background = '#ffffff';
-          graficosPortafolio.style.padding = '10px';
-          graficosPortafolio.style.display = 'grid';
-          graficosPortafolio.style.gridTemplateColumns = '1fr 1fr';
-          graficosPortafolio.style.gap = '20px';
-          const aaChart = document.querySelector('#portafolio-total canvas[id*="sectoresPF"]')?.parentElement?.parentElement;
-          const maturityChart = document.querySelector('#portafolio-total canvas[id*="maturityWall"]')?.parentElement?.parentElement;
-          const aaChartClone = clonarConCanvas(aaChart);
-          const maturityChartClone = clonarConCanvas(maturityChart);
-          if (aaChartClone) graficosPortafolio.appendChild(aaChartClone);
-          if (maturityChartClone) graficosPortafolio.appendChild(maturityChartClone);
-          if (graficosPortafolio.children.length > 0) {
-            document.body.appendChild(graficosPortafolio);
-            await agregarSeccionAlPDF(graficosPortafolio, 'Descomposición del Portafolio');
-            document.body.removeChild(graficosPortafolio);
-          }
-          
-          // Diapo 5: Portafolio Renta Variable (Tabla + gráficos región/vehículo)
-          await navegarA('[data-tab="renta-variable"].tab-child', '[data-sub="renta-variable-total"]');
-          await agregarSeccionAlPDF(document.getElementById('renta-variable-total'), 'Portafolio de Renta Variable');
-          
-          // Diapo 6: Renta Variable (Top 10 + Sectores) - si existen
-          const top10Chart = document.querySelector('#renta-variable-total canvas[id*="top10"]')?.parentElement;
-          const sectoresChart = document.querySelector('#renta-variable-total canvas[id*="sectores"]')?.parentElement;
-          if (top10Chart || sectoresChart) {
-            const rvGraficos = document.createElement('div');
-            rvGraficos.style.background = '#ffffff';
-            rvGraficos.style.padding = '10px';
-            rvGraficos.style.display = 'grid';
-            rvGraficos.style.gridTemplateColumns = '1fr 1fr';
-            rvGraficos.style.gap = '20px';
-            const top10Clone = clonarConCanvas(top10Chart);
-            const sectoresClone = clonarConCanvas(sectoresChart);
-            if (top10Clone) rvGraficos.appendChild(top10Clone);
-            if (sectoresClone) rvGraficos.appendChild(sectoresClone);
-            document.body.appendChild(rvGraficos);
-            await agregarSeccionAlPDF(rvGraficos, 'Portafolio de Renta Variable');
-            document.body.removeChild(rvGraficos);
-          }
-          
-          // Diapo 7: Portafolio Renta Fija (Tabla + gráficos)
-          await navegarA('[data-tab="renta-fija"].tab-child', '[data-sub="renta-fija-total"]');
-          await agregarSeccionAlPDF(document.getElementById('rf-seccion-tabla-graficos'), 'Portafolio de Renta Fija');
-          
-          // Diapo 8: Renta Fija (Rating + Sector) - si existen
-          const ratingChart = document.querySelector('#renta-fija-total canvas[id*="rating"]')?.parentElement;
-          const sectorRFChart = document.querySelector('#renta-fija-total canvas[id*="sector"]')?.parentElement;
-          if (ratingChart || sectorRFChart) {
-            const rfGraficos = document.createElement('div');
-            rfGraficos.style.background = '#ffffff';
-            rfGraficos.style.padding = '10px';
-            rfGraficos.style.display = 'grid';
-            rfGraficos.style.gridTemplateColumns = '1fr 1fr';
-            rfGraficos.style.gap = '20px';
-            const ratingClone = clonarConCanvas(ratingChart);
-            const sectorRFClone = clonarConCanvas(sectorRFChart);
-            if (ratingClone) rfGraficos.appendChild(ratingClone);
-            if (sectorRFClone) rfGraficos.appendChild(sectorRFClone);
-            document.body.appendChild(rfGraficos);
-            await agregarSeccionAlPDF(rfGraficos, 'Portafolio de Renta Fija');
-            document.body.removeChild(rfGraficos);
-          }
-          
-          // Diapo 9: Portafolio de Bonos (condicional)
-          await navegarA('[data-tab="reporte"].tab-child', '[data-sub="crono-total"]');
+          // FORZAR visibilidad de TODOS los padres del canvas hasta el body
+          const canvasAA1 = document.getElementById('sectoresPFChartTotal');
+          const canvasMaturity = document.getElementById('maturityWallPFChartTotal');
+
+          // Función para hacer visible un elemento y TODOS sus padres
+          const hacerVisibleConPadres = (elemento) => {
+            const elementosModificados = [];
+            let el = elemento;
+            while (el && el !== document.body) {
+              const computed = getComputedStyle(el);
+              if (computed.display === 'none' || computed.visibility === 'hidden' || el.offsetHeight === 0) {
+                elementosModificados.push({
+                  el,
+                  display: el.style.display,
+                  visibility: el.style.visibility,
+                  height: el.style.height
+                });
+                el.style.setProperty('display', 'block', 'important');
+                el.style.setProperty('visibility', 'visible', 'important');
+                if (el.offsetHeight === 0) el.style.setProperty('height', 'auto', 'important');
+              }
+              el = el.parentElement;
+            }
+            return elementosModificados;
+          };
+
+          // Hacer visibles ambos canvas y todos sus padres
+          const modificados1 = canvasAA1 ? hacerVisibleConPadres(canvasAA1) : [];
+          const modificados2 = canvasMaturity ? hacerVisibleConPadres(canvasMaturity) : [];
           await new Promise(r => setTimeout(r, 300));
-          const bonosSection = document.getElementById('rf-seccion-bonos');
-          if (bonosSection && bonosSection.querySelector('tbody tr')) {
-            await agregarSeccionAlPDF(bonosSection, 'Portafolio de Bonos');
+
+          // Re-renderizar los gráficos AHORA que son visibles
+          const perfil = document.getElementById('pfPerfilSel')?.value || 'Moderado';
+          if (typeof renderAssetAllocationChart === 'function' && typeof calculateAssetAllocation === 'function') {
+            const aaData = calculateAssetAllocation('TOTAL', perfil);
+            renderAssetAllocationChart('sectoresPFChartTotal', aaData);
+          }
+          if (typeof renderMaturityWallPFChart === 'function') {
+            await renderMaturityWallPFChart('maturityWallPFChartTotal', 'TOTAL');
+          }
+          await new Promise(r => setTimeout(r, 500)); // Esperar que Chart.js termine
+
+          // LOG para debug
+          console.log('Canvas1 después de forzar visibilidad:', canvasAA1?.width, 'x', canvasAA1?.height);
+
+          if (canvasAA1 || canvasMaturity) {
+            pdf.addPage();
+            // Logo BBVA
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // Título
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
+            pdf.setTextColor(0, 19, 145);
+            pdf.text('Descomposición del Portafolio', margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
+
+            const chartY = isWidescreen ? 25 : 30;
+            const chartWidth = (pageWidth - margin * 3) / 2; // Ancho para cada gráfico
+            const chartHeight = pageHeight - chartY - 10; // Altura disponible
+
+            // Ratio fijo: los canvas son 693x508 cuando están visibles
+            const FIXED_RATIO = 508 / 693; // 0.733
+            const imgWidth = chartWidth;
+            const imgHeight = Math.min(chartWidth * FIXED_RATIO, chartHeight - 15);
+
+            // Gráfico AA1 (izquierda)
+            if (canvasAA1 && canvasAA1.width > 0) {
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, chartY);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(margin, chartY + 2, margin + chartWidth, chartY + 2);
+
+              const imgData1 = canvasAA1.toDataURL('image/png');
+              pdf.addImage(imgData1, 'PNG', margin, chartY + 5, imgWidth, imgHeight);
+            }
+
+            // Gráfico Maturity Wall (derecha)
+            if (canvasMaturity && canvasMaturity.width > 0) {
+              const rightX = margin + chartWidth + margin;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('MATURITY WALL', rightX, chartY);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(rightX, chartY + 2, rightX + chartWidth, chartY + 2);
+
+              const imgData2 = canvasMaturity.toDataURL('image/png');
+              pdf.addImage(imgData2, 'PNG', rightX, chartY + 5, imgWidth, imgHeight);
+            }
           }
           
-          // Diapo 10: Cuponera (condicional)
-          const cuponesSection = document.getElementById('crono-seccion-cupones');
-          if (cuponesSection && cuponesSection.querySelector('tbody tr')) {
-            await agregarSeccionAlPDF(cuponesSection, 'Cuponera');
+          // Diapo 5: Portafolio Renta Variable (solo tabla) - con paginación si > 19 filas
+          await navegarA('[data-tab="renta-variable"].tab-child', '[data-sub="renta-variable-total"]');
+          const tablaRVWrapper = document.querySelector('#renta-variable-total .table-wrapper');
+          if (tablaRVWrapper) {
+            const tablaRVOriginal = tablaRVWrapper.querySelector('table');
+            const filasRV = tablaRVOriginal ? tablaRVOriginal.querySelectorAll('tbody tr') : [];
+            const MAX_FILAS_RV = 18; // 19 - 1 header = 18 filas en tbody
+
+            if (filasRV.length > MAX_FILAS_RV) {
+              const theadRV = tablaRVOriginal.querySelector('thead');
+              const mitadRV = Math.ceil(filasRV.length / 2);
+
+              // Primera parte RV
+              const contenedorRV1 = document.createElement('div');
+              contenedorRV1.style.background = '#ffffff';
+              const tablaRV1 = document.createElement('table');
+              tablaRV1.className = tablaRVOriginal.className;
+              tablaRV1.style.cssText = tablaRVOriginal.style.cssText;
+              if (theadRV) tablaRV1.appendChild(theadRV.cloneNode(true));
+              const tbodyRV1 = document.createElement('tbody');
+              for (let i = 0; i < mitadRV; i++) {
+                if (filasRV[i]) tbodyRV1.appendChild(filasRV[i].cloneNode(true));
+              }
+              tablaRV1.appendChild(tbodyRV1);
+              contenedorRV1.appendChild(tablaRV1);
+              document.body.appendChild(contenedorRV1);
+              await agregarSeccionAlPDF(contenedorRV1, 'Portafolio de Renta Variable');
+              document.body.removeChild(contenedorRV1);
+
+              // Segunda parte RV
+              const contenedorRV2 = document.createElement('div');
+              contenedorRV2.style.background = '#ffffff';
+              const tablaRV2 = document.createElement('table');
+              tablaRV2.className = tablaRVOriginal.className;
+              tablaRV2.style.cssText = tablaRVOriginal.style.cssText;
+              if (theadRV) tablaRV2.appendChild(theadRV.cloneNode(true));
+              const tbodyRV2 = document.createElement('tbody');
+              for (let i = mitadRV; i < filasRV.length; i++) {
+                if (filasRV[i]) tbodyRV2.appendChild(filasRV[i].cloneNode(true));
+              }
+              tablaRV2.appendChild(tbodyRV2);
+              contenedorRV2.appendChild(tablaRV2);
+              document.body.appendChild(contenedorRV2);
+              await agregarSeccionAlPDF(contenedorRV2, 'Portafolio de Renta Variable Cont.');
+              document.body.removeChild(contenedorRV2);
+            } else {
+              await agregarSeccionAlPDF(tablaRVWrapper, 'Portafolio de Renta Variable');
+            }
+          }
+
+          // Diapo 6: Descomposición RV (Sector + Top 10)
+          const canvasSectorRV = document.getElementById('sectoresRVChartTotal');
+          const canvasTop10RV = document.getElementById('top10HoldingsChartTotal');
+          if (canvasSectorRV || canvasTop10RV) {
+            // Forzar visibilidad y re-render
+            hacerVisibleConPadres(canvasSectorRV);
+            hacerVisibleConPadres(canvasTop10RV);
+            await new Promise(r => setTimeout(r, 300));
+
+            pdf.addPage();
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
+            pdf.setTextColor(0, 19, 145);
+            pdf.text('Descomposición del Portafolio de Renta Variable', margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
+
+            const chartY_RV1 = isWidescreen ? 25 : 30;
+            const chartWidth_RV = (pageWidth - margin * 3) / 2;
+            const FIXED_RATIO_RV = 508 / 693;
+            const imgWidth_RV = chartWidth_RV;
+            const imgHeight_RV = Math.min(chartWidth_RV * FIXED_RATIO_RV, pageHeight - chartY_RV1 - 15);
+
+            if (canvasSectorRV && canvasSectorRV.width > 0) {
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', margin, chartY_RV1);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(margin, chartY_RV1 + 2, margin + chartWidth_RV, chartY_RV1 + 2);
+              pdf.addImage(canvasSectorRV.toDataURL('image/png'), 'PNG', margin, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
+            }
+
+            if (canvasTop10RV && canvasTop10RV.width > 0) {
+              const rightX_RV = margin + chartWidth_RV + margin;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('TOP 10 HOLDINGS (%)', rightX_RV, chartY_RV1);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(rightX_RV, chartY_RV1 + 2, rightX_RV + chartWidth_RV, chartY_RV1 + 2);
+              pdf.addImage(canvasTop10RV.toDataURL('image/png'), 'PNG', rightX_RV, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
+            }
+          }
+
+          // Diapo 7: Descomposición RV Cont. (Región + Vehículo)
+          const canvasRegionRV = document.getElementById('regionRVChartTotal');
+          const canvasVehiculoRV = document.getElementById('vehiculoRVChartTotal');
+          if (canvasRegionRV || canvasVehiculoRV) {
+            hacerVisibleConPadres(canvasRegionRV);
+            hacerVisibleConPadres(canvasVehiculoRV);
+            await new Promise(r => setTimeout(r, 300));
+
+            pdf.addPage();
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
+            pdf.setTextColor(0, 19, 145);
+            pdf.text('Descomposición del Portafolio de Renta Variable Cont.', margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
+
+            const chartY_RV2 = isWidescreen ? 25 : 30;
+            const chartWidth_RV2 = (pageWidth - margin * 3) / 2;
+            const FIXED_RATIO_RV2 = 508 / 693;
+            const imgWidth_RV2 = chartWidth_RV2;
+            const imgHeight_RV2 = Math.min(chartWidth_RV2 * FIXED_RATIO_RV2, pageHeight - chartY_RV2 - 15);
+
+            if (canvasRegionRV && canvasRegionRV.width > 0) {
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DESCOMPOSICIÓN POR REGIÓN (%)', margin, chartY_RV2);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(margin, chartY_RV2 + 2, margin + chartWidth_RV2, chartY_RV2 + 2);
+              pdf.addImage(canvasRegionRV.toDataURL('image/png'), 'PNG', margin, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
+            }
+
+            if (canvasVehiculoRV && canvasVehiculoRV.width > 0) {
+              const rightX_RV2 = margin + chartWidth_RV2 + margin;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DESCOMPOSICIÓN POR VEHÍCULO (%)', rightX_RV2, chartY_RV2);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(rightX_RV2, chartY_RV2 + 2, rightX_RV2 + chartWidth_RV2, chartY_RV2 + 2);
+              pdf.addImage(canvasVehiculoRV.toDataURL('image/png'), 'PNG', rightX_RV2, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
+            }
+          }
+
+          // Diapo 8: Portafolio Renta Fija (solo tabla) - con paginación si > 19 filas
+          await navegarA('[data-tab="renta-fija"].tab-child', '[data-sub="renta-fija-total"]');
+          const tablaRFWrapper = document.querySelector('#rf-seccion-tabla .table-wrapper');
+          if (tablaRFWrapper) {
+            const tablaRFOriginal = tablaRFWrapper.querySelector('table');
+            const filasRF = tablaRFOriginal ? tablaRFOriginal.querySelectorAll('tbody tr') : [];
+            const MAX_FILAS_RF = 18; // 19 - 1 header = 18 filas en tbody
+
+            if (filasRF.length > MAX_FILAS_RF) {
+              const theadRF = tablaRFOriginal.querySelector('thead');
+              const mitadRF = Math.ceil(filasRF.length / 2);
+
+              // Primera parte RF
+              const contenedorRF1 = document.createElement('div');
+              contenedorRF1.style.background = '#ffffff';
+              const tablaRF1 = document.createElement('table');
+              tablaRF1.className = tablaRFOriginal.className;
+              tablaRF1.style.cssText = tablaRFOriginal.style.cssText;
+              if (theadRF) tablaRF1.appendChild(theadRF.cloneNode(true));
+              const tbodyRF1 = document.createElement('tbody');
+              for (let i = 0; i < mitadRF; i++) {
+                if (filasRF[i]) tbodyRF1.appendChild(filasRF[i].cloneNode(true));
+              }
+              tablaRF1.appendChild(tbodyRF1);
+              contenedorRF1.appendChild(tablaRF1);
+              document.body.appendChild(contenedorRF1);
+              await agregarSeccionAlPDF(contenedorRF1, 'Portafolio de Renta Fija');
+              document.body.removeChild(contenedorRF1);
+
+              // Segunda parte RF
+              const contenedorRF2 = document.createElement('div');
+              contenedorRF2.style.background = '#ffffff';
+              const tablaRF2 = document.createElement('table');
+              tablaRF2.className = tablaRFOriginal.className;
+              tablaRF2.style.cssText = tablaRFOriginal.style.cssText;
+              if (theadRF) tablaRF2.appendChild(theadRF.cloneNode(true));
+              const tbodyRF2 = document.createElement('tbody');
+              for (let i = mitadRF; i < filasRF.length; i++) {
+                if (filasRF[i]) tbodyRF2.appendChild(filasRF[i].cloneNode(true));
+              }
+              tablaRF2.appendChild(tbodyRF2);
+              contenedorRF2.appendChild(tablaRF2);
+              document.body.appendChild(contenedorRF2);
+              await agregarSeccionAlPDF(contenedorRF2, 'Portafolio de Renta Fija Cont.');
+              document.body.removeChild(contenedorRF2);
+            } else {
+              await agregarSeccionAlPDF(tablaRFWrapper, 'Portafolio de Renta Fija');
+            }
+          }
+
+          // Diapo 9: Descomposición RF (Rating + Sector)
+          const canvasRatingRF = document.getElementById('ratingsChartTotal');
+          const canvasSectorRF = document.getElementById('sectoresChartTotal');
+          if (canvasRatingRF || canvasSectorRF) {
+            hacerVisibleConPadres(canvasRatingRF);
+            hacerVisibleConPadres(canvasSectorRF);
+            await new Promise(r => setTimeout(r, 300));
+
+            pdf.addPage();
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
+            pdf.setTextColor(0, 19, 145);
+            pdf.text('Descomposición del Portafolio de Renta Fija', margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
+
+            const chartY_RF1 = isWidescreen ? 25 : 30;
+            const chartWidth_RF = (pageWidth - margin * 3) / 2;
+            const FIXED_RATIO_RF = 508 / 693;
+            const imgWidth_RF = chartWidth_RF;
+            const imgHeight_RF = Math.min(chartWidth_RF * FIXED_RATIO_RF, pageHeight - chartY_RF1 - 15);
+
+            if (canvasRatingRF && canvasRatingRF.width > 0) {
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DESCOMPOSICIÓN POR RATING (%)', margin, chartY_RF1);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(margin, chartY_RF1 + 2, margin + chartWidth_RF, chartY_RF1 + 2);
+              pdf.addImage(canvasRatingRF.toDataURL('image/png'), 'PNG', margin, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
+            }
+
+            if (canvasSectorRF && canvasSectorRF.width > 0) {
+              const rightX_RF = margin + chartWidth_RF + margin;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', rightX_RF, chartY_RF1);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(rightX_RF, chartY_RF1 + 2, rightX_RF + chartWidth_RF, chartY_RF1 + 2);
+              pdf.addImage(canvasSectorRF.toDataURL('image/png'), 'PNG', rightX_RF, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
+            }
+          }
+
+          // Diapo 10: Descomposición RF Cont. (Duración vs YTW + Subclasificación)
+          const canvasScatterRF = document.getElementById('scatterRFChartTotal');
+          const canvasSubclasRF = document.getElementById('subclasificacionChartTotal');
+          if (canvasScatterRF || canvasSubclasRF) {
+            hacerVisibleConPadres(canvasScatterRF);
+            hacerVisibleConPadres(canvasSubclasRF);
+            await new Promise(r => setTimeout(r, 300));
+
+            pdf.addPage();
+            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(isWidescreen ? 20 : 26);
+            pdf.setTextColor(0, 19, 145);
+            pdf.text('Descomposición del Portafolio de Renta Fija Cont.', margin, isWidescreen ? 14 : 18);
+            pdf.setFont('helvetica', 'normal');
+
+            const chartY_RF2 = isWidescreen ? 25 : 30;
+            const chartWidth_RF2 = (pageWidth - margin * 3) / 2;
+            const FIXED_RATIO_RF2 = 508 / 693;
+            const imgWidth_RF2 = chartWidth_RF2;
+            const imgHeight_RF2 = Math.min(chartWidth_RF2 * FIXED_RATIO_RF2, pageHeight - chartY_RF2 - 15);
+
+            if (canvasScatterRF && canvasScatterRF.width > 0) {
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
+              pdf.addImage(canvasScatterRF.toDataURL('image/png'), 'PNG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
+            }
+
+            if (canvasSubclasRF && canvasSubclasRF.width > 0) {
+              const rightX_RF2 = margin + chartWidth_RF2 + margin;
+              pdf.setFontSize(11);
+              pdf.setTextColor(0, 19, 145);
+              pdf.text('DESCOMPOSICIÓN POR SUBCLASIFICACIÓN (%)', rightX_RF2, chartY_RF2);
+              pdf.setDrawColor(0, 19, 145);
+              pdf.line(rightX_RF2, chartY_RF2 + 2, rightX_RF2 + chartWidth_RF2, chartY_RF2 + 2);
+              pdf.addImage(canvasSubclasRF.toDataURL('image/png'), 'PNG', rightX_RF2, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
+            }
+          }
+
+          // Diapo 11: Portafolio de Bonos (solo tabla) - con paginación si > 19 filas
+          await navegarA('[data-tab="renta-fija"].tab-child', '[data-sub="renta-fija-total"]');
+          const tablaBonosWrapper = document.querySelector('#rf-seccion-bonos .table-wrapper');
+          if (tablaBonosWrapper) {
+            const tablaBonosOriginal = tablaBonosWrapper.querySelector('table');
+            const filasBonos = tablaBonosOriginal ? tablaBonosOriginal.querySelectorAll('tbody tr') : [];
+            const MAX_FILAS_BONOS = 18;
+
+            if (filasBonos.length > MAX_FILAS_BONOS) {
+              const theadBonos = tablaBonosOriginal.querySelector('thead');
+              const mitadBonos = Math.ceil(filasBonos.length / 2);
+
+              // Primera parte Bonos
+              const contenedorBonos1 = document.createElement('div');
+              contenedorBonos1.style.background = '#ffffff';
+              const tablaBonos1 = document.createElement('table');
+              tablaBonos1.className = tablaBonosOriginal.className;
+              tablaBonos1.style.cssText = tablaBonosOriginal.style.cssText;
+              if (theadBonos) tablaBonos1.appendChild(theadBonos.cloneNode(true));
+              const tbodyBonos1 = document.createElement('tbody');
+              for (let i = 0; i < mitadBonos; i++) {
+                if (filasBonos[i]) tbodyBonos1.appendChild(filasBonos[i].cloneNode(true));
+              }
+              tablaBonos1.appendChild(tbodyBonos1);
+              contenedorBonos1.appendChild(tablaBonos1);
+              document.body.appendChild(contenedorBonos1);
+              await agregarSeccionAlPDF(contenedorBonos1, 'Portafolio de Bonos');
+              document.body.removeChild(contenedorBonos1);
+
+              // Segunda parte Bonos
+              const contenedorBonos2 = document.createElement('div');
+              contenedorBonos2.style.background = '#ffffff';
+              const tablaBonos2 = document.createElement('table');
+              tablaBonos2.className = tablaBonosOriginal.className;
+              tablaBonos2.style.cssText = tablaBonosOriginal.style.cssText;
+              if (theadBonos) tablaBonos2.appendChild(theadBonos.cloneNode(true));
+              const tbodyBonos2 = document.createElement('tbody');
+              for (let i = mitadBonos; i < filasBonos.length; i++) {
+                if (filasBonos[i]) tbodyBonos2.appendChild(filasBonos[i].cloneNode(true));
+              }
+              tablaBonos2.appendChild(tbodyBonos2);
+              contenedorBonos2.appendChild(tablaBonos2);
+              document.body.appendChild(contenedorBonos2);
+              await agregarSeccionAlPDF(contenedorBonos2, 'Portafolio de Bonos Cont.');
+              document.body.removeChild(contenedorBonos2);
+            } else {
+              await agregarSeccionAlPDF(tablaBonosWrapper, 'Portafolio de Bonos');
+            }
           }
           
-          // Diapo 11: Amortizaciones y Vencimientos (condicional)
-          const amortSection = document.getElementById('crono-seccion-amort');
-          if (amortSection && amortSection.querySelector('tbody tr')) {
-            await agregarSeccionAlPDF(amortSection, 'Amortizaciones y Vencimientos');
+          // Diapo 12: Cuponera (solo tabla) - con paginación si > 19 filas
+          await navegarA('[data-tab="reporte"].tab-child', '[data-sub="crono-total"]');
+          const tablaCuponesWrapper = document.querySelector('#crono-seccion-cupones .table-wrapper');
+          if (tablaCuponesWrapper) {
+            const tablaCuponesOriginal = tablaCuponesWrapper.querySelector('table');
+            const filasCupones = tablaCuponesOriginal ? tablaCuponesOriginal.querySelectorAll('tbody tr') : [];
+            const MAX_FILAS_CUPONES = 18;
+
+            if (filasCupones.length > MAX_FILAS_CUPONES) {
+              const theadCupones = tablaCuponesOriginal.querySelector('thead');
+              const mitadCupones = Math.ceil(filasCupones.length / 2);
+
+              // Primera parte Cupones
+              const contenedorCupones1 = document.createElement('div');
+              contenedorCupones1.style.background = '#ffffff';
+              const tablaCupones1 = document.createElement('table');
+              tablaCupones1.className = tablaCuponesOriginal.className;
+              tablaCupones1.style.cssText = tablaCuponesOriginal.style.cssText;
+              if (theadCupones) tablaCupones1.appendChild(theadCupones.cloneNode(true));
+              const tbodyCupones1 = document.createElement('tbody');
+              for (let i = 0; i < mitadCupones; i++) {
+                if (filasCupones[i]) tbodyCupones1.appendChild(filasCupones[i].cloneNode(true));
+              }
+              tablaCupones1.appendChild(tbodyCupones1);
+              contenedorCupones1.appendChild(tablaCupones1);
+              document.body.appendChild(contenedorCupones1);
+              await agregarSeccionAlPDF(contenedorCupones1, 'Cuponera');
+              document.body.removeChild(contenedorCupones1);
+
+              // Segunda parte Cupones
+              const contenedorCupones2 = document.createElement('div');
+              contenedorCupones2.style.background = '#ffffff';
+              const tablaCupones2 = document.createElement('table');
+              tablaCupones2.className = tablaCuponesOriginal.className;
+              tablaCupones2.style.cssText = tablaCuponesOriginal.style.cssText;
+              if (theadCupones) tablaCupones2.appendChild(theadCupones.cloneNode(true));
+              const tbodyCupones2 = document.createElement('tbody');
+              for (let i = mitadCupones; i < filasCupones.length; i++) {
+                if (filasCupones[i]) tbodyCupones2.appendChild(filasCupones[i].cloneNode(true));
+              }
+              tablaCupones2.appendChild(tbodyCupones2);
+              contenedorCupones2.appendChild(tablaCupones2);
+              document.body.appendChild(contenedorCupones2);
+              await agregarSeccionAlPDF(contenedorCupones2, 'Cuponera Cont.');
+              document.body.removeChild(contenedorCupones2);
+            } else {
+              await agregarSeccionAlPDF(tablaCuponesWrapper, 'Cuponera');
+            }
+          }
+
+          // Diapo 13: Amortizaciones y Vencimientos (solo tabla) - con paginación si > 19 filas
+          const tablaAmortWrapper = document.querySelector('#crono-seccion-amort .table-wrapper');
+          if (tablaAmortWrapper) {
+            const tablaAmortOriginal = tablaAmortWrapper.querySelector('table');
+            const filasAmort = tablaAmortOriginal ? tablaAmortOriginal.querySelectorAll('tbody tr') : [];
+            const MAX_FILAS_AMORT = 18;
+
+            if (filasAmort.length > MAX_FILAS_AMORT) {
+              const theadAmort = tablaAmortOriginal.querySelector('thead');
+              const mitadAmort = Math.ceil(filasAmort.length / 2);
+
+              // Primera parte Amort
+              const contenedorAmort1 = document.createElement('div');
+              contenedorAmort1.style.background = '#ffffff';
+              const tablaAmort1 = document.createElement('table');
+              tablaAmort1.className = tablaAmortOriginal.className;
+              tablaAmort1.style.cssText = tablaAmortOriginal.style.cssText;
+              if (theadAmort) tablaAmort1.appendChild(theadAmort.cloneNode(true));
+              const tbodyAmort1 = document.createElement('tbody');
+              for (let i = 0; i < mitadAmort; i++) {
+                if (filasAmort[i]) tbodyAmort1.appendChild(filasAmort[i].cloneNode(true));
+              }
+              tablaAmort1.appendChild(tbodyAmort1);
+              contenedorAmort1.appendChild(tablaAmort1);
+              document.body.appendChild(contenedorAmort1);
+              await agregarSeccionAlPDF(contenedorAmort1, 'Amortizaciones y Vencimientos');
+              document.body.removeChild(contenedorAmort1);
+
+              // Segunda parte Amort
+              const contenedorAmort2 = document.createElement('div');
+              contenedorAmort2.style.background = '#ffffff';
+              const tablaAmort2 = document.createElement('table');
+              tablaAmort2.className = tablaAmortOriginal.className;
+              tablaAmort2.style.cssText = tablaAmortOriginal.style.cssText;
+              if (theadAmort) tablaAmort2.appendChild(theadAmort.cloneNode(true));
+              const tbodyAmort2 = document.createElement('tbody');
+              for (let i = mitadAmort; i < filasAmort.length; i++) {
+                if (filasAmort[i]) tbodyAmort2.appendChild(filasAmort[i].cloneNode(true));
+              }
+              tablaAmort2.appendChild(tbodyAmort2);
+              contenedorAmort2.appendChild(tablaAmort2);
+              document.body.appendChild(contenedorAmort2);
+              await agregarSeccionAlPDF(contenedorAmort2, 'Amortizaciones y Vencimientos Cont.');
+              document.body.removeChild(contenedorAmort2);
+            } else {
+              await agregarSeccionAlPDF(tablaAmortWrapper, 'Amortizaciones y Vencimientos');
+            }
           }
           
           // Diapo 12: Disclaimer
@@ -8263,7 +8782,7 @@ const regionCols = [
           responsive: true,
           maintainAspectRatio: false,
           parsing: false,
-          layout: { padding: { top: 18 } },
+          layout: { padding: { top: 18, right: 30 } },
           plugins: {
             legend: {
               display: true,
@@ -8478,6 +8997,11 @@ const regionCols = [
           indexAxis: 'y',
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              right: 50
+            }
+          },
           plugins: {
             legend: { display: false },
             datalabels: {
@@ -8492,7 +9016,7 @@ const regionCols = [
             x: {
               beginAtZero: true,
               grid: { display: false },
-              ticks: { 
+              ticks: {
                 callback: (value) => value,
                 font: { size: 13 }
               }
@@ -8509,17 +9033,49 @@ const regionCols = [
       });
     }
 
-    // Normalizar nombres: espacios y mayúsculas/minúsculas
+    // Lista de empresas que deben mantener mayúsculas
+    const UPPERCASE_COMPANIES = new Set([
+      'ASML', 'SAP', 'IBM', 'AMD', 'HP', 'HPE', 'BMW', 'UBS', 'ING', 'HSBC',
+      'BHP', 'BP', 'AT&T', 'LVMH', 'BBVA', 'BNP', 'UPS', 'FDX', 'TSMC', 'SK',
+      'LG', 'NTT', 'KPN', 'BT', 'EDF', 'RWE', 'EON', 'ENI', 'CRH', 'DSM',
+      'ABB', 'ABN', 'AXA', 'BNY', 'CVS', 'GSK', 'JNJ', 'JPM', 'SAB', 'SEB',
+      'UPM', 'VW', 'BASF', 'USA', 'UK', 'EU', 'NYSE', 'NASDAQ', 'ETF', 'ADR',
+      'GDR', 'SPDR', 'MSCI', 'S&P', 'DJ', 'FTSE', 'DAX', 'CAC', 'ADP', 'CDW',
+      'CME', 'CSX', 'DTE', 'EMN', 'GE', 'GD', 'GM', 'HD', 'HON', 'IP', 'KO',
+      'LMT', 'MMM', '3M', 'MO', 'MRK', 'MS', 'NKE', 'NOC', 'PG', 'PM', 'RTX',
+      'SO', 'T', 'TJX', 'TMO', 'TXN', 'UNH', 'UNP', 'V', 'VZ', 'WM', 'WMT',
+      'XOM', 'ZTS', 'AAPL', 'GOOG', 'GOOGL', 'AMZN', 'META', 'MSFT', 'NVDA',
+      'TSLA', 'NFLX', 'CRM', 'ORCL', 'INTC', 'QCOM', 'AVGO', 'MU', 'LRCX',
+      'AMAT', 'KLAC', 'MRVL', 'ADI', 'NXPI', 'ON', 'SWKS', 'MCHP', 'MPWR',
+      'NOW', 'ADBE', 'INTU', 'WDAY', 'SNOW', 'DDOG', 'ZS', 'CRWD', 'PANW',
+      'PLTR', 'TEAM', 'SHOP', 'SQ', 'PYPL', 'COIN', 'ABNB', 'DASH', 'UBER',
+      'LYFT', 'BA', 'CAT', 'DE', 'ROK', 'EMR', 'ETN', 'IR', 'PH', 'DOV',
+      'CMI', 'ITW', 'AME', 'ROP', 'SWK', 'TT', 'XYL', 'IEX', 'GNRC', 'CARR'
+    ]);
+
+    // Normalizar nombres: espacios y formato Nombre Propio
     function normalizeCompanyName(name) {
       if (!name) return '';
-      
-      // Trim y convertir a uppercase para normalización
-      let normalized = String(name).trim().toUpperCase();
-      
-      // Remover espacios múltiples
-      normalized = normalized.replace(/\s+/g, ' ');
-      
-      return normalized;
+
+      let cleaned = String(name).trim().replace(/\s+/g, ' ');
+
+      let displayName = cleaned.toLowerCase().split(' ').map(word => {
+        const upperWord = word.toUpperCase();
+        if (UPPERCASE_COMPANIES.has(upperWord)) {
+          return upperWord;
+        }
+        if (word.includes('.') || word.includes('-')) {
+          return word.split(/([.-])/).map(part => {
+            if (part === '.' || part === '-') return part;
+            const upperPart = part.toUpperCase();
+            if (UPPERCASE_COMPANIES.has(upperPart)) return upperPart;
+            return part.charAt(0).toUpperCase() + part.slice(1);
+          }).join('');
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(' ');
+
+      return displayName;
     }
 
     // =========================
@@ -11551,14 +12107,19 @@ const regionCols = [
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              bottom: 10
+            }
+          },
           plugins: {
             legend: {
               display: true,
               position: 'bottom',
               labels: {
                 boxWidth: 15,
-                padding: 12,
-                font: { size: 13, family: 'Lato, sans-serif' }
+                padding: 10,
+                font: { size: 12, family: 'Lato, sans-serif' }
               }
             },
             datalabels: {
@@ -11566,14 +12127,14 @@ const regionCols = [
               align: 'end',
               formatter: (value) => value > 0 ? value.toFixed(1) : '',
               color: '#333',
-              font: { weight: 'normal', size: 13, family: 'Lato, sans-serif' }
+              font: { weight: 'normal', size: 12, family: 'Lato, sans-serif' }
             }
           },
           scales: {
             x: {
               grid: { display: false },
               ticks: {
-                font: { size: 12, family: 'Lato, sans-serif' },
+                font: { size: 11, family: 'Lato, sans-serif' },
                 callback: function(value, index) {
                   const label = this.getLabelForValue(value);
                   const words = label.split(' ');
@@ -11847,17 +12408,22 @@ const regionCols = [
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: {
+            padding: {
+              bottom: 10
+            }
+          },
           plugins: {
-            legend: { 
+            legend: {
               display: true,
               position: 'bottom',
               labels: {
                 boxWidth: 15,
-                padding: 12,
-                font: { size: 13 }
+                padding: 10,
+                font: { size: 12 }
               }
             },
-            tooltip: { 
+            tooltip: {
               enabled: true,
               mode: 'index',
               callbacks: {
@@ -11871,20 +12437,20 @@ const regionCols = [
             datalabels: { display: false }
           },
           scales: {
-            x: { 
+            x: {
               stacked: true,
               grid: { display: false },
               ticks: {
-                font: { size: 13 }
+                font: { size: 11 }
               }
             },
             y: {
               stacked: true,
               beginAtZero: true,
               title: { display: false },
-              ticks: { 
+              ticks: {
                 callback: (v)=> Number(v).toLocaleString('en-US'),
-                font: { size: 13 }
+                font: { size: 11 }
               },
               grid: { color: 'rgba(0,0,0,0.06)' }
             }
@@ -20729,4 +21295,4 @@ function wirePMChartFilters(){
 
   </script>
 </body>
-</html>
+</html>// Updated Wed Dec 17 18:36:49 UTC 2025
