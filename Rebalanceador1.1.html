@@ -2994,18 +2994,14 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Guardar y remover bordes/padding de chart-wrappers para PDF limpio
             const chartWrappers = elemento.querySelectorAll('.chart-wrapper');
-            const originalWrapperStyles = [];
+            const originalWrapperStyles = new Map();
             chartWrappers.forEach(wrapper => {
-              originalWrapperStyles.push({
-                border: wrapper.style.border,
-                borderRadius: wrapper.style.borderRadius,
-                padding: wrapper.style.padding,
-                boxShadow: wrapper.style.boxShadow
+              originalWrapperStyles.set(wrapper, {
+                cssText: wrapper.style.cssText
               });
-              wrapper.style.border = 'none';
-              wrapper.style.borderRadius = '0';
-              wrapper.style.padding = '0';
-              wrapper.style.boxShadow = 'none';
+              // Usar cssText para forzar todos los estilos y sobreescribir CSS
+              const currentHeight = wrapper.style.height || '';
+              wrapper.style.cssText = `border: none !important; border-radius: 0 !important; padding: 0 !important; box-shadow: none !important; background: transparent !important; height: ${currentHeight};`;
             });
 
             const canvas = await html2canvas(elemento, {
@@ -3017,11 +3013,11 @@ async function descargarReportePDF(formato = 'A4') {
             });
 
             // Restaurar estilos originales de chart-wrappers
-            chartWrappers.forEach((wrapper, index) => {
-              wrapper.style.border = originalWrapperStyles[index].border;
-              wrapper.style.borderRadius = originalWrapperStyles[index].borderRadius;
-              wrapper.style.padding = originalWrapperStyles[index].padding;
-              wrapper.style.boxShadow = originalWrapperStyles[index].boxShadow;
+            chartWrappers.forEach(wrapper => {
+              const orig = originalWrapperStyles.get(wrapper);
+              if (orig) {
+                wrapper.style.cssText = orig.cssText;
+              }
             });
 
             elemento.style.display = originalDisplay;
