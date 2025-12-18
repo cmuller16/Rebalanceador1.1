@@ -3545,17 +3545,20 @@ async function descargarReportePDF(formato = 'A4') {
               tablaRF1.querySelectorAll('th').forEach((th, idx) => {
                 const texto = th.textContent.trim();
                 let ancho = null;
-                if (texto.includes('Exposición')) ancho = '70px';
-                else if (texto.includes('Patrimonio')) ancho = '55px';
-                else if (texto.includes('Vol')) ancho = '35px';
-                else if (texto.includes('N Holdings')) ancho = '50px';
+                let centrar = false;
+                if (texto.includes('Exposición')) ancho = '85px';
+                else if (texto.includes('Patrimonio')) { ancho = '65px'; centrar = true; }
+                else if (texto.includes('Vol')) ancho = '45px';
+                else if (texto.includes('N') && texto.includes('Holdings')) ancho = '55px';
                 if (ancho) {
                   th.style.width = ancho;
                   th.style.maxWidth = ancho;
+                  if (centrar) th.style.textAlign = 'center';
                   tablaRF1.querySelectorAll('tbody tr').forEach(row => {
                     if (row.cells[idx]) {
                       row.cells[idx].style.width = ancho;
                       row.cells[idx].style.maxWidth = ancho;
+                      if (centrar) row.cells[idx].style.textAlign = 'center';
                     }
                   });
                 }
@@ -3586,17 +3589,20 @@ async function descargarReportePDF(formato = 'A4') {
               tablaRF2.querySelectorAll('th').forEach((th, idx) => {
                 const texto = th.textContent.trim();
                 let ancho = null;
-                if (texto.includes('Exposición')) ancho = '70px';
-                else if (texto.includes('Patrimonio')) ancho = '55px';
-                else if (texto.includes('Vol')) ancho = '35px';
-                else if (texto.includes('N Holdings')) ancho = '50px';
+                let centrar = false;
+                if (texto.includes('Exposición')) ancho = '85px';
+                else if (texto.includes('Patrimonio')) { ancho = '65px'; centrar = true; }
+                else if (texto.includes('Vol')) ancho = '45px';
+                else if (texto.includes('N') && texto.includes('Holdings')) ancho = '55px';
                 if (ancho) {
                   th.style.width = ancho;
                   th.style.maxWidth = ancho;
+                  if (centrar) th.style.textAlign = 'center';
                   tablaRF2.querySelectorAll('tbody tr').forEach(row => {
                     if (row.cells[idx]) {
                       row.cells[idx].style.width = ancho;
                       row.cells[idx].style.maxWidth = ancho;
+                      if (centrar) row.cells[idx].style.textAlign = 'center';
                     }
                   });
                 }
@@ -3619,17 +3625,20 @@ async function descargarReportePDF(formato = 'A4') {
               tablaRFClone.querySelectorAll('th').forEach((th, idx) => {
                 const texto = th.textContent.trim();
                 let ancho = null;
-                if (texto.includes('Exposición')) ancho = '70px';
-                else if (texto.includes('Patrimonio')) ancho = '55px';
-                else if (texto.includes('Vol')) ancho = '35px';
-                else if (texto.includes('N Holdings')) ancho = '50px';
+                let centrar = false;
+                if (texto.includes('Exposición')) ancho = '85px';
+                else if (texto.includes('Patrimonio')) { ancho = '65px'; centrar = true; }
+                else if (texto.includes('Vol')) ancho = '45px';
+                else if (texto.includes('N') && texto.includes('Holdings')) ancho = '55px';
                 if (ancho) {
                   th.style.width = ancho;
                   th.style.maxWidth = ancho;
+                  if (centrar) th.style.textAlign = 'center';
                   tablaRFClone.querySelectorAll('tbody tr').forEach(row => {
                     if (row.cells[idx]) {
                       row.cells[idx].style.width = ancho;
                       row.cells[idx].style.maxWidth = ancho;
+                      if (centrar) row.cells[idx].style.textAlign = 'center';
                     }
                   });
                 }
