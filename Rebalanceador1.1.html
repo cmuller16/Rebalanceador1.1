@@ -3188,10 +3188,6 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text(fechaStr, 15, lineY + 22);
           }
           
-          // Imagen ciudad (parte inferior)
-          try {
-            pdf.addImage(CIUDAD_B64, 'JPEG', 10, 185, 190, 100);
-          } catch(e) { console.warn('Error imagen ciudad:', e); }
         }
         
         // 0. Carátula BBVA
