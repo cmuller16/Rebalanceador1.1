@@ -4106,6 +4106,11 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasBonos[i]) tbodyBonos1.appendChild(filasBonos[i].cloneNode(true));
               }
               tablaBonos1.appendChild(tbodyBonos1);
+              // Aplicar estilo 11px para mejor legibilidad
+              tablaBonos1.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '11px';
+                cell.style.padding = '4px 10px';
+              });
               contenedorBonos1.appendChild(tablaBonos1);
               document.body.appendChild(contenedorBonos1);
               const footerBonos = 'Precio Compra: Promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO. Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
@@ -4124,13 +4129,29 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasBonos[i]) tbodyBonos2.appendChild(filasBonos[i].cloneNode(true));
               }
               tablaBonos2.appendChild(tbodyBonos2);
+              // Aplicar estilo 11px para mejor legibilidad
+              tablaBonos2.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '11px';
+                cell.style.padding = '4px 10px';
+              });
               contenedorBonos2.appendChild(tablaBonos2);
               document.body.appendChild(contenedorBonos2);
               await agregarSeccionAlPDF(contenedorBonos2, 'Portafolio de Bonos Cont.', footerBonos);
               document.body.removeChild(contenedorBonos2);
             } else {
+              // Clonar tabla para aplicar estilos sin afectar original
+              const tablaBonosClone = tablaBonosOriginal.cloneNode(true);
+              tablaBonosClone.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '11px';
+                cell.style.padding = '4px 10px';
+              });
+              const contenedorBonosSingle = document.createElement('div');
+              contenedorBonosSingle.style.background = '#ffffff';
+              contenedorBonosSingle.appendChild(tablaBonosClone);
+              document.body.appendChild(contenedorBonosSingle);
               const footerBonos = 'Precio Compra: Promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO. Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
-              await agregarSeccionAlPDF(tablaBonosWrapper, 'Portafolio de Bonos', footerBonos);
+              await agregarSeccionAlPDF(contenedorBonosSingle, 'Portafolio de Bonos', footerBonos);
+              document.body.removeChild(contenedorBonosSingle);
             }
           }
 
