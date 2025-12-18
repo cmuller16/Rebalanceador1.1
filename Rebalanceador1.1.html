@@ -4633,7 +4633,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
               // Título con línea de lado a lado (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(7);
+              pdf.setFontSize(9);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, currentYA4);
               pdf.setDrawColor(6, 14, 70);
@@ -4652,7 +4652,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
               // Título con línea de lado a lado (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(7);
+              pdf.setFontSize(9);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', margin, currentYA4);
               pdf.setDrawColor(6, 14, 70);
@@ -4802,7 +4802,7 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Pie de página Renta Fija
               pdf.setFont('helvetica', 'normal');
-              pdf.setFontSize(7);
+              pdf.setFontSize(9);
               pdf.setTextColor(100, 100, 100);
               const footerRF1 = 'Montos estimados. Por días útiles y feriados, la fecha efectiva de pago puede variar.';
               const footerRF2 = 'Portafolio de Bonos: Precio Compra corresponde a promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO.';
@@ -4825,7 +4825,7 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Pie de página Renta Fija
               pdf.setFont('helvetica', 'normal');
-              pdf.setFontSize(7);
+              pdf.setFontSize(9);
               pdf.setTextColor(100, 100, 100);
               const footerRF1 = 'Montos estimados. Por días útiles y feriados, la fecha efectiva de pago puede variar.';
               const footerRF2 = 'Portafolio de Bonos: Precio Compra corresponde a promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO.';
@@ -4849,7 +4849,7 @@ async function descargarReportePDF(formato = 'A4') {
           pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(9);
           pdf.setTextColor(255, 255, 255);
-          const disclaimerTextA4 = 'La información contenida en la presente comunicación y/o documento ha sido elaborada por BBVA Asset Management S.A. SAF y tiene carácter meramente informativo e ilustrativo. Con carácter previo a la toma de una decisión respecto a la contratación de cualquiera de los productos detallados, el receptor de la presente comunicación y/o documento deberá estar plenamente consciente y no albergar ninguna duda sobre el funcionamiento de los mismos, así como de las obligaciones y riesgos que asumiría con dicha posible contratación. De existir dudas o no quedar claro el funcionamiento y los riesgos implícitos en estos productos, no se deberá efectuar contratación alguna hasta que dichas dudas hayan sido resueltas. La presente comunicación y/o documento no debe en ningún caso entenderse como un servicio de asesoría en materia de inversión, tributaria, legal o contable puesto que no contiene ninguna recomendación personalizada para tomar los productos ni para hacer alguna de las operaciones descritas. En ningún caso podrá considerarse que por la recepción de esta comunicación y/o documento, BBVA Asset Management S.A. SAF está calificando o presentando el producto como idóneo para el receptor de este documento puesto que para la elaboración del mismo y sus respectivos ejemplos no ha tenido en cuenta las circunstancias personales del potencial tomador, su perfil de riesgo, su posición financiera o sus necesidades específicas. En ese sentido, corresponde al receptor de este documento el determinar si los productos descritos en el presente documento resultan adecuados considerando sus características particulares, así como su tolerancia al riesgo y expectativa de rendimiento, debiendo adoptar sus propias decisiones de contratación procurándose el asesoramiento específico y especializado en materia financiera, de mercados, tributaria, contable y legal ajeno a BBVA Asset Management S.A. SAF. Sin perjuicio de lo antes señalado, el receptor del presente documento debe tener en cuenta que los valores cuota de los fondos mutuos son variables y que la rentabilidad obtenida por un fondo mutuo en el pasado, no garantiza que se repita en el futuro. El receptor de esta comunicación y/o documento no podrá distribuir, reenviar, citar o usar la misma bajo manera alguna para propósitos distintos ni publicar o incluirla en cualquier otro documento, sin el consentimiento previo del BBVA Asset Management S.A. SAF.';
+          const disclaimerTextA4 = 'La información contenida en la presente comunicación y/o documento ha sido elaborada por BBVA y tiene carácter meramente informativo e ilustrativo. Con carácter previo a la toma de una decisión respecto a la contratación de cualquiera de los productos detallados, el receptor de la presente comunicación y/o documento deberá estar plenamente consciente y no albergar ninguna duda sobre el funcionamiento de los mismos, así como de las obligaciones y riesgos que asumiría con dicha posible contratación. De existir dudas o no quedar claro el funcionamiento y los riesgos implícitos en estos productos, no se deberá efectuar contratación alguna hasta que dichas dudas hayan sido resueltas. La presente comunicación y/o documento no debe en ningún caso entenderse como un servicio de asesoría en materia de inversión, tributaria, legal o contable puesto que no contiene ninguna recomendación personalizada para tomar los productos ni para hacer alguna de las operaciones descritas. En ningún caso podrá considerarse que por la recepción de esta comunicación y/o documento, BBVA está calificando o presentando el producto como idóneo para el receptor de este documento puesto que para la elaboración del mismo y sus respectivos ejemplos no ha tenido en cuenta las circunstancias personales del potencial tomador, su perfil de riesgo, su posición financiera o sus necesidades específicas. En ese sentido, corresponde al receptor de este documento el determinar si los productos descritos en el presente documento resultan adecuados considerando sus características particulares, así como su tolerancia al riesgo y expectativa de rendimiento, debiendo adoptar sus propias decisiones de contratación procurándose el asesoramiento específico y especializado en materia financiera, de mercados, tributaria, contable y legal ajeno a BBVA. Sin perjuicio de lo antes señalado, el receptor del presente documento debe tener en cuenta que los valores cuota de los fondos mutuos son variables y que la rentabilidad obtenida por un fondo mutuo en el pasado, no garantiza que se repita en el futuro. El receptor de esta comunicación y/o documento no podrá ser distribuir, reenviar, citar o usar la misma bajo manera alguna para propósitos distintos ni publicar o incluirla en cualquier otro documento, sin el consentimiento previo de BBVA.';
           const splitDisclaimerA4 = pdf.splitTextToSize(disclaimerTextA4, pageWidth - 20);
           pdf.text(splitDisclaimerA4, margin, 35, { align: 'justify', maxWidth: pageWidth - 20 });
 
@@ -4945,7 +4945,7 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.setFillColor(202, 209, 216);
             pdf.setTextColor(6, 14, 70);
             pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(7);
+            pdf.setFontSize(9);
             pdf.rect(startXA4, yPosA4, tableWidthA4, 7, 'F');
 
             let xPosA4 = startXA4 + 2;
@@ -4964,7 +4964,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(0, 0, 0);
-            pdf.setFontSize(7);
+            pdf.setFontSize(9);
             operacionesUnicasPdfA4.forEach((op, idx) => {
               if (idx % 2 === 0) {
                 pdf.setFillColor(245, 245, 245);
