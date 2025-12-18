@@ -4931,14 +4931,15 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text(splitIntroA4, margin, yPosA4, { align: 'justify', maxWidth: pageWidth - 20 });
             yPosA4 += splitIntroA4.length * 5 + 8;
 
-            const colWidthsA4 = [70, 40, 30, 25, 30, 25];
-            const tableWidthA4 = colWidthsA4.reduce((a, b) => a + b, 0);
+            // Tabla ajustada al ancho completo de A4
+            const tableWidthA4 = pageWidth - (margin * 2);
+            const colWidthsA4 = [75, 45, 22, 18, 20, 15]; // Total ~195mm para A4
             const startXA4 = margin;
 
             pdf.setFillColor(202, 209, 216);
             pdf.setTextColor(6, 14, 70);
             pdf.setFont('helvetica', 'bold');
-            pdf.setFontSize(8);
+            pdf.setFontSize(7);
             pdf.rect(startXA4, yPosA4, tableWidthA4, 7, 'F');
 
             let xPosA4 = startXA4 + 2;
@@ -4957,17 +4958,17 @@ async function descargarReportePDF(formato = 'A4') {
 
             pdf.setFont('helvetica', 'normal');
             pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(7);
             operacionesUnicasPdfA4.forEach((op, idx) => {
               if (idx % 2 === 0) {
                 pdf.setFillColor(245, 245, 245);
                 pdf.rect(startXA4, yPosA4, tableWidthA4, 6, 'F');
               }
               xPosA4 = startXA4 + 2;
-              const instrTruncA4 = op.instrumento.length > 32 ? op.instrumento.substring(0, 32) + '...' : op.instrumento;
-              pdf.text(instrTruncA4, xPosA4, yPosA4 + 4);
+              // Texto completo sin truncar
+              pdf.text(op.instrumento, xPosA4, yPosA4 + 4);
               xPosA4 += colWidthsA4[0];
-              const limTruncA4 = op.limite.length > 16 ? op.limite.substring(0, 16) + '...' : op.limite;
-              pdf.text(limTruncA4, xPosA4, yPosA4 + 4);
+              pdf.text(op.limite, xPosA4, yPosA4 + 4);
               xPosA4 += colWidthsA4[1];
               pdf.text(op.ambito, xPosA4, yPosA4 + 4);
               xPosA4 += colWidthsA4[2];
