@@ -2290,7 +2290,7 @@
       <h3 style="margin-bottom: 20px; color: var(--bbva-primary);">Seleccionar Formato</h3>
       <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 13px;">Elige el formato de exportación del reporte</p>
       <div style="display: flex; gap: 12px; justify-content: center;">
-        <button class="btn-action btn-primary" onclick="descargarReportePDF('A4')" style="padding: 12px 24px;">
+        <button class="btn-action btn-outline" onclick="descargarReportePDF('A4')" style="padding: 12px 24px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
             <rect x="4" y="2" width="16" height="20" rx="2"/>
             <line x1="8" y1="6" x2="16" y2="6"/>
@@ -4568,20 +4568,25 @@ async function descargarReportePDF(formato = 'A4') {
 
           // Página 2: Resumen Asignación de Activos
           const tablaAsignacionA4 = document.querySelector('#tablaGuiaConsolidada');
-          const canvasAAGroupedA4 = document.getElementById('aaCanvasGrouped');
+          const canvasAA1_A4 = document.getElementById('sectoresPFChartTotal');
           const canvasMaturityA4 = document.getElementById('maturityWallPFChartTotal');
 
           if (tablaAsignacionA4) {
             // Hacer visibles los gráficos
-            hacerVisibleConPadres(canvasAAGroupedA4);
+            hacerVisibleConPadres(canvasAA1_A4);
             hacerVisibleConPadres(canvasMaturityA4);
             await new Promise(r => setTimeout(r, 300));
 
-            // Renderizar Maturity Wall si existe la función
+            // Renderizar Asset Allocation y Maturity Wall
+            const perfilA4 = document.getElementById('pfPerfilSel')?.value || 'Moderado';
+            if (typeof renderAssetAllocationChart === 'function' && typeof calculateAssetAllocation === 'function') {
+              const aaDataA4 = calculateAssetAllocation('TOTAL', perfilA4);
+              renderAssetAllocationChart('sectoresPFChartTotal', aaDataA4);
+            }
             if (typeof renderMaturityWallPFChart === 'function') {
               await renderMaturityWallPFChart('maturityWallPFChartTotal', 'TOTAL');
             }
-            await new Promise(r => setTimeout(r, 300));
+            await new Promise(r => setTimeout(r, 500));
 
             // Crear contenedor para la tabla
             const contenedorAsignacionA4 = document.createElement('div');
@@ -4624,11 +4629,11 @@ async function descargarReportePDF(formato = 'A4') {
             let currentYA4 = 28 + tablaHeightA4 + 10;
             const fullChartWidthA4 = pageWidth - (margin * 2);
 
-            if (canvasAAGroupedA4 && canvasAAGroupedA4.width > 0) {
-              const groupedRatioA4 = canvasAAGroupedA4.width / canvasAAGroupedA4.height;
-              const groupedHeightA4 = fullChartWidthA4 / groupedRatioA4;
-              pdf.addImage(canvasAAGroupedA4.toDataURL('image/png'), 'PNG', margin, currentYA4, fullChartWidthA4, groupedHeightA4);
-              currentYA4 += groupedHeightA4 + 10;
+            if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
+              const aa1RatioA4 = canvasAA1_A4.width / canvasAA1_A4.height;
+              const aa1HeightA4 = fullChartWidthA4 / aa1RatioA4;
+              pdf.addImage(canvasAA1_A4.toDataURL('image/png'), 'PNG', margin, currentYA4, fullChartWidthA4, aa1HeightA4);
+              currentYA4 += aa1HeightA4 + 10;
             }
 
             // Gráfico Maturity Wall debajo (ancho completo)
@@ -4802,6 +4807,168 @@ async function descargarReportePDF(formato = 'A4') {
           const disclaimerTextA4 = 'La información contenida en la presente comunicación y/o documento ha sido elaborada por BBVA Asset Management S.A. SAF y tiene carácter meramente informativo e ilustrativo. Con carácter previo a la toma de una decisión respecto a la contratación de cualquiera de los productos detallados, el receptor de la presente comunicación y/o documento deberá estar plenamente consciente y no albergar ninguna duda sobre el funcionamiento de los mismos, así como de las obligaciones y riesgos que asumiría con dicha posible contratación. De existir dudas o no quedar claro el funcionamiento y los riesgos implícitos en estos productos, no se deberá efectuar contratación alguna hasta que dichas dudas hayan sido resueltas. La presente comunicación y/o documento no debe en ningún caso entenderse como un servicio de asesoría en materia de inversión, tributaria, legal o contable puesto que no contiene ninguna recomendación personalizada para tomar los productos ni para hacer alguna de las operaciones descritas. En ningún caso podrá considerarse que por la recepción de esta comunicación y/o documento, BBVA Asset Management S.A. SAF está calificando o presentando el producto como idóneo para el receptor de este documento puesto que para la elaboración del mismo y sus respectivos ejemplos no ha tenido en cuenta las circunstancias personales del potencial tomador, su perfil de riesgo, su posición financiera o sus necesidades específicas. En ese sentido, corresponde al receptor de este documento el determinar si los productos descritos en el presente documento resultan adecuados considerando sus características particulares, así como su tolerancia al riesgo y expectativa de rendimiento, debiendo adoptar sus propias decisiones de contratación procurándose el asesoramiento específico y especializado en materia financiera, de mercados, tributaria, contable y legal ajeno a BBVA Asset Management S.A. SAF. Sin perjuicio de lo antes señalado, el receptor del presente documento debe tener en cuenta que los valores cuota de los fondos mutuos son variables y que la rentabilidad obtenida por un fondo mutuo en el pasado, no garantiza que se repita en el futuro. El receptor de esta comunicación y/o documento no podrá distribuir, reenviar, citar o usar la misma bajo manera alguna para propósitos distintos ni publicar o incluirla en cualquier otro documento, sin el consentimiento previo del BBVA Asset Management S.A. SAF.';
           const splitDisclaimerA4 = pdf.splitTextToSize(disclaimerTextA4, pageWidth - 20);
           pdf.text(splitDisclaimerA4, margin, 35, { align: 'justify', maxWidth: pageWidth - 20 });
+
+          // Carta Disclaimer - Productos Específicos (solo si hay compras con exceso)
+          const tcPdfA4 = parseFloat(document.getElementById('tipoCambio')?.value) || 3.40;
+          const totalUSDpdfA4 = (LAST_HOLDINGS.USD || []).reduce((sum, r) => {
+            const b = toNum(r.valor_mercado);
+            const e = edits.USD ? (edits.USD.get(r._rid) || 0) : 0;
+            return sum + b + e;
+          }, 0);
+          const totalPENpdfA4 = (LAST_HOLDINGS.PEN || []).reduce((sum, r) => {
+            const b = toNum(r.valor_mercado);
+            const e = edits.PEN ? (edits.PEN.get(r._rid) || 0) : 0;
+            return sum + (b + e) / tcPdfA4;
+          }, 0);
+          const totalCarteraPdfA4 = totalUSDpdfA4 + totalPENpdfA4;
+
+          const operacionesExcesoPdfA4 = [];
+          (LIMITS_RESULTS || []).filter(r => !r.ok).forEach(lim => {
+            const limite = LIMITS[lim.i];
+            const exceso = lim.valor - lim.limite;
+            const ambito = lim.tipo === 'I' ? 'Individual' : 'Agregado';
+
+            (LAST_HOLDINGS.USD || []).forEach(row => {
+              const editVal = edits.USD ? (edits.USD.get(row._rid) || 0) : 0;
+              if (editVal <= 0) return;
+              const enriched = enrichRow(row, 'USD');
+              if (matchesLimit(limite.filters, enriched) && !isException(limite, enriched)) {
+                operacionesExcesoPdfA4.push({
+                  instrumento: row.nombre,
+                  limite: lim.name,
+                  ambito,
+                  limiteVal: lim.limite,
+                  valorActual: lim.valor,
+                  exceso
+                });
+              }
+            });
+
+            (LAST_HOLDINGS.PEN || []).forEach(row => {
+              const editVal = edits.PEN ? (edits.PEN.get(row._rid) || 0) : 0;
+              if (editVal <= 0) return;
+              const enriched = enrichRow(row, 'PEN');
+              if (matchesLimit(limite.filters, enriched) && !isException(limite, enriched)) {
+                operacionesExcesoPdfA4.push({
+                  instrumento: row.nombre,
+                  limite: lim.name,
+                  ambito,
+                  limiteVal: lim.limite,
+                  valorActual: lim.valor,
+                  exceso
+                });
+              }
+            });
+          });
+
+          const operacionesUnicasPdfA4 = [];
+          const seenPdfA4 = new Set();
+          operacionesExcesoPdfA4.forEach(op => {
+            const key = `${op.instrumento}|${op.limite}`;
+            if (!seenPdfA4.has(key)) {
+              seenPdfA4.add(key);
+              operacionesUnicasPdfA4.push(op);
+            }
+          });
+
+          if (operacionesUnicasPdfA4.length > 0) {
+            pdf.addPage();
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(18);
+            pdf.setTextColor(6, 14, 70);
+            pdf.text('Carta Disclaimer - Productos Específicos', margin, 14);
+
+            const hoyA4 = new Date();
+            const fechaStrA4 = `Lima, ${hoyA4.getDate().toString().padStart(2, '0')}/${(hoyA4.getMonth() + 1).toString().padStart(2, '0')}/${hoyA4.getFullYear()}`;
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            pdf.text(fechaStrA4, margin, 24);
+
+            let yPosA4 = 34;
+            pdf.setFontSize(10);
+            const textoIntroA4 = 'Yo, ____________________________________________________________ con DNI __________________ he decidido realizar la(s) inversión(es) que se detallan en el siguiente recuadro:';
+            const splitIntroA4 = pdf.splitTextToSize(textoIntroA4, pageWidth - 20);
+            pdf.text(splitIntroA4, margin, yPosA4, { align: 'justify', maxWidth: pageWidth - 20 });
+            yPosA4 += splitIntroA4.length * 5 + 8;
+
+            const colWidthsA4 = [70, 40, 30, 25, 30, 25];
+            const tableWidthA4 = colWidthsA4.reduce((a, b) => a + b, 0);
+            const startXA4 = margin;
+
+            pdf.setFillColor(202, 209, 216);
+            pdf.setTextColor(6, 14, 70);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setFontSize(8);
+            pdf.rect(startXA4, yPosA4, tableWidthA4, 7, 'F');
+
+            let xPosA4 = startXA4 + 2;
+            pdf.text('Instrumento', xPosA4, yPosA4 + 5);
+            xPosA4 += colWidthsA4[0];
+            pdf.text('Límite', xPosA4, yPosA4 + 5);
+            xPosA4 += colWidthsA4[1];
+            pdf.text('Ámbito', xPosA4, yPosA4 + 5);
+            xPosA4 += colWidthsA4[2];
+            pdf.text('Límite', xPosA4, yPosA4 + 5);
+            xPosA4 += colWidthsA4[3];
+            pdf.text('Valor Actual', xPosA4, yPosA4 + 5);
+            xPosA4 += colWidthsA4[4];
+            pdf.text('Exceso', xPosA4, yPosA4 + 5);
+            yPosA4 += 7;
+
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(0, 0, 0);
+            operacionesUnicasPdfA4.forEach((op, idx) => {
+              if (idx % 2 === 0) {
+                pdf.setFillColor(245, 245, 245);
+                pdf.rect(startXA4, yPosA4, tableWidthA4, 6, 'F');
+              }
+              xPosA4 = startXA4 + 2;
+              const instrTruncA4 = op.instrumento.length > 32 ? op.instrumento.substring(0, 32) + '...' : op.instrumento;
+              pdf.text(instrTruncA4, xPosA4, yPosA4 + 4);
+              xPosA4 += colWidthsA4[0];
+              const limTruncA4 = op.limite.length > 16 ? op.limite.substring(0, 16) + '...' : op.limite;
+              pdf.text(limTruncA4, xPosA4, yPosA4 + 4);
+              xPosA4 += colWidthsA4[1];
+              pdf.text(op.ambito, xPosA4, yPosA4 + 4);
+              xPosA4 += colWidthsA4[2];
+              pdf.text(op.limiteVal.toFixed(2) + '%', xPosA4, yPosA4 + 4);
+              xPosA4 += colWidthsA4[3];
+              pdf.text(op.valorActual.toFixed(2) + '%', xPosA4, yPosA4 + 4);
+              xPosA4 += colWidthsA4[4];
+              pdf.setTextColor(150, 148, 255);
+              pdf.text('+' + op.exceso.toFixed(2) + '%', xPosA4, yPosA4 + 4);
+              pdf.setTextColor(0, 0, 0);
+              yPosA4 += 6;
+            });
+
+            pdf.setDrawColor(200, 200, 200);
+            pdf.rect(startXA4, yPosA4 - (operacionesUnicasPdfA4.length * 6) - 7, tableWidthA4, (operacionesUnicasPdfA4.length * 6) + 7);
+
+            yPosA4 += 10;
+
+            pdf.setFontSize(9);
+            const texto1A4 = 'Con respecto a dicha(s) inversión(es), estoy consciente y de acuerdo con que representa(n) una exposición mayor a la sugerida por mi perfil de riesgo o no está(n) dentro de las alternativas de inversión de mi perfil de riesgo.';
+            const split1A4 = pdf.splitTextToSize(texto1A4, pageWidth - 20);
+            pdf.text(split1A4, margin, yPosA4, { align: 'justify', maxWidth: pageWidth - 20 });
+            yPosA4 += split1A4.length * 4 + 6;
+
+            const texto2A4 = 'Reconozco que es de mi entera responsabilidad las acciones que yo decida ejecutar. El BBVA se limita a seguir mis instrucciones en función a los mandatos específicos que les dé, los cuales pueden hacer que salga de la diversificación que el Banco me ha sugerido o incluso que salga de mi perfil de riesgo. El BBVA no es responsable por los daños y perjuicios de cualquier naturaleza que yo pueda sufrir a consecuencia de mis propias decisiones de inversión, en especial de aquellas que realice y que no se ajusten a mi perfil de riesgo.';
+            const split2A4 = pdf.splitTextToSize(texto2A4, pageWidth - 20);
+            pdf.text(split2A4, margin, yPosA4, { align: 'justify', maxWidth: pageWidth - 20 });
+            yPosA4 += split2A4.length * 4 + 20;
+
+            pdf.setDrawColor(0, 0, 0);
+            const firmaWidthA4 = 70;
+            const firmaYA4 = Math.min(yPosA4 + 15, pageHeight - 25);
+
+            pdf.line(margin, firmaYA4, margin + firmaWidthA4, firmaYA4);
+            pdf.setFontSize(9);
+            pdf.text('Firma del Cliente', margin + (firmaWidthA4 / 2), firmaYA4 + 5, { align: 'center' });
+
+            pdf.line(pageWidth - margin - firmaWidthA4, firmaYA4, pageWidth - margin, firmaYA4);
+            pdf.text('Firma del Banquero / Investment Advisor', pageWidth - margin - (firmaWidthA4 / 2), firmaYA4 + 5, { align: 'center' });
+          }
 
           // Volver a Portafolio Final
           await navegarA('[data-tab="portafolio"].tab-child', '[data-sub="portafolio-total"]');
