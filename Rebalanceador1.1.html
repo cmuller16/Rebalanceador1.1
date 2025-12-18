@@ -3246,6 +3246,7 @@ async function descargarReportePDF(formato = 'A4') {
             const wrapperDonut = canvasAADonut?.closest('.chart-wrapper');
             const originalHeightGrouped = wrapperGrouped?.style.height;
             const originalHeightDonut = wrapperDonut?.style.height;
+            const originalWidthDonut = wrapperDonut?.style.width;
 
             // Redimensionar contenedores para proporción más alta (para PDF)
             // Usar proporción que llene el espacio del PDF
@@ -3296,7 +3297,15 @@ async function descargarReportePDF(formato = 'A4') {
             if (wrapperGrouped) wrapperGrouped.style.height = originalHeightGrouped || '500px';
             if (wrapperDonut) {
               wrapperDonut.style.height = originalHeightDonut || '500px';
-              wrapperDonut.style.width = '';
+              wrapperDonut.style.width = originalWidthDonut || '';
+            }
+            // Forzar reflow del grid padre para que recalcule el layout
+            const gridContainer = wrapperDonut?.closest('[style*="grid-template-columns"]') || wrapperDonut?.parentElement?.parentElement;
+            if (gridContainer) {
+              const originalDisplay = gridContainer.style.display;
+              gridContainer.style.display = 'none';
+              gridContainer.offsetHeight; // Forzar reflow
+              gridContainer.style.display = originalDisplay || 'grid';
             }
             if (charts.grouped) charts.grouped.resize();
             if (charts.donut) charts.donut.resize();
