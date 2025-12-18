@@ -3837,11 +3837,16 @@ async function descargarReportePDF(formato = 'A4') {
           }
 
           // Diapo 11b: Operaciones de Bonos (solo si hubo compras/ventas de bonos)
+          await navegarA('[data-tab="renta-fija"].tab-child', '[data-sub="renta-fija-total"]');
+          await new Promise(r => setTimeout(r, 300));
           const operacionesBonosContainer = document.getElementById('operacionesBonosTotalContainer');
-          if (operacionesBonosContainer && operacionesBonosContainer.style.display !== 'none') {
-            const tablaOperacionesBonos = operacionesBonosContainer.querySelector('table');
-            const filasOperaciones = tablaOperacionesBonos ? tablaOperacionesBonos.querySelectorAll('tbody tr') : [];
-            if (filasOperaciones.length > 0) {
+          const operacionesBonosBody = document.getElementById('operacionesBonosBodyTotal');
+          const filasOperaciones = operacionesBonosBody ? operacionesBonosBody.querySelectorAll('tr') : [];
+          if (filasOperaciones.length > 0) {
+            // Hacer visible el contenedor para captura
+            if (operacionesBonosContainer) {
+              operacionesBonosContainer.style.display = 'block';
+              await new Promise(r => setTimeout(r, 200));
               await agregarSeccionAlPDF(operacionesBonosContainer, 'Operaciones de Bonos');
             }
           }
