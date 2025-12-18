@@ -2981,7 +2981,7 @@ async function descargarReportePDF(formato = 'A4') {
           img.src = LOGO_AZUL_B64;
         })();
                 // Helper: Convertir canvas a JPEG con fondo blanco (evita fondo negro por transparencia)
-        function canvasToJpegWithWhiteBg(canvas, quality = 0.90) {
+        function canvasToJpegWithWhiteBg(canvas, quality = 1.0) {
           const tempCanvas = document.createElement('canvas');
           tempCanvas.width = canvas.width;
           tempCanvas.height = canvas.height;
@@ -3067,7 +3067,7 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text(titulo, margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.90);
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
             const imgWidth = pageWidth - (margin * 2);
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             const startY = isWidescreen ? 20 : 25;
@@ -3275,7 +3275,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Posicionar tabla
             const startY = isWidescreen ? 20 : 25;
-            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 0.90);
+            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 1.0);
             const tablaWidth = pageWidth - (margin * 2);
             const tablaHeight = (canvasTabla.height * tablaWidth) / canvasTabla.width;
             pdf.addImage(imgDataTabla, 'JPEG', margin, startY, tablaWidth, tablaHeight);
