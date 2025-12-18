@@ -2949,7 +2949,7 @@ async function descargarReportePDF(formato = 'A4') {
       cerrarModalFormato();
       const btnDescargar = document.getElementById('btnDescargarReporte');
       const textoOriginal = btnDescargar.innerHTML;
-      btnDescargar.innerHTML = '⏳ Generando PDF...';
+      btnDescargar.innerHTML = 'Generando PDF...';
       btnDescargar.disabled = true;
       
       try {
