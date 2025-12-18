@@ -3369,16 +3369,21 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Primera parte RV
               const contenedorRV1 = document.createElement('div');
-              contenedorRV1.style.background = '#ffffff';
+              contenedorRV1.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaRV1 = document.createElement('table');
               tablaRV1.className = tablaRVOriginal.className;
-              tablaRV1.style.cssText = tablaRVOriginal.style.cssText;
+              tablaRV1.style.width = '100%';
               if (theadRV) tablaRV1.appendChild(theadRV.cloneNode(true));
               const tbodyRV1 = document.createElement('tbody');
               for (let i = 0; i < mitadRV; i++) {
                 if (filasRV[i]) tbodyRV1.appendChild(filasRV[i].cloneNode(true));
               }
               tablaRV1.appendChild(tbodyRV1);
+              // Aplicar estilo 9px
+              tablaRV1.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorRV1.appendChild(tablaRV1);
               document.body.appendChild(contenedorRV1);
               await agregarSeccionAlPDF(contenedorRV1, 'Portafolio de Renta Variable');
@@ -3386,22 +3391,39 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Segunda parte RV
               const contenedorRV2 = document.createElement('div');
-              contenedorRV2.style.background = '#ffffff';
+              contenedorRV2.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaRV2 = document.createElement('table');
               tablaRV2.className = tablaRVOriginal.className;
-              tablaRV2.style.cssText = tablaRVOriginal.style.cssText;
+              tablaRV2.style.width = '100%';
               if (theadRV) tablaRV2.appendChild(theadRV.cloneNode(true));
               const tbodyRV2 = document.createElement('tbody');
               for (let i = mitadRV; i < filasRV.length; i++) {
                 if (filasRV[i]) tbodyRV2.appendChild(filasRV[i].cloneNode(true));
               }
               tablaRV2.appendChild(tbodyRV2);
+              // Aplicar estilo 9px
+              tablaRV2.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorRV2.appendChild(tablaRV2);
               document.body.appendChild(contenedorRV2);
               await agregarSeccionAlPDF(contenedorRV2, 'Portafolio de Renta Variable Cont.');
               document.body.removeChild(contenedorRV2);
             } else {
-              await agregarSeccionAlPDF(tablaRVWrapper, 'Portafolio de Renta Variable');
+              // Cabe en una sola página - crear contenedor con ancho fijo
+              const contenedorRVUnico = document.createElement('div');
+              contenedorRVUnico.style.cssText = 'width: 900px; background: #ffffff;';
+              const tablaRVClone = tablaRVOriginal.cloneNode(true);
+              tablaRVClone.style.width = '100%';
+              tablaRVClone.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
+              contenedorRVUnico.appendChild(tablaRVClone);
+              document.body.appendChild(contenedorRVUnico);
+              await agregarSeccionAlPDF(contenedorRVUnico, 'Portafolio de Renta Variable');
+              document.body.removeChild(contenedorRVUnico);
             }
           }
 
@@ -3504,16 +3526,21 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Primera parte RF
               const contenedorRF1 = document.createElement('div');
-              contenedorRF1.style.background = '#ffffff';
+              contenedorRF1.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaRF1 = document.createElement('table');
               tablaRF1.className = tablaRFOriginal.className;
-              tablaRF1.style.cssText = tablaRFOriginal.style.cssText;
+              tablaRF1.style.width = '100%';
               if (theadRF) tablaRF1.appendChild(theadRF.cloneNode(true));
               const tbodyRF1 = document.createElement('tbody');
               for (let i = 0; i < mitadRF; i++) {
                 if (filasRF[i]) tbodyRF1.appendChild(filasRF[i].cloneNode(true));
               }
               tablaRF1.appendChild(tbodyRF1);
+              // Aplicar estilo 9px
+              tablaRF1.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorRF1.appendChild(tablaRF1);
               document.body.appendChild(contenedorRF1);
               await agregarSeccionAlPDF(contenedorRF1, 'Portafolio de Renta Fija');
@@ -3521,22 +3548,39 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Segunda parte RF
               const contenedorRF2 = document.createElement('div');
-              contenedorRF2.style.background = '#ffffff';
+              contenedorRF2.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaRF2 = document.createElement('table');
               tablaRF2.className = tablaRFOriginal.className;
-              tablaRF2.style.cssText = tablaRFOriginal.style.cssText;
+              tablaRF2.style.width = '100%';
               if (theadRF) tablaRF2.appendChild(theadRF.cloneNode(true));
               const tbodyRF2 = document.createElement('tbody');
               for (let i = mitadRF; i < filasRF.length; i++) {
                 if (filasRF[i]) tbodyRF2.appendChild(filasRF[i].cloneNode(true));
               }
               tablaRF2.appendChild(tbodyRF2);
+              // Aplicar estilo 9px
+              tablaRF2.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorRF2.appendChild(tablaRF2);
               document.body.appendChild(contenedorRF2);
               await agregarSeccionAlPDF(contenedorRF2, 'Portafolio de Renta Fija Cont.');
               document.body.removeChild(contenedorRF2);
             } else {
-              await agregarSeccionAlPDF(tablaRFWrapper, 'Portafolio de Renta Fija');
+              // Cabe en una sola página - crear contenedor con ancho fijo
+              const contenedorRFUnico = document.createElement('div');
+              contenedorRFUnico.style.cssText = 'width: 900px; background: #ffffff;';
+              const tablaRFClone = tablaRFOriginal.cloneNode(true);
+              tablaRFClone.style.width = '100%';
+              tablaRFClone.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
+              contenedorRFUnico.appendChild(tablaRFClone);
+              document.body.appendChild(contenedorRFUnico);
+              await agregarSeccionAlPDF(contenedorRFUnico, 'Portafolio de Renta Fija');
+              document.body.removeChild(contenedorRFUnico);
             }
           }
 
