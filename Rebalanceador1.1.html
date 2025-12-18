@@ -3201,50 +3201,55 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Calcular espacio disponible para gráficos
             const chartY = startY + tablaHeight + 8;
-            const chartWidth = (pageWidth - margin * 3) / 2;
-            const maxChartHeight = pageHeight - chartY - 8;
+            const totalWidth = pageWidth - margin * 2;
+            const maxChartHeight = pageHeight - chartY - 5; // Usar casi todo el espacio
+            const gap = 10; // Espacio entre gráficos
 
-            // Gráfico izquierdo: Distribución por Clase de Activo (maximizar tamaño)
+            // El donut es cuadrado - usar toda la altura disponible
+            const donutSize = maxChartHeight;
+
+            // El gráfico de barras usa el resto del ancho
+            const barChartWidth = totalWidth - donutSize - gap;
+
+            // Calcular altura del gráfico de barras respetando su proporción
+            let imgWidthGrouped = barChartWidth;
+            let imgHeightGrouped = maxChartHeight;
+
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
               const ratioGrouped = canvasAAGrouped.height / canvasAAGrouped.width;
-              // Intentar usar altura máxima primero
-              let imgHeightGrouped = maxChartHeight;
-              let imgWidthGrouped = maxChartHeight / ratioGrouped;
-              // Si excede ancho, usar ancho máximo
-              if (imgWidthGrouped > chartWidth) {
-                imgWidthGrouped = chartWidth;
-                imgHeightGrouped = chartWidth * ratioGrouped;
+              // Calcular altura basada en el ancho disponible
+              const heightFromWidth = barChartWidth * ratioGrouped;
+              // Usar el menor entre altura calculada y máxima disponible
+              if (heightFromWidth < maxChartHeight) {
+                imgHeightGrouped = heightFromWidth;
+              } else {
+                // Si la altura calculada excede, ajustar ancho
+                imgHeightGrouped = maxChartHeight;
+                imgWidthGrouped = maxChartHeight / ratioGrouped;
               }
+            }
 
+            // Gráfico izquierdo: Distribución por Clase de Activo
+            if (canvasAAGrouped && canvasAAGrouped.width > 0) {
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
               pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
+              pdf.line(margin, chartY + 1.5, margin + barChartWidth, chartY + 1.5);
               pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, imgWidthGrouped, imgHeightGrouped);
             }
 
-            // Gráfico derecho: Distribución por Moneda (maximizar tamaño)
+            // Gráfico derecho: Distribución por Moneda (donut cuadrado = circular)
             if (canvasAADonut && canvasAADonut.width > 0) {
-              const rightX = margin + chartWidth + margin;
-              const ratioDonut = canvasAADonut.height / canvasAADonut.width;
-              // Intentar usar altura máxima primero
-              let imgHeightDonut = maxChartHeight;
-              let imgWidthDonut = maxChartHeight / ratioDonut;
-              // Si excede ancho, usar ancho máximo
-              if (imgWidthDonut > chartWidth) {
-                imgWidthDonut = chartWidth;
-                imgHeightDonut = chartWidth * ratioDonut;
-              }
-              // Centrar horizontalmente
-              const donutX = rightX + (chartWidth - imgWidthDonut) / 2;
+              const rightX = margin + barChartWidth + gap;
 
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
               pdf.text('DISTRIBUCIÓN POR MONEDA (%)', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(rightX, chartY + 1.5, rightX + chartWidth, chartY + 1.5);
-              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutX, chartY + 3, imgWidthDonut, imgHeightDonut);
+              pdf.line(rightX, chartY + 1.5, rightX + donutSize, chartY + 1.5);
+              // Donut cuadrado para que sea circular
+              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', rightX, chartY + 3, donutSize, donutSize);
             }
           }
           
