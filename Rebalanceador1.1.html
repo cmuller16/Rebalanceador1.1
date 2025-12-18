@@ -4633,14 +4633,13 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
               // Título con línea (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(14);
+              pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, currentYA4);
-              currentYA4 += 2;
               pdf.setDrawColor(6, 14, 70);
               pdf.setLineWidth(0.5);
-              pdf.line(margin, currentYA4, margin + 80, currentYA4);
-              currentYA4 += 5;
+              pdf.line(margin, currentYA4 + 1, margin + 65, currentYA4 + 1);
+              currentYA4 += 6;
 
               const aa1RatioA4 = canvasAA1_A4.width / canvasAA1_A4.height;
               const aa1HeightA4 = (chartWidthA4 / aa1RatioA4) * chartScaleA4;
@@ -4653,14 +4652,13 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
               // Título con línea (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(14);
+              pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', margin, currentYA4);
-              currentYA4 += 2;
               pdf.setDrawColor(6, 14, 70);
               pdf.setLineWidth(0.5);
-              pdf.line(margin, currentYA4, margin + 45, currentYA4);
-              currentYA4 += 5;
+              pdf.line(margin, currentYA4 + 1, margin + 35, currentYA4 + 1);
+              currentYA4 += 6;
 
               const maturityRatioA4 = canvasMaturityA4.width / canvasMaturityA4.height;
               const maturityHeightA4 = (chartWidthA4 / maturityRatioA4) * chartScaleA4;
@@ -4939,9 +4937,9 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text(splitIntroA4, margin, yPosA4, { align: 'justify', maxWidth: pageWidth - 20 });
             yPosA4 += splitIntroA4.length * 5 + 8;
 
-            // Tabla ajustada al ancho completo de A4
+            // Tabla ajustada al ancho completo de A4 (190mm)
             const tableWidthA4 = pageWidth - (margin * 2);
-            const colWidthsA4 = [75, 45, 22, 18, 20, 15]; // Total ~195mm para A4
+            const colWidthsA4 = [70, 42, 22, 18, 22, 16]; // Total = 190mm exacto
             const startXA4 = margin;
 
             pdf.setFillColor(202, 209, 216);
