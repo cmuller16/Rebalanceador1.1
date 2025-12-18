@@ -3544,10 +3544,61 @@ async function descargarReportePDF(formato = 'A4') {
           console.log('Canvas1 después de forzar visibilidad:', canvasAA1?.width, 'x', canvasAA1?.height);
 
           if (canvasAA1 || canvasMaturity) {
+            // Obtener los charts
+            const chartAA1 = canvasAA1 ? Chart.getChart(canvasAA1) : null;
+            const chartMaturity = canvasMaturity ? Chart.getChart(canvasMaturity) : null;
+
+            // Guardar wrappers y dimensiones originales
+            const wrapperAA1 = canvasAA1?.closest('.chart-wrapper');
+            const wrapperMaturity = canvasMaturity?.closest('.chart-wrapper');
+            const originalHeightAA1 = wrapperAA1?.style.height;
+            const originalHeightMaturity = wrapperMaturity?.style.height;
+
+            // Guardar fuentes originales AA1
+            const originalAA1Options = chartAA1 ? {
+              legendFont: chartAA1.options?.plugins?.legend?.labels?.font?.size,
+              datalabelsFont: chartAA1.options?.plugins?.datalabels?.font?.size,
+              xTicksFont: chartAA1.options?.scales?.x?.ticks?.font?.size,
+              yTicksFont: chartAA1.options?.scales?.y?.ticks?.font?.size
+            } : {};
+
+            // Guardar fuentes originales Maturity
+            const originalMaturityOptions = chartMaturity ? {
+              legendFont: chartMaturity.options?.plugins?.legend?.labels?.font?.size,
+              datalabelsFont: chartMaturity.options?.plugins?.datalabels?.font?.size,
+              xTicksFont: chartMaturity.options?.scales?.x?.ticks?.font?.size,
+              yTicksFont: chartMaturity.options?.scales?.y?.ticks?.font?.size
+            } : {};
+
+            // Agrandar contenedores
+            const pdfChartHeight = 600;
+            if (wrapperAA1) wrapperAA1.style.height = pdfChartHeight + 'px';
+            if (wrapperMaturity) wrapperMaturity.style.height = pdfChartHeight + 'px';
+
+            // Aumentar fuentes a 24px para AA1
+            if (chartAA1) {
+              chartAA1.options.plugins.legend.labels.font.size = 24;
+              chartAA1.options.plugins.datalabels.font.size = 24;
+              chartAA1.options.scales.x.ticks.font.size = 24;
+              chartAA1.options.scales.y.ticks.font.size = 24;
+              chartAA1.update('none');
+            }
+
+            // Aumentar fuentes a 24px para Maturity
+            if (chartMaturity) {
+              chartMaturity.options.plugins.legend.labels.font.size = 24;
+              chartMaturity.options.plugins.datalabels.font.size = 24;
+              chartMaturity.options.scales.x.ticks.font.size = 24;
+              chartMaturity.options.scales.y.ticks.font.size = 24;
+              chartMaturity.update('none');
+            }
+
+            // Resize y esperar
+            if (chartAA1) chartAA1.resize();
+            if (chartMaturity) chartMaturity.resize();
+            await new Promise(r => setTimeout(r, 400));
+
             pdf.addPage();
-            // Logo BBVA
-            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
-            // Título
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(6, 14, 70);
@@ -3555,38 +3606,60 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.setFont('helvetica', 'normal');
 
             const chartY = isWidescreen ? 25 : 30;
-            const chartWidth = (pageWidth - margin * 3) / 2; // Ancho para cada gráfico
-            const chartHeight = pageHeight - chartY - 10; // Altura disponible
+            const chartWidth = (pageWidth - margin * 3) / 2;
+            const maxChartHeight = pageHeight - chartY - 10;
+            const scaleFactor = 0.85;
+            const reducedHeight = maxChartHeight * scaleFactor;
+            const verticalPadding = (maxChartHeight - reducedHeight) / 2;
 
-            // Ratio fijo: los canvas son 693x508 cuando están visibles
-            const FIXED_RATIO = 508 / 693; // 0.733
-            const imgWidth = chartWidth;
-            const imgHeight = Math.min(chartWidth * FIXED_RATIO, chartHeight - 15);
-
-            // Gráfico AA1 (izquierda)
+            // Gráfico AA1 (izquierda) - con ratio real
             if (canvasAA1 && canvasAA1.width > 0) {
+              const aa1Ratio = canvasAA1.width / canvasAA1.height;
+              const aa1Width = reducedHeight * aa1Ratio;
+
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(margin, chartY + 2, margin + chartWidth, chartY + 2);
-
-              const imgData1 = canvasToJpegWithWhiteBg(canvasAA1);
-              pdf.addImage(imgData1, 'JPEG', margin, chartY + 5, imgWidth, imgHeight);
+              pdf.line(margin, chartY + 2, margin + aa1Width, chartY + 2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasAA1), 'JPEG', margin, chartY + 5 + verticalPadding, aa1Width, reducedHeight);
             }
 
-            // Gráfico Maturity Wall (derecha)
+            // Gráfico Maturity Wall (derecha) - con ratio real
             if (canvasMaturity && canvasMaturity.width > 0) {
+              const maturityRatio = canvasMaturity.width / canvasMaturity.height;
+              const maturityWidth = reducedHeight * maturityRatio;
               const rightX = margin + chartWidth + margin;
+
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(rightX, chartY + 2, rightX + chartWidth, chartY + 2);
-
-              const imgData2 = canvasToJpegWithWhiteBg(canvasMaturity);
-              pdf.addImage(imgData2, 'JPEG', rightX, chartY + 5, imgWidth, imgHeight);
+              pdf.line(rightX, chartY + 2, rightX + maturityWidth, chartY + 2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasMaturity), 'JPEG', rightX, chartY + 5 + verticalPadding, maturityWidth, reducedHeight);
             }
+
+            // Restaurar fuentes originales AA1
+            if (chartAA1) {
+              chartAA1.options.plugins.legend.labels.font.size = originalAA1Options.legendFont;
+              chartAA1.options.plugins.datalabels.font.size = originalAA1Options.datalabelsFont;
+              chartAA1.options.scales.x.ticks.font.size = originalAA1Options.xTicksFont;
+              chartAA1.options.scales.y.ticks.font.size = originalAA1Options.yTicksFont;
+              chartAA1.update('none');
+            }
+
+            // Restaurar fuentes originales Maturity
+            if (chartMaturity) {
+              chartMaturity.options.plugins.legend.labels.font.size = originalMaturityOptions.legendFont;
+              chartMaturity.options.plugins.datalabels.font.size = originalMaturityOptions.datalabelsFont;
+              chartMaturity.options.scales.x.ticks.font.size = originalMaturityOptions.xTicksFont;
+              chartMaturity.options.scales.y.ticks.font.size = originalMaturityOptions.yTicksFont;
+              chartMaturity.update('none');
+            }
+
+            // Restaurar dimensiones originales
+            if (wrapperAA1) wrapperAA1.style.height = originalHeightAA1 || '500px';
+            if (wrapperMaturity) wrapperMaturity.style.height = originalHeightMaturity || '500px';
           }
           
           // Diapo 5: Portafolio Renta Variable (solo tabla) - con paginación si > 19 filas
