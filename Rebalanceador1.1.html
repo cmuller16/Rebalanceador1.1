@@ -3361,7 +3361,7 @@ async function descargarReportePDF(formato = 'A4') {
             await new Promise(r => setTimeout(r, 400));
 
             // Factor de reducción para dejar espacio arriba y abajo
-            const scaleFactor = 0.85;
+            const scaleFactor = 0.70;
             const reducedHeight = maxChartHeight * scaleFactor;
             const verticalPadding = (maxChartHeight - reducedHeight) / 2;
 
