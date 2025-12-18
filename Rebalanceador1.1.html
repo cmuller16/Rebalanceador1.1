@@ -4092,9 +4092,9 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasBonos[i]) tbodyBonos1.appendChild(filasBonos[i].cloneNode(true));
               }
               tablaBonos1.appendChild(tbodyBonos1);
-              // Aplicar estilo 11px para mejor legibilidad
+              // Aplicar estilo 12px para igualar al resto de tablas
               tablaBonos1.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '11px';
+                cell.style.fontSize = '12px';
                 cell.style.padding = '4px 10px';
               });
               contenedorBonos1.appendChild(tablaBonos1);
@@ -4115,9 +4115,9 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasBonos[i]) tbodyBonos2.appendChild(filasBonos[i].cloneNode(true));
               }
               tablaBonos2.appendChild(tbodyBonos2);
-              // Aplicar estilo 11px para mejor legibilidad
+              // Aplicar estilo 12px para igualar al resto de tablas
               tablaBonos2.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '11px';
+                cell.style.fontSize = '12px';
                 cell.style.padding = '4px 10px';
               });
               contenedorBonos2.appendChild(tablaBonos2);
@@ -4128,7 +4128,7 @@ async function descargarReportePDF(formato = 'A4') {
               // Clonar tabla para aplicar estilos sin afectar original
               const tablaBonosClone = tablaBonosOriginal.cloneNode(true);
               tablaBonosClone.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '11px';
+                cell.style.fontSize = '12px';
                 cell.style.padding = '4px 10px';
               });
               const contenedorBonosSingle = document.createElement('div');
