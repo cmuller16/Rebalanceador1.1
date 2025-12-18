@@ -4633,7 +4633,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
               // Título con línea de lado a lado (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(5);
+              pdf.setFontSize(7);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, currentYA4);
               pdf.setDrawColor(6, 14, 70);
@@ -4652,7 +4652,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
               // Título con línea de lado a lado (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(5);
+              pdf.setFontSize(7);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', margin, currentYA4);
               pdf.setDrawColor(6, 14, 70);
