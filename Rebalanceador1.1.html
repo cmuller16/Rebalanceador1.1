@@ -3577,19 +3577,19 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Aumentar fuentes a 24px para AA1
             if (chartAA1) {
-              chartAA1.options.plugins.legend.labels.font.size = 24;
-              chartAA1.options.plugins.datalabels.font.size = 24;
-              chartAA1.options.scales.x.ticks.font.size = 24;
-              chartAA1.options.scales.y.ticks.font.size = 24;
+              if (chartAA1.options?.plugins?.legend?.labels?.font) chartAA1.options.plugins.legend.labels.font.size = 24;
+              if (chartAA1.options?.plugins?.datalabels?.font) chartAA1.options.plugins.datalabels.font.size = 24;
+              if (chartAA1.options?.scales?.x?.ticks?.font) chartAA1.options.scales.x.ticks.font.size = 24;
+              if (chartAA1.options?.scales?.y?.ticks?.font) chartAA1.options.scales.y.ticks.font.size = 24;
               chartAA1.update('none');
             }
 
             // Aumentar fuentes a 24px para Maturity
             if (chartMaturity) {
-              chartMaturity.options.plugins.legend.labels.font.size = 24;
-              chartMaturity.options.plugins.datalabels.font.size = 24;
-              chartMaturity.options.scales.x.ticks.font.size = 24;
-              chartMaturity.options.scales.y.ticks.font.size = 24;
+              if (chartMaturity.options?.plugins?.legend?.labels?.font) chartMaturity.options.plugins.legend.labels.font.size = 24;
+              if (chartMaturity.options?.plugins?.datalabels?.font) chartMaturity.options.plugins.datalabels.font.size = 24;
+              if (chartMaturity.options?.scales?.x?.ticks?.font) chartMaturity.options.scales.x.ticks.font.size = 24;
+              if (chartMaturity.options?.scales?.y?.ticks?.font) chartMaturity.options.scales.y.ticks.font.size = 24;
               chartMaturity.update('none');
             }
 
@@ -3641,19 +3641,19 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Restaurar fuentes originales AA1
             if (chartAA1) {
-              chartAA1.options.plugins.legend.labels.font.size = originalAA1Options.legendFont;
-              chartAA1.options.plugins.datalabels.font.size = originalAA1Options.datalabelsFont;
-              chartAA1.options.scales.x.ticks.font.size = originalAA1Options.xTicksFont;
-              chartAA1.options.scales.y.ticks.font.size = originalAA1Options.yTicksFont;
+              if (chartAA1.options?.plugins?.legend?.labels?.font) chartAA1.options.plugins.legend.labels.font.size = originalAA1Options.legendFont;
+              if (chartAA1.options?.plugins?.datalabels?.font) chartAA1.options.plugins.datalabels.font.size = originalAA1Options.datalabelsFont;
+              if (chartAA1.options?.scales?.x?.ticks?.font) chartAA1.options.scales.x.ticks.font.size = originalAA1Options.xTicksFont;
+              if (chartAA1.options?.scales?.y?.ticks?.font) chartAA1.options.scales.y.ticks.font.size = originalAA1Options.yTicksFont;
               chartAA1.update('none');
             }
 
             // Restaurar fuentes originales Maturity
             if (chartMaturity) {
-              chartMaturity.options.plugins.legend.labels.font.size = originalMaturityOptions.legendFont;
-              chartMaturity.options.plugins.datalabels.font.size = originalMaturityOptions.datalabelsFont;
-              chartMaturity.options.scales.x.ticks.font.size = originalMaturityOptions.xTicksFont;
-              chartMaturity.options.scales.y.ticks.font.size = originalMaturityOptions.yTicksFont;
+              if (chartMaturity.options?.plugins?.legend?.labels?.font) chartMaturity.options.plugins.legend.labels.font.size = originalMaturityOptions.legendFont;
+              if (chartMaturity.options?.plugins?.datalabels?.font) chartMaturity.options.plugins.datalabels.font.size = originalMaturityOptions.datalabelsFont;
+              if (chartMaturity.options?.scales?.x?.ticks?.font) chartMaturity.options.scales.x.ticks.font.size = originalMaturityOptions.xTicksFont;
+              if (chartMaturity.options?.scales?.y?.ticks?.font) chartMaturity.options.scales.y.ticks.font.size = originalMaturityOptions.yTicksFont;
               chartMaturity.update('none');
             }
 
