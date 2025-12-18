@@ -3203,29 +3203,28 @@ async function descargarReportePDF(formato = 'A4') {
             const chartY = startY + tablaHeight + 8;
             const totalWidth = pageWidth - margin * 2;
             const maxChartHeight = pageHeight - chartY - 5;
-            const gap = 15;
+            const gap = 10;
+            const chartWidth = (totalWidth - gap) / 2; // 50% cada uno
 
-            // DONUT: cuadrado para que sea CIRCULAR (no ovalado)
-            // Tamaño = altura disponible (así es lo más grande posible siendo cuadrado)
-            const donutSize = Math.min(maxChartHeight, totalWidth * 0.4);
+            // Guardar dimensiones originales de los contenedores
+            const wrapperGrouped = canvasAAGrouped?.closest('.chart-wrapper');
+            const wrapperDonut = canvasAADonut?.closest('.chart-wrapper');
+            const originalHeightGrouped = wrapperGrouped?.style.height;
+            const originalHeightDonut = wrapperDonut?.style.height;
 
-            // BARRAS: usa el resto del ancho
-            const barChartMaxWidth = totalWidth - donutSize - gap;
-
-            // Calcular dimensiones de barras respetando proporción
-            let imgWidthGrouped = barChartMaxWidth;
-            let imgHeightGrouped = maxChartHeight;
-
-            if (canvasAAGrouped && canvasAAGrouped.width > 0) {
-              const ratioGrouped = canvasAAGrouped.height / canvasAAGrouped.width;
-              const heightFromWidth = barChartMaxWidth * ratioGrouped;
-              if (heightFromWidth <= maxChartHeight) {
-                imgHeightGrouped = heightFromWidth;
-              } else {
-                imgHeightGrouped = maxChartHeight;
-                imgWidthGrouped = maxChartHeight / ratioGrouped;
-              }
+            // Redimensionar contenedores para proporción más alta (para PDF)
+            // Usar proporción que llene el espacio del PDF
+            const pdfChartHeight = 600; // px - más alto para el PDF
+            if (wrapperGrouped) wrapperGrouped.style.height = pdfChartHeight + 'px';
+            if (wrapperDonut) {
+              wrapperDonut.style.height = pdfChartHeight + 'px';
+              wrapperDonut.style.width = pdfChartHeight + 'px'; // Cuadrado para donut
             }
+
+            // Re-renderizar los gráficos con la nueva proporción
+            if (charts.grouped) charts.grouped.resize();
+            if (charts.donut) charts.donut.resize();
+            await new Promise(r => setTimeout(r, 400));
 
             // Gráfico izquierdo: Distribución por Clase de Activo
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
@@ -3233,24 +3232,33 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setTextColor(0, 19, 145);
               pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(margin, chartY + 1.5, margin + imgWidthGrouped, chartY + 1.5);
-              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, imgWidthGrouped, imgHeightGrouped);
+              pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
+              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, chartWidth, maxChartHeight);
             }
 
             // Gráfico derecho: Distribución por Moneda - CUADRADO = CIRCULAR
             if (canvasAADonut && canvasAADonut.width > 0) {
-              const donutAreaX = margin + barChartMaxWidth + gap;
-              // Centrar el donut en su área
-              const donutX = donutAreaX + (donutSize - donutSize) / 2;
+              const donutX = margin + chartWidth + gap;
+              // Donut cuadrado centrado en su área
+              const donutSize = Math.min(maxChartHeight, chartWidth);
+              const donutOffsetX = (chartWidth - donutSize) / 2;
 
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
-              pdf.text('DISTRIBUCIÓN POR MONEDA (%)', donutAreaX, chartY);
+              pdf.text('DISTRIBUCIÓN POR MONEDA (%)', donutX, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(donutAreaX, chartY + 1.5, donutAreaX + donutSize, chartY + 1.5);
-              // CUADRADO: mismo ancho y alto = círculo perfecto
-              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutAreaX, chartY + 3, donutSize, donutSize);
+              pdf.line(donutX, chartY + 1.5, donutX + chartWidth, chartY + 1.5);
+              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutX + donutOffsetX, chartY + 3, donutSize, donutSize);
             }
+
+            // Restaurar dimensiones originales
+            if (wrapperGrouped) wrapperGrouped.style.height = originalHeightGrouped || '500px';
+            if (wrapperDonut) {
+              wrapperDonut.style.height = originalHeightDonut || '500px';
+              wrapperDonut.style.width = '';
+            }
+            if (charts.grouped) charts.grouped.resize();
+            if (charts.donut) charts.donut.resize();
           }
           
           // Diapo 3: Posición Detallada (Tabla consolidada) - con división automática si es muy larga
