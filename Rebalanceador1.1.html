@@ -3835,7 +3835,17 @@ async function descargarReportePDF(formato = 'A4') {
               await agregarSeccionAlPDF(tablaBonosWrapper, 'Portafolio de Bonos');
             }
           }
-          
+
+          // Diapo 11b: Operaciones de Bonos (solo si hubo compras/ventas de bonos)
+          const operacionesBonosContainer = document.getElementById('operacionesBonosTotalContainer');
+          if (operacionesBonosContainer && operacionesBonosContainer.style.display !== 'none') {
+            const tablaOperacionesBonos = operacionesBonosContainer.querySelector('table');
+            const filasOperaciones = tablaOperacionesBonos ? tablaOperacionesBonos.querySelectorAll('tbody tr') : [];
+            if (filasOperaciones.length > 0) {
+              await agregarSeccionAlPDF(operacionesBonosContainer, 'Operaciones de Bonos');
+            }
+          }
+
           // Diapo 12: Cuponera (solo tabla) - con paginación si > 19 filas
           await navegarA('[data-tab="reporte"].tab-child', '[data-sub="crono-total"]');
           const tablaCuponesWrapper = document.querySelector('#crono-seccion-cupones .table-wrapper');
