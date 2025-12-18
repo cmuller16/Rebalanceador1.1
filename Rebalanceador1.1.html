@@ -4569,12 +4569,18 @@ async function descargarReportePDF(formato = 'A4') {
           // Página 2: Resumen Asignación de Activos
           const tablaAsignacionA4 = document.querySelector('#tablaGuiaConsolidada');
           const canvasAAGroupedA4 = document.getElementById('aaCanvasGrouped');
-          const canvasAADonutA4 = document.getElementById('aaCanvasDonut');
+          const canvasMaturityA4 = document.getElementById('maturityWallPFChartTotal');
 
           if (tablaAsignacionA4) {
             // Hacer visibles los gráficos
             hacerVisibleConPadres(canvasAAGroupedA4);
-            hacerVisibleConPadres(canvasAADonutA4);
+            hacerVisibleConPadres(canvasMaturityA4);
+            await new Promise(r => setTimeout(r, 300));
+
+            // Renderizar Maturity Wall si existe la función
+            if (typeof renderMaturityWallPFChart === 'function') {
+              await renderMaturityWallPFChart('maturityWallPFChartTotal', 'TOTAL');
+            }
             await new Promise(r => setTimeout(r, 300));
 
             // Crear contenedor para la tabla
@@ -4598,17 +4604,6 @@ async function descargarReportePDF(formato = 'A4') {
             });
             document.body.removeChild(contenedorAsignacionA4);
 
-            // Capturar gráficos
-            let canvasGroupedImgA4 = null;
-            let canvasDonutImgA4 = null;
-
-            if (canvasAAGroupedA4 && canvasAAGroupedA4.width > 0) {
-              canvasGroupedImgA4 = canvasAAGroupedA4;
-            }
-            if (canvasAADonutA4 && canvasAADonutA4.width > 0) {
-              canvasDonutImgA4 = canvasAADonutA4;
-            }
-
             // Agregar página con tabla y gráficos
             pdf.addPage();
             pdf.setFont('helvetica', 'bold');
@@ -4625,19 +4620,22 @@ async function descargarReportePDF(formato = 'A4') {
             const tablaHeightA4 = (canvasTablaA4.height * tablaWidthA4) / canvasTablaA4.width;
             pdf.addImage(tablaImgA4, 'JPEG', margin, 28, tablaWidthA4, tablaHeightA4);
 
-            // Gráficos debajo de la tabla
-            const chartYA4 = 28 + tablaHeightA4 + 10;
-            const chartWidthA4 = (pageWidth - (margin * 3)) / 2;
+            // Gráfico Asset Allocation Nivel 1 (ancho completo)
+            let currentYA4 = 28 + tablaHeightA4 + 10;
+            const fullChartWidthA4 = pageWidth - (margin * 2);
 
-            if (canvasGroupedImgA4) {
-              const groupedRatioA4 = canvasGroupedImgA4.width / canvasGroupedImgA4.height;
-              const groupedHeightA4 = chartWidthA4 / groupedRatioA4;
-              pdf.addImage(canvasGroupedImgA4.toDataURL('image/png'), 'PNG', margin, chartYA4, chartWidthA4, groupedHeightA4);
+            if (canvasAAGroupedA4 && canvasAAGroupedA4.width > 0) {
+              const groupedRatioA4 = canvasAAGroupedA4.width / canvasAAGroupedA4.height;
+              const groupedHeightA4 = fullChartWidthA4 / groupedRatioA4;
+              pdf.addImage(canvasAAGroupedA4.toDataURL('image/png'), 'PNG', margin, currentYA4, fullChartWidthA4, groupedHeightA4);
+              currentYA4 += groupedHeightA4 + 10;
             }
-            if (canvasDonutImgA4) {
-              const donutRatioA4 = canvasDonutImgA4.width / canvasDonutImgA4.height;
-              const donutHeightA4 = chartWidthA4 / donutRatioA4;
-              pdf.addImage(canvasDonutImgA4.toDataURL('image/png'), 'PNG', margin + chartWidthA4 + margin, chartYA4, chartWidthA4, donutHeightA4);
+
+            // Gráfico Maturity Wall debajo (ancho completo)
+            if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
+              const maturityRatioA4 = canvasMaturityA4.width / canvasMaturityA4.height;
+              const maturityHeightA4 = fullChartWidthA4 / maturityRatioA4;
+              pdf.addImage(canvasMaturityA4.toDataURL('image/png'), 'PNG', margin, currentYA4, fullChartWidthA4, maturityHeightA4);
             }
           }
 
