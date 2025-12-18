@@ -3218,20 +3218,26 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, imgWidthGrouped, imgHeightGrouped);
             }
 
-            // Gráfico derecho: Distribución por Moneda (donut cuadrado centrado)
+            // Gráfico derecho: Distribución por Moneda (respetar proporción original)
             if (canvasAADonut && canvasAADonut.width > 0) {
               const rightX = margin + chartWidth + margin;
-              // Donut debe ser cuadrado - usar el menor entre ancho y alto disponible
-              const donutSize = Math.min(chartWidth, maxChartHeight);
-              // Centrar horizontalmente en su espacio
-              const donutX = rightX + (chartWidth - donutSize) / 2;
+              // Respetar proporción del canvas original
+              const ratioDonut = canvasAADonut.height / canvasAADonut.width;
+              let imgWidthDonut = chartWidth;
+              let imgHeightDonut = chartWidth * ratioDonut;
+              if (imgHeightDonut > maxChartHeight) {
+                imgHeightDonut = maxChartHeight;
+                imgWidthDonut = maxChartHeight / ratioDonut;
+              }
+              // Centrar horizontalmente
+              const donutX = rightX + (chartWidth - imgWidthDonut) / 2;
 
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
               pdf.text('DISTRIBUCIÓN POR MONEDA (%)', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX, chartY + 1.5, rightX + chartWidth, chartY + 1.5);
-              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutX, chartY + 3, donutSize, donutSize);
+              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutX, chartY + 3, imgWidthDonut, imgHeightDonut);
             }
           }
           
