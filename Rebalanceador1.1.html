@@ -3317,7 +3317,7 @@ async function descargarReportePDF(formato = 'A4') {
             }
 
             // Dar tiempo al browser para recalcular layout antes de resize
-            await new Promise(r => setTimeout(r, 100));
+            await new Promise(r => setTimeout(r, 150));
 
             if (charts.grouped) charts.grouped.resize();
             if (charts.donut) charts.donut.resize();
