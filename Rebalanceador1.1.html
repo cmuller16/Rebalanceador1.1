@@ -3227,10 +3227,10 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Primera parte
               const contenedor1 = document.createElement('div');
-              contenedor1.style.background = '#ffffff';
+              contenedor1.style.cssText = 'width: 900px; background: #ffffff;';
               const tabla1 = document.createElement('table');
               tabla1.className = tablaOriginal.className;
-              tabla1.style.cssText = tablaOriginal.style.cssText;
+              tabla1.style.width = '100%';
               if (thead) tabla1.appendChild(thead.cloneNode(true));
               const tbody1 = document.createElement('tbody');
               for (let i = 0; i < mitad; i++) {
@@ -3249,10 +3249,10 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Segunda parte
               const contenedor2 = document.createElement('div');
-              contenedor2.style.background = '#ffffff';
+              contenedor2.style.cssText = 'width: 900px; background: #ffffff;';
               const tabla2 = document.createElement('table');
               tabla2.className = tablaOriginal.className;
-              tabla2.style.cssText = tablaOriginal.style.cssText;
+              tabla2.style.width = '100%';
               if (thead) tabla2.appendChild(thead.cloneNode(true));
               const tbody2 = document.createElement('tbody');
               for (let i = mitad; i < filas.length; i++) {
@@ -3269,12 +3269,19 @@ async function descargarReportePDF(formato = 'A4') {
               await agregarSeccionAlPDF(contenedor2, 'Posición Detallada Cont.');
               document.body.removeChild(contenedor2);
             } else {
-              // Cabe en una sola página - aplicar estilo 9px
-              tablaPortafolio.querySelectorAll('th, td').forEach(cell => {
+              // Cabe en una sola página - crear contenedor con ancho fijo
+              const contenedorUnico = document.createElement('div');
+              contenedorUnico.style.cssText = 'width: 900px; background: #ffffff;';
+              const tablaClonePD = tablaOriginal.cloneNode(true);
+              tablaClonePD.style.width = '100%';
+              tablaClonePD.querySelectorAll('th, td').forEach(cell => {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
-              await agregarSeccionAlPDF(tablaPortafolio, 'Posición Detallada');
+              contenedorUnico.appendChild(tablaClonePD);
+              document.body.appendChild(contenedorUnico);
+              await agregarSeccionAlPDF(contenedorUnico, 'Posición Detallada');
+              document.body.removeChild(contenedorUnico);
             }
           }
           
@@ -3681,10 +3688,10 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Primera parte Cupones
               const contenedorCupones1 = document.createElement('div');
-              contenedorCupones1.style.background = '#ffffff';
+              contenedorCupones1.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaCupones1 = document.createElement('table');
               tablaCupones1.className = tablaCuponesOriginal.className;
-              tablaCupones1.style.cssText = tablaCuponesOriginal.style.cssText;
+              tablaCupones1.style.width = '100%';
               if (theadCupones) tablaCupones1.appendChild(theadCupones.cloneNode(true));
               const tbodyCupones1 = document.createElement('tbody');
               for (let i = 0; i < mitadCupones; i++) {
@@ -3703,10 +3710,10 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Segunda parte Cupones
               const contenedorCupones2 = document.createElement('div');
-              contenedorCupones2.style.background = '#ffffff';
+              contenedorCupones2.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaCupones2 = document.createElement('table');
               tablaCupones2.className = tablaCuponesOriginal.className;
-              tablaCupones2.style.cssText = tablaCuponesOriginal.style.cssText;
+              tablaCupones2.style.width = '100%';
               if (theadCupones) tablaCupones2.appendChild(theadCupones.cloneNode(true));
               const tbodyCupones2 = document.createElement('tbody');
               for (let i = mitadCupones; i < filasCupones.length; i++) {
@@ -3723,12 +3730,19 @@ async function descargarReportePDF(formato = 'A4') {
               await agregarSeccionAlPDF(contenedorCupones2, 'Cuponera Cont.');
               document.body.removeChild(contenedorCupones2);
             } else {
-              // Aplicar estilo 9px
-              tablaCuponesWrapper.querySelectorAll('th, td').forEach(cell => {
+              // Cabe en una sola página - crear contenedor con ancho fijo
+              const contenedorCuponesUnico = document.createElement('div');
+              contenedorCuponesUnico.style.cssText = 'width: 900px; background: #ffffff;';
+              const tablaCuponesClone = tablaCuponesOriginal.cloneNode(true);
+              tablaCuponesClone.style.width = '100%';
+              tablaCuponesClone.querySelectorAll('th, td').forEach(cell => {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
-              await agregarSeccionAlPDF(tablaCuponesWrapper, 'Cuponera');
+              contenedorCuponesUnico.appendChild(tablaCuponesClone);
+              document.body.appendChild(contenedorCuponesUnico);
+              await agregarSeccionAlPDF(contenedorCuponesUnico, 'Cuponera');
+              document.body.removeChild(contenedorCuponesUnico);
             }
           }
 
@@ -3745,10 +3759,10 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Primera parte Amort
               const contenedorAmort1 = document.createElement('div');
-              contenedorAmort1.style.background = '#ffffff';
+              contenedorAmort1.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaAmort1 = document.createElement('table');
               tablaAmort1.className = tablaAmortOriginal.className;
-              tablaAmort1.style.cssText = tablaAmortOriginal.style.cssText;
+              tablaAmort1.style.width = '100%';
               if (theadAmort) tablaAmort1.appendChild(theadAmort.cloneNode(true));
               const tbodyAmort1 = document.createElement('tbody');
               for (let i = 0; i < mitadAmort; i++) {
@@ -3767,10 +3781,10 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Segunda parte Amort
               const contenedorAmort2 = document.createElement('div');
-              contenedorAmort2.style.background = '#ffffff';
+              contenedorAmort2.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaAmort2 = document.createElement('table');
               tablaAmort2.className = tablaAmortOriginal.className;
-              tablaAmort2.style.cssText = tablaAmortOriginal.style.cssText;
+              tablaAmort2.style.width = '100%';
               if (theadAmort) tablaAmort2.appendChild(theadAmort.cloneNode(true));
               const tbodyAmort2 = document.createElement('tbody');
               for (let i = mitadAmort; i < filasAmort.length; i++) {
@@ -3787,15 +3801,22 @@ async function descargarReportePDF(formato = 'A4') {
               await agregarSeccionAlPDF(contenedorAmort2, 'Amortizaciones y Vencimientos Cont.');
               document.body.removeChild(contenedorAmort2);
             } else {
-              // Aplicar estilo 9px
-              tablaAmortWrapper.querySelectorAll('th, td').forEach(cell => {
+              // Cabe en una sola página - crear contenedor con ancho fijo
+              const contenedorAmortUnico = document.createElement('div');
+              contenedorAmortUnico.style.cssText = 'width: 900px; background: #ffffff;';
+              const tablaAmortClone = tablaAmortOriginal.cloneNode(true);
+              tablaAmortClone.style.width = '100%';
+              tablaAmortClone.querySelectorAll('th, td').forEach(cell => {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
-              await agregarSeccionAlPDF(tablaAmortWrapper, 'Amortizaciones y Vencimientos');
+              contenedorAmortUnico.appendChild(tablaAmortClone);
+              document.body.appendChild(contenedorAmortUnico);
+              await agregarSeccionAlPDF(contenedorAmortUnico, 'Amortizaciones y Vencimientos');
+              document.body.removeChild(contenedorAmortUnico);
             }
           }
-          
+
           // Diapo 12: Disclaimer
           pdf.addPage();
           pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
