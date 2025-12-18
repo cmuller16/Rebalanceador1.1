@@ -4082,20 +4082,20 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Primera parte Bonos
               const contenedorBonos1 = document.createElement('div');
-              contenedorBonos1.style.background = '#ffffff';
+              contenedorBonos1.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaBonos1 = document.createElement('table');
               tablaBonos1.className = tablaBonosOriginal.className;
-              tablaBonos1.style.cssText = tablaBonosOriginal.style.cssText;
+              tablaBonos1.style.width = '100%';
               if (theadBonos) tablaBonos1.appendChild(theadBonos.cloneNode(true));
               const tbodyBonos1 = document.createElement('tbody');
               for (let i = 0; i < mitadBonos; i++) {
                 if (filasBonos[i]) tbodyBonos1.appendChild(filasBonos[i].cloneNode(true));
               }
               tablaBonos1.appendChild(tbodyBonos1);
-              // Aplicar estilo 12px para igualar al resto de tablas
+              // Aplicar estilo 9px igual que Renta Variable
               tablaBonos1.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '12px';
-                cell.style.padding = '4px 10px';
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
               });
               contenedorBonos1.appendChild(tablaBonos1);
               document.body.appendChild(contenedorBonos1);
@@ -4105,20 +4105,20 @@ async function descargarReportePDF(formato = 'A4') {
 
               // Segunda parte Bonos
               const contenedorBonos2 = document.createElement('div');
-              contenedorBonos2.style.background = '#ffffff';
+              contenedorBonos2.style.cssText = 'width: 900px; background: #ffffff;';
               const tablaBonos2 = document.createElement('table');
               tablaBonos2.className = tablaBonosOriginal.className;
-              tablaBonos2.style.cssText = tablaBonosOriginal.style.cssText;
+              tablaBonos2.style.width = '100%';
               if (theadBonos) tablaBonos2.appendChild(theadBonos.cloneNode(true));
               const tbodyBonos2 = document.createElement('tbody');
               for (let i = mitadBonos; i < filasBonos.length; i++) {
                 if (filasBonos[i]) tbodyBonos2.appendChild(filasBonos[i].cloneNode(true));
               }
               tablaBonos2.appendChild(tbodyBonos2);
-              // Aplicar estilo 12px para igualar al resto de tablas
+              // Aplicar estilo 9px igual que Renta Variable
               tablaBonos2.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '12px';
-                cell.style.padding = '4px 10px';
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
               });
               contenedorBonos2.appendChild(tablaBonos2);
               document.body.appendChild(contenedorBonos2);
@@ -4127,12 +4127,13 @@ async function descargarReportePDF(formato = 'A4') {
             } else {
               // Clonar tabla para aplicar estilos sin afectar original
               const tablaBonosClone = tablaBonosOriginal.cloneNode(true);
+              tablaBonosClone.style.width = '100%';
               tablaBonosClone.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '12px';
-                cell.style.padding = '4px 10px';
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
               });
               const contenedorBonosSingle = document.createElement('div');
-              contenedorBonosSingle.style.background = '#ffffff';
+              contenedorBonosSingle.style.cssText = 'width: 900px; background: #ffffff;';
               contenedorBonosSingle.appendChild(tablaBonosClone);
               document.body.appendChild(contenedorBonosSingle);
               const footerBonos = 'Precio Compra: Promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO. Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
