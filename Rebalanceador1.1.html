@@ -3204,11 +3204,17 @@ async function descargarReportePDF(formato = 'A4') {
             const chartWidth = (pageWidth - margin * 3) / 2;
             const maxChartHeight = pageHeight - chartY - 8;
 
-            // Gráfico izquierdo: Distribución por Clase de Activo (mantener proporción)
+            // Gráfico izquierdo: Distribución por Clase de Activo (maximizar tamaño)
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
               const ratioGrouped = canvasAAGrouped.height / canvasAAGrouped.width;
-              const imgWidthGrouped = chartWidth;
-              const imgHeightGrouped = Math.min(chartWidth * ratioGrouped, maxChartHeight);
+              // Intentar usar altura máxima primero
+              let imgHeightGrouped = maxChartHeight;
+              let imgWidthGrouped = maxChartHeight / ratioGrouped;
+              // Si excede ancho, usar ancho máximo
+              if (imgWidthGrouped > chartWidth) {
+                imgWidthGrouped = chartWidth;
+                imgHeightGrouped = chartWidth * ratioGrouped;
+              }
 
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
@@ -3218,16 +3224,17 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, imgWidthGrouped, imgHeightGrouped);
             }
 
-            // Gráfico derecho: Distribución por Moneda (respetar proporción original)
+            // Gráfico derecho: Distribución por Moneda (maximizar tamaño)
             if (canvasAADonut && canvasAADonut.width > 0) {
               const rightX = margin + chartWidth + margin;
-              // Respetar proporción del canvas original
               const ratioDonut = canvasAADonut.height / canvasAADonut.width;
-              let imgWidthDonut = chartWidth;
-              let imgHeightDonut = chartWidth * ratioDonut;
-              if (imgHeightDonut > maxChartHeight) {
-                imgHeightDonut = maxChartHeight;
-                imgWidthDonut = maxChartHeight / ratioDonut;
+              // Intentar usar altura máxima primero
+              let imgHeightDonut = maxChartHeight;
+              let imgWidthDonut = maxChartHeight / ratioDonut;
+              // Si excede ancho, usar ancho máximo
+              if (imgWidthDonut > chartWidth) {
+                imgWidthDonut = chartWidth;
+                imgHeightDonut = chartWidth * ratioDonut;
               }
               // Centrar horizontalmente
               const donutX = rightX + (chartWidth - imgWidthDonut) / 2;
