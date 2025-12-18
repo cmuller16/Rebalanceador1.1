@@ -3939,10 +3939,16 @@ async function descargarReportePDF(formato = 'A4') {
 
             const chartY_RF2 = isWidescreen ? 25 : 30;
             const chartWidth_RF2 = (pageWidth - margin * 3) / 2;
-            const SCALE_RF2 = 0.7; // Factor de escala (70%)
-            const imgWidth_RF2 = chartWidth_RF2 * SCALE_RF2;
-            const imgHeight_RF2 = imgWidth_RF2; // Ratio 1:1 para donut circular
-            const offsetX_RF2 = (chartWidth_RF2 - imgWidth_RF2) / 2;
+
+            // Scatter plot (izquierdo) - tamaño completo
+            const imgWidth_Scatter = chartWidth_RF2;
+            const imgHeight_Scatter = chartWidth_RF2 * 0.85;
+
+            // Donut subclasificación (derecho) - escala reducida y cuadrado
+            const SCALE_RF2 = 0.7;
+            const imgWidth_Donut = chartWidth_RF2 * SCALE_RF2;
+            const imgHeight_Donut = imgWidth_Donut;
+            const offsetX_Donut = (chartWidth_RF2 - imgWidth_Donut) / 2;
 
             if (canvasScatterRF && canvasScatterRF.width > 0) {
               pdf.setFontSize(11);
@@ -3950,7 +3956,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin + offsetX_RF2, chartY_RF2 + 15, imgWidth_RF2, imgHeight_RF2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 15, imgWidth_Scatter, imgHeight_Scatter);
             }
 
             if (canvasSubclasRF && canvasSubclasRF.width > 0) {
@@ -3960,7 +3966,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR SUBCLASIFICACIÓN (%)', rightX_RF2, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RF2, chartY_RF2 + 2, rightX_RF2 + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasSubclasRF), 'JPEG', rightX_RF2 + offsetX_RF2, chartY_RF2 + 15, imgWidth_RF2, imgHeight_RF2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasSubclasRF), 'JPEG', rightX_RF2 + offsetX_Donut, chartY_RF2 + 15, imgWidth_Donut, imgHeight_Donut);
             }
           }
 
