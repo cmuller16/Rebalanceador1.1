@@ -3373,7 +3373,9 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
               // Centrar verticalmente con el padding
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasAAGrouped), 'JPEG', margin, chartY + 3 + verticalPadding, chartWidth * scaleFactor, reducedHeight);
+              const barChartRatio = canvasAAGrouped.width / canvasAAGrouped.height;
+              const barChartWidth = reducedHeight * barChartRatio;
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasAAGrouped), 'JPEG', margin, chartY + 3 + verticalPadding, barChartWidth, reducedHeight);
             }
 
             // Gráfico derecho: Distribución por Moneda - CUADRADO = CIRCULAR
