@@ -3237,6 +3237,11 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filas[i]) tbody1.appendChild(filas[i].cloneNode(true));
               }
               tabla1.appendChild(tbody1);
+              // Aplicar estilo 9px
+              tabla1.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedor1.appendChild(tabla1);
               document.body.appendChild(contenedor1);
               await agregarSeccionAlPDF(contenedor1, 'Posición Detallada');
@@ -3254,12 +3259,21 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filas[i]) tbody2.appendChild(filas[i].cloneNode(true));
               }
               tabla2.appendChild(tbody2);
+              // Aplicar estilo 9px
+              tabla2.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedor2.appendChild(tabla2);
               document.body.appendChild(contenedor2);
               await agregarSeccionAlPDF(contenedor2, 'Posición Detallada Cont.');
               document.body.removeChild(contenedor2);
             } else {
-              // Cabe en una sola página
+              // Cabe en una sola página - aplicar estilo 9px
+              tablaPortafolio.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               await agregarSeccionAlPDF(tablaPortafolio, 'Posición Detallada');
             }
           }
@@ -3677,6 +3691,11 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasCupones[i]) tbodyCupones1.appendChild(filasCupones[i].cloneNode(true));
               }
               tablaCupones1.appendChild(tbodyCupones1);
+              // Aplicar estilo 9px
+              tablaCupones1.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorCupones1.appendChild(tablaCupones1);
               document.body.appendChild(contenedorCupones1);
               await agregarSeccionAlPDF(contenedorCupones1, 'Cuponera');
@@ -3694,11 +3713,21 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasCupones[i]) tbodyCupones2.appendChild(filasCupones[i].cloneNode(true));
               }
               tablaCupones2.appendChild(tbodyCupones2);
+              // Aplicar estilo 9px
+              tablaCupones2.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorCupones2.appendChild(tablaCupones2);
               document.body.appendChild(contenedorCupones2);
               await agregarSeccionAlPDF(contenedorCupones2, 'Cuponera Cont.');
               document.body.removeChild(contenedorCupones2);
             } else {
+              // Aplicar estilo 9px
+              tablaCuponesWrapper.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               await agregarSeccionAlPDF(tablaCuponesWrapper, 'Cuponera');
             }
           }
@@ -3726,6 +3755,11 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasAmort[i]) tbodyAmort1.appendChild(filasAmort[i].cloneNode(true));
               }
               tablaAmort1.appendChild(tbodyAmort1);
+              // Aplicar estilo 9px
+              tablaAmort1.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorAmort1.appendChild(tablaAmort1);
               document.body.appendChild(contenedorAmort1);
               await agregarSeccionAlPDF(contenedorAmort1, 'Amortizaciones y Vencimientos');
@@ -3743,11 +3777,21 @@ async function descargarReportePDF(formato = 'A4') {
                 if (filasAmort[i]) tbodyAmort2.appendChild(filasAmort[i].cloneNode(true));
               }
               tablaAmort2.appendChild(tbodyAmort2);
+              // Aplicar estilo 9px
+              tablaAmort2.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               contenedorAmort2.appendChild(tablaAmort2);
               document.body.appendChild(contenedorAmort2);
               await agregarSeccionAlPDF(contenedorAmort2, 'Amortizaciones y Vencimientos Cont.');
               document.body.removeChild(contenedorAmort2);
             } else {
+              // Aplicar estilo 9px
+              tablaAmortWrapper.querySelectorAll('th, td').forEach(cell => {
+                cell.style.fontSize = '9px';
+                cell.style.padding = '4px 12px';
+              });
               await agregarSeccionAlPDF(tablaAmortWrapper, 'Amortizaciones y Vencimientos');
             }
           }
