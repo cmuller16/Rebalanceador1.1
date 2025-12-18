@@ -15184,34 +15184,84 @@ const regionCols = [
       return out;
     }
 
+    // Normalizar vehículo: BONO, BONOS, BOND, BONDS → BONOS
+    function normVehiculo(v) {
+      const n = normTxt(v);
+      if (n === 'BONO' || n === 'BOND' || n === 'BONDS' || n === 'BONOS') return 'BONOS';
+      return n;
+    }
+
+    // Mapeo de sectores inglés → español (sin tildes porque normTxt ya las elimina)
+    const SECTOR_MAP = {
+      'FINANCIALS': 'FINANCIERO',
+      'FINANCIAL': 'FINANCIERO',
+      'FINANCE': 'FINANCIERO',
+      'ENERGY': 'ENERGIA',
+      'UTILITIES': 'SERVICIOS PUBLICOS',
+      'CONSUMER': 'CONSUMO',
+      'CONSUMER DISCRETIONARY': 'CONSUMO',
+      'CONSUMER STAPLES': 'CONSUMO',
+      'INFRASTRUCTURE': 'INFRAESTRUCTURA',
+      'COMMUNICATIONS': 'COMUNICACIONES',
+      'COMMUNICATION SERVICES': 'COMUNICACIONES',
+      'TELECOM': 'COMUNICACIONES',
+      'TELECOMMUNICATIONS': 'COMUNICACIONES',
+      'MINING': 'MINERIA',
+      'MATERIALS': 'MINERIA',
+      'GOVERNMENT': 'SOBERANOS',
+      'SOVEREIGN': 'SOBERANOS',
+      'QUASI-SOVEREIGN': 'CUASI- GUBERNAMENTALES',
+      'QUASI SOVEREIGN': 'CUASI- GUBERNAMENTALES',
+      'TECHNOLOGY': 'TECNOLOGIA',
+      'TECH': 'TECNOLOGIA',
+      'INFORMATION TECHNOLOGY': 'TECNOLOGIA',
+      'HEALTH CARE': 'SALUD',
+      'HEALTHCARE': 'SALUD',
+      'INDUSTRIALS': 'INDUSTRIAL',
+      'INDUSTRIAL': 'INDUSTRIAL',
+      'REAL ESTATE': 'INMOBILIARIO'
+    };
+
+    // Normalizar sector: mapear inglés a español
+    function normSector(s) {
+      const n = normTxt(s);
+      return SECTOR_MAP[n] || n;
+    }
+
     // Verificar si una fila coincide con los filtros de un límite
     function matchesLimit(filters, row) {
-      // Función auxiliar para normalizar y comparar
+      // Función auxiliar genérica para normalizar y comparar
       const matches = (filterArr, value) => {
         if (!filterArr || filterArr.length === 0) return true;
-        let normValue = normTxt(value);
-        
-        // Normalizar Bono/Bonos para que sean equivalentes
-        if (normValue === 'BONO') normValue = 'BONOS';
-        
-        return filterArr.some(f => {
-          let normFilter = normTxt(f);
-          if (normFilter === 'BONO') normFilter = 'BONOS';
-          return normFilter === normValue; // Solo matching EXACTO
-        });
+        const normValue = normTxt(value);
+        return filterArr.some(f => normTxt(f) === normValue);
       };
-      
+
+      // Función para vehículo con normalización especial
+      const matchesVeh = (filterArr, value) => {
+        if (!filterArr || filterArr.length === 0) return true;
+        const normValue = normVehiculo(value);
+        return filterArr.some(f => normVehiculo(f) === normValue);
+      };
+
+      // Función para sector con normalización especial
+      const matchesSector = (filterArr, value) => {
+        if (!filterArr || filterArr.length === 0) return true;
+        const normValue = normSector(value);
+        return filterArr.some(f => normSector(f) === normValue);
+      };
+
       // Verificar cada dimensión
       if (!matches(filters.clase, row.clase)) return false;
-      if (!matches(filters.veh, row.veh)) return false;
+      if (!matchesVeh(filters.veh, row.veh)) return false;
       if (!matches(filters.grupo, row.grupo)) return false;
       if (!matches(filters.geo, row.geo)) return false;
       if (!matches(filters.ighy, row.ighy)) return false;
       if (!matches(filters.expo, row.expo)) return false;
       if (!matches(filters.codSub, row._codSub)) return false;
       if (!matches(filters.rating, row.rating)) return false;
-      if (!matches(filters.sector, row.sector)) return false;
-      
+      if (!matchesSector(filters.sector, row.sector)) return false;
+
       // Duración (filtro especial)
       if (filters.dur && row.dur != null) {
         const durStr = String(filters.dur).trim();
@@ -15223,7 +15273,7 @@ const regionCols = [
           }
         }
       }
-      
+
       return true;
     }
 
