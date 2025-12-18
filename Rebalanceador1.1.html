@@ -4625,22 +4625,39 @@ async function descargarReportePDF(formato = 'A4') {
             const tablaHeightA4 = (canvasTablaA4.height * tablaWidthA4) / canvasTablaA4.width;
             pdf.addImage(tablaImgA4, 'JPEG', margin, 28, tablaWidthA4, tablaHeightA4);
 
-            // Gráfico Asset Allocation Nivel 1 (ancho completo)
-            let currentYA4 = 28 + tablaHeightA4 + 10;
-            const fullChartWidthA4 = pageWidth - (margin * 2);
+            // Gráfico Asset Allocation Nivel 1 (con título)
+            let currentYA4 = 28 + tablaHeightA4 + 8;
+            const chartWidthA4 = pageWidth - (margin * 2);
+            const chartScaleA4 = 0.85; // Reducir tamaño de gráficos
 
             if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
+              // Título
+              pdf.setFont('helvetica', 'bold');
+              pdf.setFontSize(11);
+              pdf.setTextColor(6, 14, 70);
+              pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, currentYA4);
+              currentYA4 += 5;
+
               const aa1RatioA4 = canvasAA1_A4.width / canvasAA1_A4.height;
-              const aa1HeightA4 = fullChartWidthA4 / aa1RatioA4;
-              pdf.addImage(canvasAA1_A4.toDataURL('image/png'), 'PNG', margin, currentYA4, fullChartWidthA4, aa1HeightA4);
-              currentYA4 += aa1HeightA4 + 10;
+              const aa1HeightA4 = (chartWidthA4 / aa1RatioA4) * chartScaleA4;
+              const aa1WidthA4 = chartWidthA4 * chartScaleA4;
+              pdf.addImage(canvasAA1_A4.toDataURL('image/png'), 'PNG', margin, currentYA4, aa1WidthA4, aa1HeightA4);
+              currentYA4 += aa1HeightA4 + 8;
             }
 
-            // Gráfico Maturity Wall debajo (ancho completo)
+            // Gráfico Maturity Wall (con título)
             if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
+              // Título
+              pdf.setFont('helvetica', 'bold');
+              pdf.setFontSize(11);
+              pdf.setTextColor(6, 14, 70);
+              pdf.text('MATURITY WALL', margin, currentYA4);
+              currentYA4 += 5;
+
               const maturityRatioA4 = canvasMaturityA4.width / canvasMaturityA4.height;
-              const maturityHeightA4 = fullChartWidthA4 / maturityRatioA4;
-              pdf.addImage(canvasMaturityA4.toDataURL('image/png'), 'PNG', margin, currentYA4, fullChartWidthA4, maturityHeightA4);
+              const maturityHeightA4 = (chartWidthA4 / maturityRatioA4) * chartScaleA4;
+              const maturityWidthA4 = chartWidthA4 * chartScaleA4;
+              pdf.addImage(canvasMaturityA4.toDataURL('image/png'), 'PNG', margin, currentYA4, maturityWidthA4, maturityHeightA4);
             }
           }
 
@@ -4776,6 +4793,17 @@ async function descargarReportePDF(formato = 'A4') {
               // Mostrar segunda mitad (recortando desde donde quedó)
               const offsetY = maxContentHeightA4 - 28;
               pdf.addImage(bonosImgA4, 'JPEG', margin, 28 - offsetY, bonosImgWidthA4, bonosImgHeightA4);
+
+              // Pie de página Renta Fija
+              pdf.setFont('helvetica', 'normal');
+              pdf.setFontSize(7);
+              pdf.setTextColor(100, 100, 100);
+              const footerRF1 = 'Montos estimados. Por días útiles y feriados, la fecha efectiva de pago puede variar.';
+              const footerRF2 = 'Portafolio de Bonos: Precio Compra corresponde a promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO.';
+              const footerRF3 = 'Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
+              pdf.text(footerRF1, margin, pageHeight - 18);
+              pdf.text(footerRF2, margin, pageHeight - 14);
+              pdf.text(footerRF3, margin, pageHeight - 10);
             } else {
               // Cabe en una página
               pdf.addPage();
@@ -4788,6 +4816,17 @@ async function descargarReportePDF(formato = 'A4') {
 
               const bonosImgA4 = canvasBonosA4.toDataURL('image/jpeg', 1.0);
               pdf.addImage(bonosImgA4, 'JPEG', margin, 28, bonosImgWidthA4, bonosImgHeightA4);
+
+              // Pie de página Renta Fija
+              pdf.setFont('helvetica', 'normal');
+              pdf.setFontSize(7);
+              pdf.setTextColor(100, 100, 100);
+              const footerRF1 = 'Montos estimados. Por días útiles y feriados, la fecha efectiva de pago puede variar.';
+              const footerRF2 = 'Portafolio de Bonos: Precio Compra corresponde a promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO.';
+              const footerRF3 = 'Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
+              pdf.text(footerRF1, margin, pageHeight - 18);
+              pdf.text(footerRF2, margin, pageHeight - 14);
+              pdf.text(footerRF3, margin, pageHeight - 10);
             }
 
             document.body.removeChild(contenedorBonosFullA4);
