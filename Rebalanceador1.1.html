@@ -3261,6 +3261,32 @@ async function descargarReportePDF(formato = 'A4') {
               wrapperDonut.style.width = pdfChartHeight + 'px'; // Cuadrado para donut
             }
 
+            // Guardar opciones originales de fuente
+            const originalGroupedOptions = {
+              legendFont: charts.grouped?.options?.plugins?.legend?.labels?.font?.size,
+              datalabelsFont: charts.grouped?.options?.plugins?.datalabels?.font?.size,
+              xTicksFont: charts.grouped?.options?.scales?.x?.ticks?.font?.size,
+              yTicksFont: charts.grouped?.options?.scales?.y?.ticks?.font?.size
+            };
+            const originalDonutOptions = {
+              legendFont: charts.donut?.options?.plugins?.legend?.labels?.font?.size,
+              datalabelsFont: charts.donut?.options?.plugins?.datalabels?.font?.size
+            };
+
+            // Aplicar fuentes grandes para PDF (18px)
+            if (charts.grouped) {
+              charts.grouped.options.plugins.legend.labels.font.size = 18;
+              charts.grouped.options.plugins.datalabels.font.size = 18;
+              charts.grouped.options.scales.x.ticks.font.size = 18;
+              charts.grouped.options.scales.y.ticks.font.size = 18;
+              charts.grouped.update('none');
+            }
+            if (charts.donut) {
+              charts.donut.options.plugins.legend.labels.font.size = 18;
+              charts.donut.options.plugins.datalabels.font.size = 18;
+              charts.donut.update('none');
+            }
+
             // Re-renderizar los gráficos con la nueva proporción
             if (charts.grouped) charts.grouped.resize();
             if (charts.donut) charts.donut.resize();
@@ -3295,6 +3321,20 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setDrawColor(0, 19, 145);
               pdf.line(donutX, chartY + 1.5, donutX + chartWidth, chartY + 1.5);
               pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutX + donutOffsetX, chartY + 3 + verticalPadding, donutSize, donutSize);
+            }
+
+            // Restaurar fuentes originales
+            if (charts.grouped) {
+              charts.grouped.options.plugins.legend.labels.font.size = originalGroupedOptions.legendFont;
+              charts.grouped.options.plugins.datalabels.font.size = originalGroupedOptions.datalabelsFont;
+              charts.grouped.options.scales.x.ticks.font.size = originalGroupedOptions.xTicksFont;
+              charts.grouped.options.scales.y.ticks.font.size = originalGroupedOptions.yTicksFont;
+              charts.grouped.update('none');
+            }
+            if (charts.donut) {
+              charts.donut.options.plugins.legend.labels.font.size = originalDonutOptions.legendFont;
+              charts.donut.options.plugins.datalabels.font.size = originalDonutOptions.datalabelsFont;
+              charts.donut.update('none');
             }
 
             // Restaurar dimensiones originales
