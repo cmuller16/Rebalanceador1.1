@@ -3273,17 +3273,17 @@ async function descargarReportePDF(formato = 'A4') {
               datalabelsFont: charts.donut?.options?.plugins?.datalabels?.font?.size
             };
 
-            // Aplicar fuentes grandes para PDF (18px)
+            // Aplicar fuentes grandes para PDF (24px)
             if (charts.grouped) {
-              charts.grouped.options.plugins.legend.labels.font.size = 18;
-              charts.grouped.options.plugins.datalabels.font.size = 18;
-              charts.grouped.options.scales.x.ticks.font.size = 18;
-              charts.grouped.options.scales.y.ticks.font.size = 18;
+              charts.grouped.options.plugins.legend.labels.font.size = 24;
+              charts.grouped.options.plugins.datalabels.font.size = 24;
+              charts.grouped.options.scales.x.ticks.font.size = 24;
+              charts.grouped.options.scales.y.ticks.font.size = 24;
               charts.grouped.update('none');
             }
             if (charts.donut) {
-              charts.donut.options.plugins.legend.labels.font.size = 18;
-              charts.donut.options.plugins.datalabels.font.size = 18;
+              charts.donut.options.plugins.legend.labels.font.size = 24;
+              charts.donut.options.plugins.datalabels.font.size = 24;
               charts.donut.update('none');
             }
 
