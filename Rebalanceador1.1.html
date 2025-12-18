@@ -4625,17 +4625,21 @@ async function descargarReportePDF(formato = 'A4') {
             const tablaHeightA4 = (canvasTablaA4.height * tablaWidthA4) / canvasTablaA4.width;
             pdf.addImage(tablaImgA4, 'JPEG', margin, 28, tablaWidthA4, tablaHeightA4);
 
-            // Gráfico Asset Allocation Nivel 1 (con título)
+            // Gráfico Asset Allocation Nivel 1 (con título estilo Portafolio de Bonos)
             let currentYA4 = 28 + tablaHeightA4 + 8;
             const chartWidthA4 = pageWidth - (margin * 2);
             const chartScaleA4 = 0.85; // Reducir tamaño de gráficos
 
             if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
-              // Título
+              // Título con línea (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(11);
+              pdf.setFontSize(14);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, currentYA4);
+              currentYA4 += 2;
+              pdf.setDrawColor(6, 14, 70);
+              pdf.setLineWidth(0.5);
+              pdf.line(margin, currentYA4, margin + 80, currentYA4);
               currentYA4 += 5;
 
               const aa1RatioA4 = canvasAA1_A4.width / canvasAA1_A4.height;
@@ -4645,13 +4649,17 @@ async function descargarReportePDF(formato = 'A4') {
               currentYA4 += aa1HeightA4 + 8;
             }
 
-            // Gráfico Maturity Wall (con título)
+            // Gráfico Maturity Wall (con título estilo Portafolio de Bonos)
             if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
-              // Título
+              // Título con línea (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(11);
+              pdf.setFontSize(14);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', margin, currentYA4);
+              currentYA4 += 2;
+              pdf.setDrawColor(6, 14, 70);
+              pdf.setLineWidth(0.5);
+              pdf.line(margin, currentYA4, margin + 45, currentYA4);
               currentYA4 += 5;
 
               const maturityRatioA4 = canvasMaturityA4.width / canvasMaturityA4.height;
