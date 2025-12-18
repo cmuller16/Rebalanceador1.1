@@ -4548,6 +4548,28 @@ async function descargarReportePDF(formato = 'A4') {
         } else {
           // ========== FORMATO A4 - NUEVA ESTRUCTURA ==========
 
+          // Función para hacer visible un elemento y TODOS sus padres
+          const hacerVisibleConPadres = (elemento) => {
+            const elementosModificados = [];
+            let el = elemento;
+            while (el && el !== document.body) {
+              const computed = getComputedStyle(el);
+              if (computed.display === 'none' || computed.visibility === 'hidden' || el.offsetHeight === 0) {
+                elementosModificados.push({
+                  el,
+                  display: el.style.display,
+                  visibility: el.style.visibility,
+                  height: el.style.height
+                });
+                el.style.setProperty('display', 'block', 'important');
+                el.style.setProperty('visibility', 'visible', 'important');
+                if (el.offsetHeight === 0) el.style.setProperty('height', 'auto', 'important');
+              }
+              el = el.parentElement;
+            }
+            return elementosModificados;
+          };
+
           // Página 2: Resumen Asignación de Activos
           const tablaAsignacionA4 = document.querySelector('#tablaGuiaConsolidada');
           const canvasAAGroupedA4 = document.getElementById('aaCanvasGrouped');
