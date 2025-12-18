@@ -2994,7 +2994,7 @@ async function descargarReportePDF(formato = 'A4') {
 
         
         // Función para agregar imagen al PDF
-        async function agregarSeccionAlPDF(elemento, titulo) {
+        async function agregarSeccionAlPDF(elemento, titulo, footer = null) {
           if (!elemento) {
             console.warn('Elemento no encontrado:', titulo);
             return false;
@@ -3005,6 +3005,10 @@ async function descargarReportePDF(formato = 'A4') {
             const originalVisibility = elemento.style.visibility;
             elemento.style.display = 'block';
             elemento.style.visibility = 'visible';
+
+            // Ocultar notas de tabla de bonos antes de captura
+            const notasTabla = elemento.querySelectorAll('.notas-tabla-bonos');
+            notasTabla.forEach(nota => nota.style.display = 'none');
 
             await new Promise(r => setTimeout(r, 300));
 
@@ -3049,6 +3053,9 @@ async function descargarReportePDF(formato = 'A4') {
             elemento.style.display = originalDisplay;
             elemento.style.visibility = originalVisibility;
 
+            // Restaurar visibilidad de notas de tabla de bonos
+            notasTabla.forEach(nota => nota.style.display = '');
+
             // LOG 2: Dimensiones del canvas capturado
             console.log(`📊 [${titulo}] Canvas - width: ${canvas.width}px, height: ${canvas.height}px`);
 
@@ -3075,6 +3082,20 @@ async function descargarReportePDF(formato = 'A4') {
             // Siempre usar ancho completo para mantener tamaño de letra consistente (13px)
             console.log(`📊 [${titulo}] PDF - imgWidth: ${imgWidth.toFixed(1)}mm, imgHeight: ${imgHeight.toFixed(1)}mm`);
             pdf.addImage(imgData, 'JPEG', margin, startY, imgWidth, imgHeight);
+
+            // Agregar pie de página si se proporciona
+            if (footer) {
+              pdf.setFont('helvetica', 'normal');
+              pdf.setFontSize(8);
+              pdf.setTextColor(100, 100, 100); // Gris
+              const footerY = pageHeight - 8; // 8mm desde el borde inferior
+              const maxWidth = pageWidth - (margin * 2);
+              const lines = pdf.splitTextToSize(footer, maxWidth);
+              // Ajustar Y para múltiples líneas (subir si hay más de una línea)
+              const lineHeight = 3.5;
+              const adjustedY = footerY - ((lines.length - 1) * lineHeight);
+              pdf.text(lines, margin, adjustedY);
+            }
 
             return true;
           } catch (err) {
@@ -3966,7 +3987,8 @@ async function descargarReportePDF(formato = 'A4') {
               tablaBonos1.appendChild(tbodyBonos1);
               contenedorBonos1.appendChild(tablaBonos1);
               document.body.appendChild(contenedorBonos1);
-              await agregarSeccionAlPDF(contenedorBonos1, 'Portafolio de Bonos');
+              const footerBonos = 'Precio Compra: Promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO. Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
+              await agregarSeccionAlPDF(contenedorBonos1, 'Portafolio de Bonos', footerBonos);
               document.body.removeChild(contenedorBonos1);
 
               // Segunda parte Bonos
@@ -3983,10 +4005,11 @@ async function descargarReportePDF(formato = 'A4') {
               tablaBonos2.appendChild(tbodyBonos2);
               contenedorBonos2.appendChild(tablaBonos2);
               document.body.appendChild(contenedorBonos2);
-              await agregarSeccionAlPDF(contenedorBonos2, 'Portafolio de Bonos Cont.');
+              await agregarSeccionAlPDF(contenedorBonos2, 'Portafolio de Bonos Cont.', footerBonos);
               document.body.removeChild(contenedorBonos2);
             } else {
-              await agregarSeccionAlPDF(tablaBonosWrapper, 'Portafolio de Bonos');
+              const footerBonos = 'Precio Compra: Promedio simple entre posiciones iniciales y nuevas inversiones. No aplica metodología FIFO. Intereses Recibidos: Cupones cobrados sobre nominal de posición inicial, desde fecha de compra hasta fecha del reporte. No incluye compras/ventas de este rebalanceo.';
+              await agregarSeccionAlPDF(tablaBonosWrapper, 'Portafolio de Bonos', footerBonos);
             }
           }
 
@@ -4036,7 +4059,8 @@ async function descargarReportePDF(formato = 'A4') {
               });
               contenedorCupones1.appendChild(tablaCupones1);
               document.body.appendChild(contenedorCupones1);
-              await agregarSeccionAlPDF(contenedorCupones1, 'Cuponera');
+              const footerCupones = 'Montos estimados. Por días útiles y feriados, la fecha efectiva de pago puede variar.';
+              await agregarSeccionAlPDF(contenedorCupones1, 'Cuponera', footerCupones);
               document.body.removeChild(contenedorCupones1);
 
               // Segunda parte Cupones
@@ -4058,7 +4082,7 @@ async function descargarReportePDF(formato = 'A4') {
               });
               contenedorCupones2.appendChild(tablaCupones2);
               document.body.appendChild(contenedorCupones2);
-              await agregarSeccionAlPDF(contenedorCupones2, 'Cuponera Cont.');
+              await agregarSeccionAlPDF(contenedorCupones2, 'Cuponera Cont.', footerCupones);
               document.body.removeChild(contenedorCupones2);
             } else {
               // Cabe en una sola página - crear contenedor con ancho fijo
@@ -4072,7 +4096,8 @@ async function descargarReportePDF(formato = 'A4') {
               });
               contenedorCuponesUnico.appendChild(tablaCuponesClone);
               document.body.appendChild(contenedorCuponesUnico);
-              await agregarSeccionAlPDF(contenedorCuponesUnico, 'Cuponera');
+              const footerCupones = 'Montos estimados. Por días útiles y feriados, la fecha efectiva de pago puede variar.';
+              await agregarSeccionAlPDF(contenedorCuponesUnico, 'Cuponera', footerCupones);
               document.body.removeChild(contenedorCuponesUnico);
             }
           }
@@ -4107,7 +4132,8 @@ async function descargarReportePDF(formato = 'A4') {
               });
               contenedorAmort1.appendChild(tablaAmort1);
               document.body.appendChild(contenedorAmort1);
-              await agregarSeccionAlPDF(contenedorAmort1, 'Amortizaciones y Vencimientos');
+              const footerAmort = 'Fechas referenciales.';
+              await agregarSeccionAlPDF(contenedorAmort1, 'Amortizaciones y Vencimientos', footerAmort);
               document.body.removeChild(contenedorAmort1);
 
               // Segunda parte Amort
@@ -4129,7 +4155,7 @@ async function descargarReportePDF(formato = 'A4') {
               });
               contenedorAmort2.appendChild(tablaAmort2);
               document.body.appendChild(contenedorAmort2);
-              await agregarSeccionAlPDF(contenedorAmort2, 'Amortizaciones y Vencimientos Cont.');
+              await agregarSeccionAlPDF(contenedorAmort2, 'Amortizaciones y Vencimientos Cont.', footerAmort);
               document.body.removeChild(contenedorAmort2);
             } else {
               // Cabe en una sola página - crear contenedor con ancho fijo
@@ -4143,7 +4169,8 @@ async function descargarReportePDF(formato = 'A4') {
               });
               contenedorAmortUnico.appendChild(tablaAmortClone);
               document.body.appendChild(contenedorAmortUnico);
-              await agregarSeccionAlPDF(contenedorAmortUnico, 'Amortizaciones y Vencimientos');
+              const footerAmort = 'Fechas referenciales.';
+              await agregarSeccionAlPDF(contenedorAmortUnico, 'Amortizaciones y Vencimientos', footerAmort);
               document.body.removeChild(contenedorAmortUnico);
             }
           }
@@ -10995,6 +11022,7 @@ const regionCols = [
 
 
         const trNotes = document.createElement('tr');
+        trNotes.className = 'notas-tabla-bonos';
 
         const colspanNotas = (cur === 'TOTAL') ? '14' : '13';
 
