@@ -192,7 +192,7 @@
     .subview{ display:none; } .subview.active{ display:block; }
     .subtab-content{ display:none; } .subtab-content.active{ display:block; }
 
-    .chart-wrapper { border:1px solid var(--border-light); border-radius:8px; padding:20px; background:var(--bg-card); min-height:400px; display:flex; flex-direction:column; }
+    .chart-wrapper { border:1px solid var(--border-light); border-radius:8px; padding:20px; background:var(--bg-card); min-height:400px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; }
     .chart-title { font-size:14px; font-weight:600; color:#060E46; margin-bottom:16px; }
 
     td.left, .td-nombre { max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -8938,7 +8938,8 @@ const regionCols = [
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
+          aspectRatio: 1,
           cutout: '65%',
           plugins: {
             legend: {
@@ -9121,7 +9122,8 @@ const regionCols = [
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
+          aspectRatio: 1,
           cutout: '65%',
           plugins: {
             legend: {
@@ -10180,7 +10182,8 @@ const regionCols = [
         },
         options: {
           responsive: true,
-          maintainAspectRatio: false,
+          maintainAspectRatio: true,
+          aspectRatio: 1,
           cutout: '65%',
           plugins: {
             legend: {
