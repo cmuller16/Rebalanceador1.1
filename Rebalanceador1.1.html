@@ -3372,7 +3372,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(margin, chartY + 1.5, margin + barChartWidth, chartY + 1.5);
               // Centrar verticalmente con el padding
               pdf.addImage(canvasToJpegWithWhiteBg(canvasAAGrouped), 'JPEG', margin, chartY + 3 + verticalPadding, barChartWidth, reducedHeight);
@@ -3391,7 +3391,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DISTRIBUCIÓN POR MONEDA (%)', donutX, chartY);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               // Línea llega hasta el borde derecho (donde termina la tabla)
               pdf.line(donutX, chartY + 1.5, pageWidth - margin, chartY + 1.5);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasAADonut), 'JPEG', donutX + donutOffsetX, chartY + 3 + verticalPadding, donutSize, donutSize);
@@ -3633,7 +3633,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, chartY);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(margin, chartY + 2, margin + chartWidth, chartY + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasAA1), 'JPEG', margin, chartY + 5 + verticalPadding, aa1Width, aa1Height);
             }
@@ -3657,7 +3657,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', rightX, chartY);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(rightX, chartY + 2, rightX + chartWidth, chartY + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasMaturity), 'JPEG', rightX, chartY + 5 + verticalPadding, maturityWidth, maturityHeight);
             }
@@ -3784,7 +3784,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', margin, chartY_RV1);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(margin, chartY_RV1 + 2, margin + chartWidth_RV, chartY_RV1 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasSectorRV), 'JPEG', margin, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
             }
@@ -3794,7 +3794,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('TOP 10 HOLDINGS (%)', rightX_RV, chartY_RV1);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(rightX_RV, chartY_RV1 + 2, rightX_RV + chartWidth_RV, chartY_RV1 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasTop10RV), 'JPEG', rightX_RV, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
             }
@@ -3827,7 +3827,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR REGIÓN (%)', margin, chartY_RV2);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(margin, chartY_RV2 + 2, margin + chartWidth_RV2, chartY_RV2 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasRegionRV), 'JPEG', margin + offsetX_RV2, chartY_RV2 + 15, imgWidth_RV2, imgHeight_RV2);
             }
@@ -3837,7 +3837,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR VEHÍCULO (%)', rightX_RV2, chartY_RV2);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(rightX_RV2, chartY_RV2 + 2, rightX_RV2 + chartWidth_RV2, chartY_RV2 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasVehiculoRV), 'JPEG', rightX_RV2 + offsetX_RV2, chartY_RV2 + 15, imgWidth_RV2, imgHeight_RV2);
             }
@@ -4004,7 +4004,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR RATING (%)', margin, chartY_RF1);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(margin, chartY_RF1 + 2, margin + chartWidth_RF, chartY_RF1 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasRatingRF), 'JPEG', margin, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
             }
@@ -4014,7 +4014,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', rightX_RF, chartY_RF1);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(rightX_RF, chartY_RF1 + 2, rightX_RF + chartWidth_RF, chartY_RF1 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasSectorRF), 'JPEG', rightX_RF, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
             }
@@ -4046,12 +4046,12 @@ async function descargarReportePDF(formato = 'A4') {
             // Agrandar contenedor a 600px
             if (wrapperScatter) wrapperScatter.style.height = '600px';
 
-            // Aumentar fuentes a 14px
+            // Aumentar fuentes a 16px
             if (chartScatter) {
-              if (chartScatter.options?.plugins?.legend?.labels?.font) chartScatter.options.plugins.legend.labels.font.size = 14;
-              if (chartScatter.options?.plugins?.datalabels?.font) chartScatter.options.plugins.datalabels.font.size = 14;
-              if (chartScatter.options?.scales?.x?.ticks?.font) chartScatter.options.scales.x.ticks.font.size = 14;
-              if (chartScatter.options?.scales?.y?.ticks?.font) chartScatter.options.scales.y.ticks.font.size = 14;
+              if (chartScatter.options?.plugins?.legend?.labels?.font) chartScatter.options.plugins.legend.labels.font.size = 16;
+              if (chartScatter.options?.plugins?.datalabels?.font) chartScatter.options.plugins.datalabels.font.size = 16;
+              if (chartScatter.options?.scales?.x?.ticks?.font) chartScatter.options.scales.x.ticks.font.size = 16;
+              if (chartScatter.options?.scales?.y?.ticks?.font) chartScatter.options.scales.y.ticks.font.size = 16;
               chartScatter.update('none');
               chartScatter.resize();
             }
@@ -4080,7 +4080,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
             }
@@ -4100,7 +4100,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR SUBCLASIFICACIÓN (%)', rightX_RF2, chartY_RF2);
-              pdf.setDrawColor(0, 19, 145);
+              pdf.setDrawColor(6, 14, 70);
               pdf.line(rightX_RF2, chartY_RF2 + 2, rightX_RF2 + chartWidth_RF2, chartY_RF2 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasSubclasRF), 'JPEG', rightX_RF2 + offsetX_Donut, chartY_RF2 + 15, imgWidth_Donut, imgHeight_Donut);
             }
@@ -4342,16 +4342,17 @@ async function descargarReportePDF(formato = 'A4') {
             }
           }
 
-          // Diapo 12: Disclaimer
+          // Diapo 12: Disclaimer (fondo azul oscuro, texto blanco)
           pdf.addPage();
-          // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
+          pdf.setFillColor(6, 14, 70);
+          pdf.rect(0, 0, pageWidth, pageHeight, 'F');
           pdf.setFont('helvetica', 'bold');
           pdf.setFontSize(20);
-          pdf.setTextColor(6, 14, 70);
+          pdf.setTextColor(255, 255, 255);
           pdf.text('Disclaimer', margin, 14);
           pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(8);
-          pdf.setTextColor(0, 0, 0);
+          pdf.setTextColor(255, 255, 255);
           const disclaimerText = 'La información contenida en la presente comunicación y/o documento ha sido elaborada por BBVA Asset Management S.A. SAF y tiene carácter meramente informativo e ilustrativo. Con carácter previo a la toma de una decisión respecto a la contratación de cualquiera de los productos detallados, el receptor de la presente comunicación y/o documento deberá estar plenamente consciente y no albergar ninguna duda sobre el funcionamiento de los mismos, así como de las obligaciones y riesgos que asumiría con dicha posible contratación. De existir dudas o no quedar claro el funcionamiento y los riesgos implícitos en estos productos, no se deberá efectuar contratación alguna hasta que dichas dudas hayan sido resueltas. La presente comunicación y/o documento no debe en ningún caso entenderse como un servicio de asesoría en materia de inversión, tributaria, legal o contable puesto que no contiene ninguna recomendación personalizada para tomar los productos ni para hacer alguna de las operaciones descritas. En ningún caso podrá considerarse que por la recepción de esta comunicación y/o documento, BBVA Asset Management S.A. SAF está calificando o presentando el producto como idóneo para el receptor de este documento puesto que para la elaboración del mismo y sus respectivos ejemplos no ha tenido en cuenta las circunstancias personales del potencial tomador, su perfil de riesgo, su posición financiera o sus necesidades específicas. En ese sentido, corresponde al receptor de este documento el determinar si los productos descritos en el presente documento resultan adecuados considerando sus características particulares, así como su tolerancia al riesgo y expectativa de rendimiento, debiendo adoptar sus propias decisiones de contratación procurándose el asesoramiento específico y especializado en materia financiera, de mercados, tributaria, contable y legal ajeno a BBVA Asset Management S.A. SAF. Sin perjuicio de lo antes señalado, el receptor del presente documento debe tener en cuenta que los valores cuota de los fondos mutuos son variables y que la rentabilidad obtenida por un fondo mutuo en el pasado, no garantiza que se repita en el futuro. El receptor de esta comunicación y/o documento no podrá distribuir, reenviar, citar o usar la misma bajo manera alguna para propósitos distintos ni publicar o incluirla en cualquier otro documento, sin el consentimiento previo del BBVA Asset Management S.A. SAF.';
           const splitDisclaimer = pdf.splitTextToSize(disclaimerText, pageWidth - 20);
           pdf.text(splitDisclaimer, margin, 28, { align: 'justify', maxWidth: pageWidth - 20 });
@@ -21520,7 +21521,11 @@ function wirePMChartFilters(){
       let htmlRow = '';
       fullHeaders.forEach((h, i) => {
         if (i === 0) {
-          htmlRow += `<td class="left">${fila[h] || ''}</td>`;
+          if (esFilaTotal) {
+            htmlRow += `<td class="left"><b>${fila[h] || ''}</b></td>`;
+          } else {
+            htmlRow += `<td class="left">${fila[h] || ''}</td>`;
+          }
         } else {
           const valor = fila[h] || 0;
           const contenido = formatMoneyWithCur(valor, monedaFila);
