@@ -3153,9 +3153,9 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text('Portafolio', 15, 120);
           }
           
-          // Banquero | Asesor
+          // Banquero | Asesor (solo mostrar asesor si tiene valor)
           pdf.setFont('helvetica', 'normal');
-          const infoLine = `Banquero: ${banquero} | Asesor: ${asesor}`;
+          const infoLine = asesor ? `Banquero: ${banquero} | Asesor: ${asesor}` : `Banquero: ${banquero}`;
           if (isWidescreen) {
             pdf.setFontSize(16);
             pdf.text(infoLine, 15, 95);
