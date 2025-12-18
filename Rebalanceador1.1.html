@@ -3203,27 +3203,35 @@ async function descargarReportePDF(formato = 'A4') {
             const espacioDebajo = pageHeight - (startY + tablaHeight) - 5;
             const chartY = startY + tablaHeight + 8;
             const chartWidth = (pageWidth - margin * 3) / 2;
-            const chartHeight = espacioDebajo - 15; // Espacio para subtítulos
+            const maxChartHeight = espacioDebajo - 15;
 
-            // Gráfico izquierdo: Distribución por Clase de Activo
+            // Gráfico izquierdo: Distribución por Clase de Activo (mantener proporción)
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
-              pdf.setFontSize(9);
+              const ratioGrouped = canvasAAGrouped.height / canvasAAGrouped.width;
+              const imgHeightGrouped = Math.min(chartWidth * ratioGrouped, maxChartHeight);
+              const imgWidthGrouped = imgHeightGrouped / ratioGrouped;
+
+              pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
               pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
-              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, chartWidth, chartHeight);
+              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, imgWidthGrouped, imgHeightGrouped);
             }
 
-            // Gráfico derecho: Distribución por Moneda
+            // Gráfico derecho: Distribución por Moneda (mantener proporción cuadrada)
             if (canvasAADonut && canvasAADonut.width > 0) {
               const rightX = margin + chartWidth + margin;
-              pdf.setFontSize(9);
+              const ratioDonut = canvasAADonut.height / canvasAADonut.width;
+              const imgHeightDonut = Math.min(chartWidth * ratioDonut, maxChartHeight);
+              const imgWidthDonut = imgHeightDonut / ratioDonut;
+
+              pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
               pdf.text('DISTRIBUCIÓN POR MONEDA (%)', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX, chartY + 1.5, rightX + chartWidth, chartY + 1.5);
-              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', rightX, chartY + 3, chartWidth, chartHeight);
+              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', rightX, chartY + 3, imgWidthDonut, imgHeightDonut);
             }
           }
           
