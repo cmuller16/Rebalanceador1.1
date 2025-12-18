@@ -4633,13 +4633,13 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasAA1_A4 && canvasAA1_A4.width > 0) {
               // Título con línea de lado a lado (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(14);
+              pdf.setFontSize(10);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, currentYA4);
               pdf.setDrawColor(6, 14, 70);
-              pdf.setLineWidth(0.5);
+              pdf.setLineWidth(0.7);
               pdf.line(margin, currentYA4 + 2, pageWidth - margin, currentYA4 + 2);
-              currentYA4 += 8;
+              currentYA4 += 7;
 
               const aa1RatioA4 = canvasAA1_A4.width / canvasAA1_A4.height;
               const aa1HeightA4 = (chartWidthA4 / aa1RatioA4) * chartScaleA4;
@@ -4652,13 +4652,13 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasMaturityA4 && canvasMaturityA4.width > 0) {
               // Título con línea de lado a lado (igual que Portafolio de Bonos)
               pdf.setFont('helvetica', 'bold');
-              pdf.setFontSize(14);
+              pdf.setFontSize(10);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', margin, currentYA4);
               pdf.setDrawColor(6, 14, 70);
-              pdf.setLineWidth(0.5);
+              pdf.setLineWidth(0.7);
               pdf.line(margin, currentYA4 + 2, pageWidth - margin, currentYA4 + 2);
-              currentYA4 += 8;
+              currentYA4 += 7;
 
               const maturityRatioA4 = canvasMaturityA4.width / canvasMaturityA4.height;
               const maturityHeightA4 = (chartWidthA4 / maturityRatioA4) * chartScaleA4;
