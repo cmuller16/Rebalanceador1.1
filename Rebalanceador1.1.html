@@ -3541,6 +3541,19 @@ async function descargarReportePDF(formato = 'A4') {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
+              // Reducir ancho columna Exposición
+              tablaRF1.querySelectorAll('th').forEach((th, idx) => {
+                if (th.textContent.includes('Exposición')) {
+                  th.style.width = '60px';
+                  th.style.maxWidth = '60px';
+                  tablaRF1.querySelectorAll('tbody tr').forEach(row => {
+                    if (row.cells[idx]) {
+                      row.cells[idx].style.width = '60px';
+                      row.cells[idx].style.maxWidth = '60px';
+                    }
+                  });
+                }
+              });
               contenedorRF1.appendChild(tablaRF1);
               document.body.appendChild(contenedorRF1);
               await agregarSeccionAlPDF(contenedorRF1, 'Portafolio de Renta Fija');
@@ -3563,6 +3576,19 @@ async function descargarReportePDF(formato = 'A4') {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
+              // Reducir ancho columna Exposición
+              tablaRF2.querySelectorAll('th').forEach((th, idx) => {
+                if (th.textContent.includes('Exposición')) {
+                  th.style.width = '60px';
+                  th.style.maxWidth = '60px';
+                  tablaRF2.querySelectorAll('tbody tr').forEach(row => {
+                    if (row.cells[idx]) {
+                      row.cells[idx].style.width = '60px';
+                      row.cells[idx].style.maxWidth = '60px';
+                    }
+                  });
+                }
+              });
               contenedorRF2.appendChild(tablaRF2);
               document.body.appendChild(contenedorRF2);
               await agregarSeccionAlPDF(contenedorRF2, 'Portafolio de Renta Fija Cont.');
@@ -3576,6 +3602,19 @@ async function descargarReportePDF(formato = 'A4') {
               tablaRFClone.querySelectorAll('th, td').forEach(cell => {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
+              });
+              // Reducir ancho columna Exposición
+              tablaRFClone.querySelectorAll('th').forEach((th, idx) => {
+                if (th.textContent.includes('Exposición')) {
+                  th.style.width = '60px';
+                  th.style.maxWidth = '60px';
+                  tablaRFClone.querySelectorAll('tbody tr').forEach(row => {
+                    if (row.cells[idx]) {
+                      row.cells[idx].style.width = '60px';
+                      row.cells[idx].style.maxWidth = '60px';
+                    }
+                  });
+                }
               });
               contenedorRFUnico.appendChild(tablaRFClone);
               document.body.appendChild(contenedorRFUnico);
