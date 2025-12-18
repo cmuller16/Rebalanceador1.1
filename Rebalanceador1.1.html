@@ -4028,8 +4028,36 @@ async function descargarReportePDF(formato = 'A4') {
             hacerVisibleConPadres(canvasSubclasRF);
             await new Promise(r => setTimeout(r, 300));
 
+            // Obtener el chart del scatter
+            const chartScatter = canvasScatterRF ? Chart.getChart(canvasScatterRF) : null;
+
+            // Guardar wrapper y dimensiones originales
+            const wrapperScatter = canvasScatterRF?.closest('.chart-wrapper');
+            const originalHeightScatter = wrapperScatter?.style.height;
+
+            // Guardar fuentes originales del scatter
+            const originalScatterOptions = chartScatter ? {
+              legendFont: chartScatter.options?.plugins?.legend?.labels?.font?.size,
+              datalabelsFont: chartScatter.options?.plugins?.datalabels?.font?.size,
+              xTicksFont: chartScatter.options?.scales?.x?.ticks?.font?.size,
+              yTicksFont: chartScatter.options?.scales?.y?.ticks?.font?.size
+            } : {};
+
+            // Agrandar contenedor a 600px
+            if (wrapperScatter) wrapperScatter.style.height = '600px';
+
+            // Aumentar fuentes a 14px
+            if (chartScatter) {
+              if (chartScatter.options?.plugins?.legend?.labels?.font) chartScatter.options.plugins.legend.labels.font.size = 14;
+              if (chartScatter.options?.plugins?.datalabels?.font) chartScatter.options.plugins.datalabels.font.size = 14;
+              if (chartScatter.options?.scales?.x?.ticks?.font) chartScatter.options.scales.x.ticks.font.size = 14;
+              if (chartScatter.options?.scales?.y?.ticks?.font) chartScatter.options.scales.y.ticks.font.size = 14;
+              chartScatter.update('none');
+              chartScatter.resize();
+            }
+            await new Promise(r => setTimeout(r, 400));
+
             pdf.addPage();
-            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(6, 14, 70);
@@ -4056,6 +4084,16 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
               pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
             }
+
+            // Restaurar fuentes originales del scatter
+            if (chartScatter) {
+              if (chartScatter.options?.plugins?.legend?.labels?.font && originalScatterOptions.legendFont) chartScatter.options.plugins.legend.labels.font.size = originalScatterOptions.legendFont;
+              if (chartScatter.options?.plugins?.datalabels?.font && originalScatterOptions.datalabelsFont) chartScatter.options.plugins.datalabels.font.size = originalScatterOptions.datalabelsFont;
+              if (chartScatter.options?.scales?.x?.ticks?.font && originalScatterOptions.xTicksFont) chartScatter.options.scales.x.ticks.font.size = originalScatterOptions.xTicksFont;
+              if (chartScatter.options?.scales?.y?.ticks?.font && originalScatterOptions.yTicksFont) chartScatter.options.scales.y.ticks.font.size = originalScatterOptions.yTicksFont;
+              chartScatter.update('none');
+            }
+            if (wrapperScatter) wrapperScatter.style.height = originalHeightScatter || '500px';
 
             if (canvasSubclasRF && canvasSubclasRF.width > 0) {
               const rightX_RF2 = margin + chartWidth_RF2 + margin;
