@@ -4137,7 +4137,7 @@ async function descargarReportePDF(formato = 'A4') {
             yPos += splitIntro.length * 5 + 8;
 
             // Tabla de excesos
-            const colWidths = [55, 45, 35, 30, 35, 30]; // Instrumento, Límite, Ámbito, Límite%, ValorActual, Exceso
+            const colWidths = [80, 45, 35, 30, 35, 30]; // Instrumento, Límite, Ámbito, Límite%, ValorActual, Exceso
             const tableWidth = colWidths.reduce((a, b) => a + b, 0);
             const startX = margin;
 
@@ -4171,7 +4171,7 @@ async function descargarReportePDF(formato = 'A4') {
                 pdf.rect(startX, yPos, tableWidth, 6, 'F');
               }
               xPos = startX + 2;
-              const instrTrunc = op.instrumento.length > 22 ? op.instrumento.substring(0, 22) + '...' : op.instrumento;
+              const instrTrunc = op.instrumento.length > 38 ? op.instrumento.substring(0, 38) + '...' : op.instrumento;
               pdf.text(instrTrunc, xPos, yPos + 4);
               xPos += colWidths[0];
               const limTrunc = op.limite.length > 18 ? op.limite.substring(0, 18) + '...' : op.limite;
