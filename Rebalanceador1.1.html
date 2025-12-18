@@ -1887,7 +1887,6 @@
                       <th class="center" style="width: 95px;">Valor de<br>Mercado</th>
                       <th class="center" style="width: 85px;">Fecha Últ.<br>Compra</th>
                       <th class="center" style="width: 85px;">Cupones<br>Cobrados</th>
-                      <th class="center" style="width: 60px;">Moneda</th>
                     </tr>
                   </thead>
                   <tbody id="portafolioBondosBodyTotal"></tbody>
@@ -10998,9 +10997,7 @@ const regionCols = [
 
               '<td class="center">' + fechaUltimaCompra + '</td>' +
 
-              '<td class="center">' + moneyByCur(interesesRecibidosConv, monedaDisplay) + '</td>' +
-
-              '<td class="center">' + monedaOriginal + '</td>';
+              '<td class="center">' + moneyByCur(interesesRecibidosConv, monedaDisplay) + '</td>';
 
           } else {
 
@@ -11084,9 +11081,7 @@ const regionCols = [
 
             '<td class="center"></td>' +
 
-            '<td class="center">' + moneyByCur(totalInteresesRecibidos, monedaTotales) + '</td>' +
-
-            '<td class="center">-</td>';
+            '<td class="center">' + moneyByCur(totalInteresesRecibidos, monedaTotales) + '</td>';
 
         } else {
 
