@@ -3719,9 +3719,9 @@ async function descargarReportePDF(formato = 'A4') {
 
             const chartY_RV2 = isWidescreen ? 25 : 30;
             const chartWidth_RV2 = (pageWidth - margin * 3) / 2;
-            const FIXED_RATIO_RV2 = 508 / 693;
-            const imgWidth_RV2 = chartWidth_RV2;
-            const imgHeight_RV2 = Math.min(chartWidth_RV2 * FIXED_RATIO_RV2, pageHeight - chartY_RV2 - 15);
+            const SCALE_RV2 = 0.8; // Factor de escala (80%)
+            const imgWidth_RV2 = chartWidth_RV2 * SCALE_RV2;
+            const imgHeight_RV2 = imgWidth_RV2; // Ratio 1:1 para donut circular
 
             if (canvasRegionRV && canvasRegionRV.width > 0) {
               pdf.setFontSize(11);
@@ -3729,7 +3729,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR REGIÓN (%)', margin, chartY_RV2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RV2 + 2, margin + chartWidth_RV2, chartY_RV2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasRegionRV), 'JPEG', margin, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasRegionRV), 'JPEG', margin, chartY_RV2 + 25, imgWidth_RV2, imgHeight_RV2);
             }
 
             if (canvasVehiculoRV && canvasVehiculoRV.width > 0) {
@@ -3739,7 +3739,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR VEHÍCULO (%)', rightX_RV2, chartY_RV2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RV2, chartY_RV2 + 2, rightX_RV2 + chartWidth_RV2, chartY_RV2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasVehiculoRV), 'JPEG', rightX_RV2, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasVehiculoRV), 'JPEG', rightX_RV2, chartY_RV2 + 25, imgWidth_RV2, imgHeight_RV2);
             }
           }
 
@@ -3938,9 +3938,9 @@ async function descargarReportePDF(formato = 'A4') {
 
             const chartY_RF2 = isWidescreen ? 25 : 30;
             const chartWidth_RF2 = (pageWidth - margin * 3) / 2;
-            const FIXED_RATIO_RF2 = 508 / 693;
-            const imgWidth_RF2 = chartWidth_RF2;
-            const imgHeight_RF2 = Math.min(chartWidth_RF2 * FIXED_RATIO_RF2, pageHeight - chartY_RF2 - 15);
+            const SCALE_RF2 = 0.8; // Factor de escala (80%)
+            const imgWidth_RF2 = chartWidth_RF2 * SCALE_RF2;
+            const imgHeight_RF2 = imgWidth_RF2; // Ratio 1:1 para donut circular
 
             if (canvasScatterRF && canvasScatterRF.width > 0) {
               pdf.setFontSize(11);
@@ -3948,7 +3948,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 25, imgWidth_RF2, imgHeight_RF2);
             }
 
             if (canvasSubclasRF && canvasSubclasRF.width > 0) {
@@ -3958,7 +3958,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR SUBCLASIFICACIÓN (%)', rightX_RF2, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RF2, chartY_RF2 + 2, rightX_RF2 + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasSubclasRF), 'JPEG', rightX_RF2, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasSubclasRF), 'JPEG', rightX_RF2, chartY_RF2 + 25, imgWidth_RF2, imgHeight_RF2);
             }
           }
 
