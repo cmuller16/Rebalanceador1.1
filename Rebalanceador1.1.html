@@ -2525,33 +2525,68 @@
 
   <!-- ============ Mini-modal: Límites de Concentración ============ -->
   <div id="modalLimites" class="modal" role="dialog" aria-modal="true">
-    <div class="box">
+    <div class="box" style="max-width:750px;">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border-light);gap:10px;">
         <div style="font-weight:600;">Límites de Concentración</div>
         <button id="limitesClose" title="Cerrar" style="background:transparent;border:none;font-size:18px;color:#070E46;cursor:pointer;">✕</button>
       </div>
       <div style="padding:18px;">
-        <!-- Tabla de límites excedidos -->
-        <div id="limitesExcedidosContainer" style="display:none;">
-          <div class="table-wrapper">
-            <table id="tablaLimitesExcedidos">
-              <thead>
-                <tr>
-                  <th class="left" style="width:35%;">Límite</th>
-                  <th class="center" style="width:16.25%;">Ámbito</th>
-                  <th class="center" style="width:16.25%;">Límite</th>
-                  <th class="center" style="width:16.25%;">Valor Actual</th>
-                  <th class="center" style="width:16.25%;">Exceso</th>
-                </tr>
-              </thead>
-              <tbody id="limitesExcedidosBody"></tbody>
-            </table>
+        <!-- Subpestañas Total / Operaciones -->
+        <div class="subtabs" id="limites-subtabs" style="margin-bottom:12px;">
+          <button class="subtab active" data-limites-tab="total">Total</button>
+          <button class="subtab" data-limites-tab="operaciones">Operaciones</button>
+        </div>
+
+        <!-- Contenido Total -->
+        <div id="limites-tab-total" class="limites-tab-content">
+          <!-- Tabla de límites excedidos -->
+          <div id="limitesExcedidosContainer" style="display:none;">
+            <div class="table-wrapper">
+              <table id="tablaLimitesExcedidos">
+                <thead>
+                  <tr>
+                    <th class="left" style="width:35%;">Límite</th>
+                    <th class="center" style="width:16.25%;">Ámbito</th>
+                    <th class="center" style="width:16.25%;">Límite</th>
+                    <th class="center" style="width:16.25%;">Valor Actual</th>
+                    <th class="center" style="width:16.25%;">Exceso</th>
+                  </tr>
+                </thead>
+                <tbody id="limitesExcedidosBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Mensaje cuando no hay excesos -->
+          <div id="limitesOkMessage" style="display:none;text-align:center;padding:40px;">
+            <p style="font-size:14px;color:#6b7280;">Todos los límites se cumplen</p>
           </div>
         </div>
-        
-        <!-- Mensaje cuando no hay excesos -->
-        <div id="limitesOkMessage" style="display:none;text-align:center;padding:40px;">
-          <p style="font-size:14px;color:#6b7280;">Todos los límites se cumplen</p>
+
+        <!-- Contenido Operaciones (solo compras con exceso) -->
+        <div id="limites-tab-operaciones" class="limites-tab-content" style="display:none;">
+          <div id="limitesOperacionesContainer" style="display:none;">
+            <div class="table-wrapper">
+              <table id="tablaLimitesOperaciones">
+                <thead>
+                  <tr>
+                    <th class="left" style="width:25%;">Instrumento</th>
+                    <th class="left" style="width:20%;">Límite</th>
+                    <th class="center" style="width:13.75%;">Ámbito</th>
+                    <th class="center" style="width:13.75%;">Límite</th>
+                    <th class="center" style="width:13.75%;">Valor Actual</th>
+                    <th class="center" style="width:13.75%;">Exceso</th>
+                  </tr>
+                </thead>
+                <tbody id="limitesOperacionesBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Mensaje cuando no hay excesos en operaciones -->
+          <div id="limitesOperacionesOkMessage" style="display:none;text-align:center;padding:40px;">
+            <p style="font-size:14px;color:#6b7280;">No hay excesos en las operaciones de compra</p>
+          </div>
         </div>
       </div>
     </div>
@@ -21101,7 +21136,23 @@ function wirePMChartFilters(){
   function closeLimitesModal() {
     document.getElementById('modalLimites')?.classList.remove('show');
   }
-  
+
+  // Subpestañas del modal de límites
+  document.querySelectorAll('#limites-subtabs .subtab').forEach(btn => {
+    btn.addEventListener('click', () => {
+      // Cambiar pestaña activa
+      document.querySelectorAll('#limites-subtabs .subtab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      // Mostrar/ocultar contenido
+      const tabId = btn.getAttribute('data-limites-tab');
+      document.querySelectorAll('.limites-tab-content').forEach(content => {
+        content.style.display = 'none';
+      });
+      document.getElementById(`limites-tab-${tabId}`).style.display = 'block';
+    });
+  });
+
   // === MODAL: Exceso de Concentración (individual) ===
   function openExcesoConcentracionModal(nombreActivo, moneda, violaciones) {
     const tbody = document.getElementById('excesoConcentracionBody');
@@ -21264,6 +21315,146 @@ function wirePMChartFilters(){
           tbody.appendChild(trActivo);
         });
       });
+    }
+
+    // === PESTAÑA OPERACIONES: Solo compras con exceso ===
+    const operacionesContainer = document.getElementById('limitesOperacionesContainer');
+    const operacionesOkMessage = document.getElementById('limitesOperacionesOkMessage');
+    const operacionesBody = document.getElementById('limitesOperacionesBody');
+
+    if (operacionesBody) {
+      operacionesBody.innerHTML = '';
+
+      // Obtener tipo de cambio para dolarizar PEN
+      const tcInput = document.getElementById('tipoCambio');
+      const tc = parseFloat(tcInput?.value) || 3.40;
+
+      // Calcular total del portafolio (USD + PEN dolarizado)
+      const totalUSD = (LAST_HOLDINGS.USD || []).reduce((sum, r) => {
+        const b = toNum(r.valor_mercado);
+        const e = edits.USD ? (edits.USD.get(r._rid) || 0) : 0;
+        return sum + b + e;
+      }, 0);
+      const totalPENDolarizado = (LAST_HOLDINGS.PEN || []).reduce((sum, r) => {
+        const b = toNum(r.valor_mercado);
+        const e = edits.PEN ? (edits.PEN.get(r._rid) || 0) : 0;
+        return sum + (b + e) / tc;
+      }, 0);
+      const totalCartera = totalUSD + totalPENDolarizado;
+
+      // Buscar instrumentos COMPRADOS (edit > 0) que causan exceso de límite
+      const operacionesExceso = [];
+
+      (LIMITS_RESULTS || []).filter(r => !r.ok).forEach(lim => {
+        const limite = LIMITS[lim.i];
+        const exceso = lim.valor - lim.limite;
+        const ambito = lim.tipo === 'I' ? 'Individual' : 'Agregado';
+
+        // Buscar compras en USD
+        (LAST_HOLDINGS.USD || []).forEach(row => {
+          const editVal = edits.USD ? (edits.USD.get(row._rid) || 0) : 0;
+          if (editVal <= 0) return; // Solo compras
+
+          const enriched = enrichRow(row, 'USD');
+          if (matchesLimit(limite.filters, enriched) && !isException(limite, enriched)) {
+            const base = toNum(row.valor_mercado);
+            const valor = base + editVal;
+            const peso = totalCartera > 0 ? (valor / totalCartera) * 100 : 0;
+
+            if (lim.tipo === 'I') {
+              if (peso > lim.limite) {
+                operacionesExceso.push({
+                  instrumento: row.nombre,
+                  limite: lim.name,
+                  ambito,
+                  limiteVal: lim.limite,
+                  valorActual: lim.valor,
+                  exceso
+                });
+              }
+            } else {
+              // Límite agregado: si el instrumento comprado está en el grupo excedido
+              operacionesExceso.push({
+                instrumento: row.nombre,
+                limite: lim.name,
+                ambito,
+                limiteVal: lim.limite,
+                valorActual: lim.valor,
+                exceso
+              });
+            }
+          }
+        });
+
+        // Buscar compras en PEN
+        (LAST_HOLDINGS.PEN || []).forEach(row => {
+          const editVal = edits.PEN ? (edits.PEN.get(row._rid) || 0) : 0;
+          if (editVal <= 0) return; // Solo compras
+
+          const enriched = enrichRow(row, 'PEN');
+          if (matchesLimit(limite.filters, enriched) && !isException(limite, enriched)) {
+            const base = toNum(row.valor_mercado);
+            const valor = base + editVal;
+            const valorDolarizado = valor / tc;
+            const peso = totalCartera > 0 ? (valorDolarizado / totalCartera) * 100 : 0;
+
+            if (lim.tipo === 'I') {
+              if (peso > lim.limite) {
+                operacionesExceso.push({
+                  instrumento: row.nombre,
+                  limite: lim.name,
+                  ambito,
+                  limiteVal: lim.limite,
+                  valorActual: lim.valor,
+                  exceso
+                });
+              }
+            } else {
+              // Límite agregado: si el instrumento comprado está en el grupo excedido
+              operacionesExceso.push({
+                instrumento: row.nombre,
+                limite: lim.name,
+                ambito,
+                limiteVal: lim.limite,
+                valorActual: lim.valor,
+                exceso
+              });
+            }
+          }
+        });
+      });
+
+      // Eliminar duplicados (mismo instrumento + mismo límite)
+      const operacionesUnicas = [];
+      const seen = new Set();
+      operacionesExceso.forEach(op => {
+        const key = `${op.instrumento}|${op.limite}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          operacionesUnicas.push(op);
+        }
+      });
+
+      if (operacionesUnicas.length === 0) {
+        operacionesContainer.style.display = 'none';
+        operacionesOkMessage.style.display = 'block';
+      } else {
+        operacionesContainer.style.display = 'block';
+        operacionesOkMessage.style.display = 'none';
+
+        operacionesUnicas.forEach(op => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="left">${op.instrumento}</td>
+            <td class="left">${op.limite}</td>
+            <td class="center">${op.ambito}</td>
+            <td class="center">${op.limiteVal.toFixed(2)}%</td>
+            <td class="center">${op.valorActual.toFixed(2)}%</td>
+            <td class="center" style="color:#9694FF;">+${op.exceso.toFixed(2)}%</td>
+          `;
+          operacionesBody.appendChild(tr);
+        });
+      }
     }
   }
 
