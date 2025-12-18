@@ -4018,8 +4018,20 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Scatter plot (izquierdo) - tamaño completo
             const scatterRatio = canvasScatterRF.width / canvasScatterRF.height;
-            const imgHeight_Scatter = chartWidth_RF2 * 0.90;
-            const imgWidth_Scatter = imgHeight_Scatter * scatterRatio;
+            const maxWidth_Scatter = chartWidth_RF2;
+            const maxHeight_Scatter = chartWidth_RF2 * 0.90;
+
+            // Calcular dimensiones que quepan sin distorsión
+            let imgWidth_Scatter, imgHeight_Scatter;
+            if (maxWidth_Scatter / scatterRatio <= maxHeight_Scatter) {
+              // Limitar por ancho
+              imgWidth_Scatter = maxWidth_Scatter;
+              imgHeight_Scatter = maxWidth_Scatter / scatterRatio;
+            } else {
+              // Limitar por alto
+              imgHeight_Scatter = maxHeight_Scatter;
+              imgWidth_Scatter = maxHeight_Scatter * scatterRatio;
+            }
 
             // Donut subclasificación (derecho) - escala reducida y cuadrado
             const SCALE_RF2 = 0.7;
