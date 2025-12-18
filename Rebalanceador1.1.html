@@ -2981,7 +2981,7 @@ async function descargarReportePDF(formato = 'A4') {
           img.src = LOGO_AZUL_B64;
         })();
                 // Helper: Convertir canvas a JPEG con fondo blanco (evita fondo negro por transparencia)
-        function canvasToJpegWithWhiteBg(canvas, quality = 0.70) {
+        function canvasToJpegWithWhiteBg(canvas, quality = 0.90) {
           const tempCanvas = document.createElement('canvas');
           tempCanvas.width = canvas.width;
           tempCanvas.height = canvas.height;
@@ -3059,7 +3059,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             pdf.addPage();
             // Logo BBVA en esquina superior derecha (alineado con el título)
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             // Título en estilo Lato 26 azul (usando helvetica bold)
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
@@ -3067,7 +3067,7 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text(titulo, margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.70);
+            const imgData = canvas.toDataURL('image/jpeg', 0.90);
             const imgWidth = pageWidth - (margin * 2);
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             const startY = isWidescreen ? 20 : 25;
@@ -3266,7 +3266,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Agregar página
             pdf.addPage();
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
@@ -3275,7 +3275,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Posicionar tabla
             const startY = isWidescreen ? 20 : 25;
-            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 0.70);
+            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 0.90);
             const tablaWidth = pageWidth - (margin * 2);
             const tablaHeight = (canvasTabla.height * tablaWidth) / canvasTabla.width;
             pdf.addImage(imgDataTabla, 'JPEG', margin, startY, tablaWidth, tablaHeight);
@@ -3521,7 +3521,7 @@ async function descargarReportePDF(formato = 'A4') {
           if (canvasAA1 || canvasMaturity) {
             pdf.addPage();
             // Logo BBVA
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             // Título
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
@@ -3646,7 +3646,7 @@ async function descargarReportePDF(formato = 'A4') {
             await new Promise(r => setTimeout(r, 300));
 
             pdf.addPage();
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
@@ -3688,7 +3688,7 @@ async function descargarReportePDF(formato = 'A4') {
             await new Promise(r => setTimeout(r, 300));
 
             pdf.addPage();
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
@@ -3865,7 +3865,7 @@ async function descargarReportePDF(formato = 'A4') {
             await new Promise(r => setTimeout(r, 300));
 
             pdf.addPage();
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
@@ -3907,7 +3907,7 @@ async function descargarReportePDF(formato = 'A4') {
             await new Promise(r => setTimeout(r, 300));
 
             pdf.addPage();
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
@@ -4150,7 +4150,7 @@ async function descargarReportePDF(formato = 'A4') {
 
           // Diapo 12: Disclaimer
           pdf.addPage();
-          pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
+          // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
           pdf.setFont('helvetica', 'bold');
           pdf.setFontSize(20);
           pdf.setTextColor(0, 19, 145);
@@ -4231,7 +4231,7 @@ async function descargarReportePDF(formato = 'A4') {
 
           if (operacionesUnicasPdf.length > 0) {
             pdf.addPage();
-            pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
+            // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
 
             // Título
             pdf.setFont('helvetica', 'bold');
