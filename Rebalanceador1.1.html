@@ -3152,63 +3152,78 @@ async function descargarReportePDF(formato = 'A4') {
             return elementosModificados;
           };
 
-          // Diapo 2: Resumen Asignación de Activos (SOLO tabla - 13px igual que otras)
+          // Diapo 2: Resumen Asignación de Activos + Gráficos debajo
           const tablaAsignacion = document.querySelector('#tablaGuiaConsolidada');
+          const canvasAAGrouped = document.getElementById('aaCanvasGrouped');
+          const canvasAADonut = document.getElementById('aaCanvasDonut');
+
           if (tablaAsignacion) {
+            // Hacer visibles los gráficos
+            hacerVisibleConPadres(canvasAAGrouped);
+            hacerVisibleConPadres(canvasAADonut);
+            await new Promise(r => setTimeout(r, 300));
+
+            // Crear contenedor para la tabla
             const contenedorAsignacion = document.createElement('div');
             contenedorAsignacion.style.cssText = 'width: 900px; background: #ffffff;';
             const tablaClone = tablaAsignacion.cloneNode(true);
             tablaClone.style.width = '100%';
-            // Letra 9px, líneas más pegadas
             tablaClone.querySelectorAll('th, td').forEach(cell => {
               cell.style.fontSize = '9px';
               cell.style.padding = '4px 12px';
             });
             contenedorAsignacion.appendChild(tablaClone);
             document.body.appendChild(contenedorAsignacion);
-            await agregarSeccionAlPDF(contenedorAsignacion, 'Resumen Asignación de Activos');
+
+            // Capturar tabla
+            const canvasTabla = await html2canvas(contenedorAsignacion, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: '#ffffff'
+            });
             document.body.removeChild(contenedorAsignacion);
-          }
 
-          // Diapo 3: Gráficos de Asignación (AA Grouped + Donut)
-          const canvasAAGrouped = document.getElementById('aaCanvasGrouped');
-          const canvasAADonut = document.getElementById('aaCanvasDonut');
-          if (canvasAAGrouped || canvasAADonut) {
-            hacerVisibleConPadres(canvasAAGrouped);
-            hacerVisibleConPadres(canvasAADonut);
-            await new Promise(r => setTimeout(r, 300));
-
+            // Agregar página
             pdf.addPage();
             pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
             pdf.setTextColor(0, 19, 145);
-            pdf.text('Distribución de Activos', margin, isWidescreen ? 14 : 18);
+            pdf.text('Resumen Asignación de Activos', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
-            const chartY_AA = isWidescreen ? 25 : 30;
-            const chartWidth_AA = (pageWidth - margin * 3) / 2;
-            const FIXED_RATIO_AA = 508 / 693;
-            const imgWidth_AA = chartWidth_AA;
-            const imgHeight_AA = Math.min(chartWidth_AA * FIXED_RATIO_AA, pageHeight - chartY_AA - 15);
+            // Posicionar tabla
+            const startY = isWidescreen ? 20 : 25;
+            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 0.95);
+            const tablaWidth = pageWidth - (margin * 2);
+            const tablaHeight = (canvasTabla.height * tablaWidth) / canvasTabla.width;
+            pdf.addImage(imgDataTabla, 'JPEG', margin, startY, tablaWidth, tablaHeight);
 
+            // Calcular espacio disponible para gráficos
+            const espacioDebajo = pageHeight - (startY + tablaHeight) - 5;
+            const chartY = startY + tablaHeight + 8;
+            const chartWidth = (pageWidth - margin * 3) / 2;
+            const chartHeight = espacioDebajo - 15; // Espacio para subtítulos
+
+            // Gráfico izquierdo: Distribución por Clase de Activo
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
-              pdf.setFontSize(11);
+              pdf.setFontSize(9);
               pdf.setTextColor(0, 19, 145);
-              pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY_AA);
+              pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(margin, chartY_AA + 2, margin + chartWidth_AA, chartY_AA + 2);
-              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY_AA + 5, imgWidth_AA, imgHeight_AA);
+              pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
+              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, chartWidth, chartHeight);
             }
 
+            // Gráfico derecho: Distribución por Moneda
             if (canvasAADonut && canvasAADonut.width > 0) {
-              const rightX_AA = margin + chartWidth_AA + margin;
-              pdf.setFontSize(11);
+              const rightX = margin + chartWidth + margin;
+              pdf.setFontSize(9);
               pdf.setTextColor(0, 19, 145);
-              pdf.text('DISTRIBUCIÓN POR MONEDA (%)', rightX_AA, chartY_AA);
+              pdf.text('DISTRIBUCIÓN POR MONEDA (%)', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(rightX_AA, chartY_AA + 2, rightX_AA + chartWidth_AA, chartY_AA + 2);
-              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', rightX_AA, chartY_AA + 5, imgWidth_AA, imgHeight_AA);
+              pdf.line(rightX, chartY + 1.5, rightX + chartWidth, chartY + 1.5);
+              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', rightX, chartY + 3, chartWidth, chartHeight);
             }
           }
           
