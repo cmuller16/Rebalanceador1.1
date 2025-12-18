@@ -3298,15 +3298,21 @@ async function descargarReportePDF(formato = 'A4') {
             }
 
             // Restaurar dimensiones originales
-            if (wrapperGrouped) wrapperGrouped.style.height = originalHeightGrouped || '500px';
+            if (wrapperGrouped) {
+              wrapperGrouped.style.height = originalHeightGrouped || '500px';
+            }
             if (wrapperDonut) {
               wrapperDonut.style.height = originalHeightDonut || '500px';
-              wrapperDonut.style.width = originalWidthDonut || '';
+              wrapperDonut.style.width = '';
             }
+
+            // Forzar min-width:0 en ambos cards para que el grid controle el tamaño
+            // (evita que el contenido interno fuerce el tamaño del grid item)
+            const cardGrouped = wrapperGrouped?.closest('.card');
+            if (cardGrouped) cardGrouped.style.minWidth = '0';
             if (cardDonut) {
-              cardDonut.style.width = originalWidthCard || '';
-              cardDonut.style.minWidth = '';
-              cardDonut.style.maxWidth = '';
+              cardDonut.style.width = '';
+              cardDonut.style.minWidth = '0';
             }
 
             // Forzar reflow del grid
@@ -3316,9 +3322,15 @@ async function descargarReportePDF(formato = 'A4') {
               gridContainer.style.display = 'grid';
             }
 
-            // Dar tiempo al browser para recalcular layout antes de resize
-            await new Promise(r => setTimeout(r, 150));
+            // Esperar a que el browser recalcule el layout
+            await new Promise(r => setTimeout(r, 200));
 
+            // Resize de los charts para que se ajusten al nuevo tamaño
+            if (charts.grouped) charts.grouped.resize();
+            if (charts.donut) charts.donut.resize();
+
+            // Segundo resize después de otro pequeño delay (por si acaso)
+            await new Promise(r => setTimeout(r, 100));
             if (charts.grouped) charts.grouped.resize();
             if (charts.donut) charts.donut.resize();
           }
