@@ -3616,31 +3616,51 @@ async function descargarReportePDF(formato = 'A4') {
             const reducedHeight = maxChartHeight * scaleFactor;
             const verticalPadding = (maxChartHeight - reducedHeight) / 2;
 
-            // Gráfico AA1 (izquierda) - con ratio real
+            // Gráfico AA1 (izquierda) - limitado al ancho disponible, sin deformación
             if (canvasAA1 && canvasAA1.width > 0) {
               const aa1Ratio = canvasAA1.width / canvasAA1.height;
-              const aa1Width = reducedHeight * aa1Ratio;
+              const maxWidth = chartWidth;
+              const maxHeight = reducedHeight;
+
+              let aa1Width, aa1Height;
+              if (maxWidth / aa1Ratio <= maxHeight) {
+                aa1Width = maxWidth;
+                aa1Height = maxWidth / aa1Ratio;
+              } else {
+                aa1Height = maxHeight;
+                aa1Width = maxHeight * aa1Ratio;
+              }
 
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(margin, chartY + 2, margin + aa1Width, chartY + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasAA1), 'JPEG', margin, chartY + 5 + verticalPadding, aa1Width, reducedHeight);
+              pdf.line(margin, chartY + 2, margin + chartWidth, chartY + 2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasAA1), 'JPEG', margin, chartY + 5 + verticalPadding, aa1Width, aa1Height);
             }
 
-            // Gráfico Maturity Wall (derecha) - con ratio real
+            // Gráfico Maturity Wall (derecha) - limitado al ancho disponible, sin deformación
             if (canvasMaturity && canvasMaturity.width > 0) {
               const maturityRatio = canvasMaturity.width / canvasMaturity.height;
-              const maturityWidth = reducedHeight * maturityRatio;
+              const maxWidth = chartWidth;
+              const maxHeight = reducedHeight;
               const rightX = margin + chartWidth + margin;
+
+              let maturityWidth, maturityHeight;
+              if (maxWidth / maturityRatio <= maxHeight) {
+                maturityWidth = maxWidth;
+                maturityHeight = maxWidth / maturityRatio;
+              } else {
+                maturityHeight = maxHeight;
+                maturityWidth = maxHeight * maturityRatio;
+              }
 
               pdf.setFontSize(11);
               pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
-              pdf.line(rightX, chartY + 2, rightX + maturityWidth, chartY + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasMaturity), 'JPEG', rightX, chartY + 5 + verticalPadding, maturityWidth, reducedHeight);
+              pdf.line(rightX, chartY + 2, rightX + chartWidth, chartY + 2);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasMaturity), 'JPEG', rightX, chartY + 5 + verticalPadding, maturityWidth, maturityHeight);
             }
 
             // Restaurar fuentes originales AA1
