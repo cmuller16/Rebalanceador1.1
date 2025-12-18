@@ -3579,21 +3579,21 @@ async function descargarReportePDF(formato = 'A4') {
             if (wrapperAA1) wrapperAA1.style.height = pdfChartHeight + 'px';
             if (wrapperMaturity) wrapperMaturity.style.height = pdfChartHeight + 'px';
 
-            // Aumentar fuentes a 24px para AA1
+            // Aumentar fuentes a 18px para AA1
             if (chartAA1) {
-              if (chartAA1.options?.plugins?.legend?.labels?.font) chartAA1.options.plugins.legend.labels.font.size = 24;
-              if (chartAA1.options?.plugins?.datalabels?.font) chartAA1.options.plugins.datalabels.font.size = 24;
-              if (chartAA1.options?.scales?.x?.ticks?.font) chartAA1.options.scales.x.ticks.font.size = 24;
-              if (chartAA1.options?.scales?.y?.ticks?.font) chartAA1.options.scales.y.ticks.font.size = 24;
+              if (chartAA1.options?.plugins?.legend?.labels?.font) chartAA1.options.plugins.legend.labels.font.size = 18;
+              if (chartAA1.options?.plugins?.datalabels?.font) chartAA1.options.plugins.datalabels.font.size = 18;
+              if (chartAA1.options?.scales?.x?.ticks?.font) chartAA1.options.scales.x.ticks.font.size = 18;
+              if (chartAA1.options?.scales?.y?.ticks?.font) chartAA1.options.scales.y.ticks.font.size = 18;
               chartAA1.update('none');
             }
 
-            // Aumentar fuentes a 24px para Maturity
+            // Aumentar fuentes a 18px para Maturity
             if (chartMaturity) {
-              if (chartMaturity.options?.plugins?.legend?.labels?.font) chartMaturity.options.plugins.legend.labels.font.size = 24;
-              if (chartMaturity.options?.plugins?.datalabels?.font) chartMaturity.options.plugins.datalabels.font.size = 24;
-              if (chartMaturity.options?.scales?.x?.ticks?.font) chartMaturity.options.scales.x.ticks.font.size = 24;
-              if (chartMaturity.options?.scales?.y?.ticks?.font) chartMaturity.options.scales.y.ticks.font.size = 24;
+              if (chartMaturity.options?.plugins?.legend?.labels?.font) chartMaturity.options.plugins.legend.labels.font.size = 18;
+              if (chartMaturity.options?.plugins?.datalabels?.font) chartMaturity.options.plugins.datalabels.font.size = 18;
+              if (chartMaturity.options?.scales?.x?.ticks?.font) chartMaturity.options.scales.x.ticks.font.size = 18;
+              if (chartMaturity.options?.scales?.y?.ticks?.font) chartMaturity.options.scales.y.ticks.font.size = 18;
               chartMaturity.update('none');
             }
 
