@@ -3541,15 +3541,21 @@ async function descargarReportePDF(formato = 'A4') {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
-              // Reducir ancho columna Exposición
+              // Ajustar anchos de columnas
               tablaRF1.querySelectorAll('th').forEach((th, idx) => {
-                if (th.textContent.includes('Exposición')) {
-                  th.style.width = '60px';
-                  th.style.maxWidth = '60px';
+                const texto = th.textContent.trim();
+                let ancho = null;
+                if (texto.includes('Exposición')) ancho = '70px';
+                else if (texto.includes('Patrimonio')) ancho = '55px';
+                else if (texto.includes('Vol')) ancho = '35px';
+                else if (texto.includes('N Holdings')) ancho = '50px';
+                if (ancho) {
+                  th.style.width = ancho;
+                  th.style.maxWidth = ancho;
                   tablaRF1.querySelectorAll('tbody tr').forEach(row => {
                     if (row.cells[idx]) {
-                      row.cells[idx].style.width = '60px';
-                      row.cells[idx].style.maxWidth = '60px';
+                      row.cells[idx].style.width = ancho;
+                      row.cells[idx].style.maxWidth = ancho;
                     }
                   });
                 }
@@ -3576,15 +3582,21 @@ async function descargarReportePDF(formato = 'A4') {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
-              // Reducir ancho columna Exposición
+              // Ajustar anchos de columnas
               tablaRF2.querySelectorAll('th').forEach((th, idx) => {
-                if (th.textContent.includes('Exposición')) {
-                  th.style.width = '60px';
-                  th.style.maxWidth = '60px';
+                const texto = th.textContent.trim();
+                let ancho = null;
+                if (texto.includes('Exposición')) ancho = '70px';
+                else if (texto.includes('Patrimonio')) ancho = '55px';
+                else if (texto.includes('Vol')) ancho = '35px';
+                else if (texto.includes('N Holdings')) ancho = '50px';
+                if (ancho) {
+                  th.style.width = ancho;
+                  th.style.maxWidth = ancho;
                   tablaRF2.querySelectorAll('tbody tr').forEach(row => {
                     if (row.cells[idx]) {
-                      row.cells[idx].style.width = '60px';
-                      row.cells[idx].style.maxWidth = '60px';
+                      row.cells[idx].style.width = ancho;
+                      row.cells[idx].style.maxWidth = ancho;
                     }
                   });
                 }
@@ -3603,15 +3615,21 @@ async function descargarReportePDF(formato = 'A4') {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 12px';
               });
-              // Reducir ancho columna Exposición
+              // Ajustar anchos de columnas
               tablaRFClone.querySelectorAll('th').forEach((th, idx) => {
-                if (th.textContent.includes('Exposición')) {
-                  th.style.width = '60px';
-                  th.style.maxWidth = '60px';
+                const texto = th.textContent.trim();
+                let ancho = null;
+                if (texto.includes('Exposición')) ancho = '70px';
+                else if (texto.includes('Patrimonio')) ancho = '55px';
+                else if (texto.includes('Vol')) ancho = '35px';
+                else if (texto.includes('N Holdings')) ancho = '50px';
+                if (ancho) {
+                  th.style.width = ancho;
+                  th.style.maxWidth = ancho;
                   tablaRFClone.querySelectorAll('tbody tr').forEach(row => {
                     if (row.cells[idx]) {
-                      row.cells[idx].style.width = '60px';
-                      row.cells[idx].style.maxWidth = '60px';
+                      row.cells[idx].style.width = ancho;
+                      row.cells[idx].style.maxWidth = ancho;
                     }
                   });
                 }
