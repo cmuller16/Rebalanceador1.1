@@ -3031,7 +3031,7 @@ async function descargarReportePDF(formato = 'A4') {
             });
 
             const canvas = await html2canvas(elemento, {
-              scale: 1.0,
+              scale: 2.0,
               useCORS: true,
               logging: false,
               backgroundColor: '#ffffff',
@@ -3258,7 +3258,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Capturar tabla
             const canvasTabla = await html2canvas(contenedorAsignacion, {
-              scale: 1.0,
+              scale: 2.0,
               useCORS: true,
               backgroundColor: '#ffffff'
             });
