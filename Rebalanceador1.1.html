@@ -3205,11 +3205,15 @@ async function descargarReportePDF(formato = 'A4') {
             const chartWidth = (pageWidth - margin * 3) / 2;
             const maxChartHeight = espacioDebajo - 15;
 
-            // Gráfico izquierdo: Distribución por Clase de Activo (mantener proporción)
+            // Gráfico izquierdo: Distribución por Clase de Activo
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
               const ratioGrouped = canvasAAGrouped.height / canvasAAGrouped.width;
-              const imgHeightGrouped = Math.min(chartWidth * ratioGrouped, maxChartHeight);
-              const imgWidthGrouped = imgHeightGrouped / ratioGrouped;
+              let imgWidthGrouped = chartWidth;
+              let imgHeightGrouped = chartWidth * ratioGrouped;
+              if (imgHeightGrouped > maxChartHeight) {
+                imgHeightGrouped = maxChartHeight;
+                imgWidthGrouped = maxChartHeight / ratioGrouped;
+              }
 
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
@@ -3219,12 +3223,16 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3, imgWidthGrouped, imgHeightGrouped);
             }
 
-            // Gráfico derecho: Distribución por Moneda (mantener proporción cuadrada)
+            // Gráfico derecho: Distribución por Moneda (donut circular)
             if (canvasAADonut && canvasAADonut.width > 0) {
               const rightX = margin + chartWidth + margin;
               const ratioDonut = canvasAADonut.height / canvasAADonut.width;
-              const imgHeightDonut = Math.min(chartWidth * ratioDonut, maxChartHeight);
-              const imgWidthDonut = imgHeightDonut / ratioDonut;
+              let imgWidthDonut = chartWidth;
+              let imgHeightDonut = chartWidth * ratioDonut;
+              if (imgHeightDonut > maxChartHeight) {
+                imgHeightDonut = maxChartHeight;
+                imgWidthDonut = maxChartHeight / ratioDonut;
+              }
 
               pdf.setFontSize(11);
               pdf.setTextColor(0, 19, 145);
