@@ -12847,7 +12847,15 @@ const regionCols = [
             datalabels: {
               anchor: 'end',
               align: 'end',
-              formatter: (value) => value > 0 ? value.toFixed(1) : '',
+              formatter: (value, context) => {
+                if (value <= 0) return '';
+                // Si es Portafolio Sugerido (índice 2), no mostrar etiqueta si es igual a Portafolio Actual (índice 1)
+                if (context.datasetIndex === 2) {
+                  const actualValue = context.chart.data.datasets[1].data[context.dataIndex];
+                  if (Math.abs(value - actualValue) < 0.01) return '';
+                }
+                return value.toFixed(1);
+              },
               color: '#333',
               font: { weight: 'normal', size: 12, family: 'Lato, sans-serif' }
             }
