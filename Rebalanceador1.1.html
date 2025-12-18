@@ -4632,82 +4632,33 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasGroupedImgA4) {
               const groupedRatioA4 = canvasGroupedImgA4.width / canvasGroupedImgA4.height;
               const groupedHeightA4 = chartWidthA4 / groupedRatioA4;
-              pdf.addImage(canvasGroupedImgA4.toDataURL('image/jpeg', 1.0), 'JPEG', margin, chartYA4, chartWidthA4, groupedHeightA4);
+              pdf.addImage(canvasGroupedImgA4.toDataURL('image/png'), 'PNG', margin, chartYA4, chartWidthA4, groupedHeightA4);
             }
             if (canvasDonutImgA4) {
               const donutRatioA4 = canvasDonutImgA4.width / canvasDonutImgA4.height;
               const donutHeightA4 = chartWidthA4 / donutRatioA4;
-              pdf.addImage(canvasDonutImgA4.toDataURL('image/jpeg', 1.0), 'JPEG', margin + chartWidthA4 + margin, chartYA4, chartWidthA4, donutHeightA4);
+              pdf.addImage(canvasDonutImgA4.toDataURL('image/png'), 'PNG', margin + chartWidthA4 + margin, chartYA4, chartWidthA4, donutHeightA4);
             }
           }
 
-          // Página 3+: Posición Detallada
+          // Página 3: Posición Detallada (sin dividir)
           await navegarA('[data-tab="portafolio"].tab-child', '[data-sub="portafolio-total"]');
           const tablaPortafolioA4 = document.querySelector('#portafolio-total .table-wrapper');
           if (tablaPortafolioA4) {
             const tablaOriginalA4 = tablaPortafolioA4.querySelector('table');
-            const filasA4 = tablaOriginalA4 ? tablaOriginalA4.querySelectorAll('tbody tr') : [];
-            const MAX_FILAS_A4 = 28;
-
-            if (filasA4.length > MAX_FILAS_A4) {
-              const theadA4 = tablaOriginalA4.querySelector('thead');
-              const mitadA4 = Math.ceil(filasA4.length / 2);
-
-              // Primera parte
-              const contenedor1A4 = document.createElement('div');
-              contenedor1A4.style.cssText = 'width: 800px; background: #ffffff;';
-              const tabla1A4 = document.createElement('table');
-              tabla1A4.className = tablaOriginalA4.className;
-              tabla1A4.style.width = '100%';
-              if (theadA4) tabla1A4.appendChild(theadA4.cloneNode(true));
-              const tbody1A4 = document.createElement('tbody');
-              for (let i = 0; i < mitadA4; i++) {
-                if (filasA4[i]) tbody1A4.appendChild(filasA4[i].cloneNode(true));
-              }
-              tabla1A4.appendChild(tbody1A4);
-              tabla1A4.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '9px';
-                cell.style.padding = '4px 10px';
-              });
-              contenedor1A4.appendChild(tabla1A4);
-              document.body.appendChild(contenedor1A4);
-              await agregarSeccionAlPDF(contenedor1A4, 'Posición Detallada');
-              document.body.removeChild(contenedor1A4);
-
-              // Segunda parte
-              const contenedor2A4 = document.createElement('div');
-              contenedor2A4.style.cssText = 'width: 800px; background: #ffffff;';
-              const tabla2A4 = document.createElement('table');
-              tabla2A4.className = tablaOriginalA4.className;
-              tabla2A4.style.width = '100%';
-              if (theadA4) tabla2A4.appendChild(theadA4.cloneNode(true));
-              const tbody2A4 = document.createElement('tbody');
-              for (let i = mitadA4; i < filasA4.length; i++) {
-                if (filasA4[i]) tbody2A4.appendChild(filasA4[i].cloneNode(true));
-              }
-              tabla2A4.appendChild(tbody2A4);
-              tabla2A4.querySelectorAll('th, td').forEach(cell => {
-                cell.style.fontSize = '9px';
-                cell.style.padding = '4px 10px';
-              });
-              contenedor2A4.appendChild(tabla2A4);
-              document.body.appendChild(contenedor2A4);
-              await agregarSeccionAlPDF(contenedor2A4, 'Posición Detallada (cont.)');
-              document.body.removeChild(contenedor2A4);
-            } else {
-              // Cabe en una página
-              const contenedorUnicoA4 = document.createElement('div');
-              contenedorUnicoA4.style.cssText = 'width: 800px; background: #ffffff;';
+            if (tablaOriginalA4) {
+              const contenedorPosA4 = document.createElement('div');
+              contenedorPosA4.style.cssText = 'width: 800px; background: #ffffff;';
               const tablaClonePosA4 = tablaOriginalA4.cloneNode(true);
               tablaClonePosA4.style.width = '100%';
               tablaClonePosA4.querySelectorAll('th, td').forEach(cell => {
                 cell.style.fontSize = '9px';
                 cell.style.padding = '4px 10px';
               });
-              contenedorUnicoA4.appendChild(tablaClonePosA4);
-              document.body.appendChild(contenedorUnicoA4);
-              await agregarSeccionAlPDF(contenedorUnicoA4, 'Posición Detallada');
-              document.body.removeChild(contenedorUnicoA4);
+              contenedorPosA4.appendChild(tablaClonePosA4);
+              document.body.appendChild(contenedorPosA4);
+              await agregarSeccionAlPDF(contenedorPosA4, 'Posición Detallada');
+              document.body.removeChild(contenedorPosA4);
             }
           }
 
