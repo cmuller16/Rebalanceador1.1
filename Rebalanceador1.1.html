@@ -4038,23 +4038,9 @@ async function descargarReportePDF(formato = 'A4') {
 
             const chartY_RF2 = isWidescreen ? 25 : 30;
             const chartWidth_RF2 = (pageWidth - margin * 3) / 2;
-
-            // Scatter plot (izquierdo) - tamaño completo
-            const scatterRatio = canvasScatterRF.width / canvasScatterRF.height;
-            const maxWidth_Scatter = chartWidth_RF2;
-            const maxHeight_Scatter = chartWidth_RF2 * 0.90;
-
-            // Calcular dimensiones que quepan sin distorsión
-            let imgWidth_Scatter, imgHeight_Scatter;
-            if (maxWidth_Scatter / scatterRatio <= maxHeight_Scatter) {
-              // Limitar por ancho
-              imgWidth_Scatter = maxWidth_Scatter;
-              imgHeight_Scatter = maxWidth_Scatter / scatterRatio;
-            } else {
-              // Limitar por alto
-              imgHeight_Scatter = maxHeight_Scatter;
-              imgWidth_Scatter = maxHeight_Scatter * scatterRatio;
-            }
+            const FIXED_RATIO_RF2 = 508 / 693;
+            const imgWidth_RF2 = chartWidth_RF2;
+            const imgHeight_RF2 = Math.min(chartWidth_RF2 * FIXED_RATIO_RF2, pageHeight - chartY_RF2 - 15);
 
             // Donut subclasificación (derecho) - escala reducida y cuadrado
             const SCALE_RF2 = 0.7;
@@ -4068,7 +4054,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 15, imgWidth_Scatter, imgHeight_Scatter);
+              pdf.addImage(canvasToJpegWithWhiteBg(canvasScatterRF), 'JPEG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
             }
 
             if (canvasSubclasRF && canvasSubclasRF.width > 0) {
