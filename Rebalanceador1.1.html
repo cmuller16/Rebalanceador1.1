@@ -3005,7 +3005,7 @@ async function descargarReportePDF(formato = 'A4') {
             });
 
             const canvas = await html2canvas(elemento, {
-              scale: 1.5,
+              scale: 1.2,
               useCORS: true,
               logging: false,
               backgroundColor: '#ffffff',
@@ -3041,7 +3041,7 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.text(titulo, margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            const imgData = canvas.toDataURL('image/jpeg', 0.85);
             const imgWidth = pageWidth - (margin * 2);
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             const startY = isWidescreen ? 20 : 25;
@@ -3232,7 +3232,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Capturar tabla
             const canvasTabla = await html2canvas(contenedorAsignacion, {
-              scale: 2,
+              scale: 1.2,
               useCORS: true,
               backgroundColor: '#ffffff'
             });
@@ -3249,7 +3249,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             // Posicionar tabla
             const startY = isWidescreen ? 20 : 25;
-            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 0.95);
+            const imgDataTabla = canvasTabla.toDataURL('image/jpeg', 0.85);
             const tablaWidth = pageWidth - (margin * 2);
             const tablaHeight = (canvasTabla.height * tablaWidth) / canvasTabla.width;
             pdf.addImage(imgDataTabla, 'JPEG', margin, startY, tablaWidth, tablaHeight);
@@ -3325,7 +3325,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
               // Centrar verticalmente con el padding
-              pdf.addImage(canvasAAGrouped.toDataURL('image/png'), 'PNG', margin, chartY + 3 + verticalPadding, chartWidth * scaleFactor, reducedHeight);
+              pdf.addImage(canvasAAGrouped.toDataURL('image/jpeg', 0.85), 'JPEG', margin, chartY + 3 + verticalPadding, chartWidth * scaleFactor, reducedHeight);
             }
 
             // Gráfico derecho: Distribución por Moneda - CUADRADO = CIRCULAR
@@ -3340,7 +3340,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DISTRIBUCIÓN POR MONEDA (%)', donutX, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(donutX, chartY + 1.5, donutX + chartWidth, chartY + 1.5);
-              pdf.addImage(canvasAADonut.toDataURL('image/png'), 'PNG', donutX + donutOffsetX, chartY + 3 + verticalPadding, donutSize, donutSize);
+              pdf.addImage(canvasAADonut.toDataURL('image/jpeg', 0.85), 'JPEG', donutX + donutOffsetX, chartY + 3 + verticalPadding, donutSize, donutSize);
             }
 
             // Restaurar fuentes originales
@@ -3520,8 +3520,8 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY + 2, margin + chartWidth, chartY + 2);
 
-              const imgData1 = canvasAA1.toDataURL('image/png');
-              pdf.addImage(imgData1, 'PNG', margin, chartY + 5, imgWidth, imgHeight);
+              const imgData1 = canvasAA1.toDataURL('image/jpeg', 0.85);
+              pdf.addImage(imgData1, 'JPEG', margin, chartY + 5, imgWidth, imgHeight);
             }
 
             // Gráfico Maturity Wall (derecha)
@@ -3533,8 +3533,8 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX, chartY + 2, rightX + chartWidth, chartY + 2);
 
-              const imgData2 = canvasMaturity.toDataURL('image/png');
-              pdf.addImage(imgData2, 'PNG', rightX, chartY + 5, imgWidth, imgHeight);
+              const imgData2 = canvasMaturity.toDataURL('image/jpeg', 0.85);
+              pdf.addImage(imgData2, 'JPEG', rightX, chartY + 5, imgWidth, imgHeight);
             }
           }
           
@@ -3639,7 +3639,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', margin, chartY_RV1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RV1 + 2, margin + chartWidth_RV, chartY_RV1 + 2);
-              pdf.addImage(canvasSectorRV.toDataURL('image/png'), 'PNG', margin, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
+              pdf.addImage(canvasSectorRV.toDataURL('image/jpeg', 0.85), 'JPEG', margin, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
             }
 
             if (canvasTop10RV && canvasTop10RV.width > 0) {
@@ -3649,7 +3649,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('TOP 10 HOLDINGS (%)', rightX_RV, chartY_RV1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RV, chartY_RV1 + 2, rightX_RV + chartWidth_RV, chartY_RV1 + 2);
-              pdf.addImage(canvasTop10RV.toDataURL('image/png'), 'PNG', rightX_RV, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
+              pdf.addImage(canvasTop10RV.toDataURL('image/jpeg', 0.85), 'JPEG', rightX_RV, chartY_RV1 + 5, imgWidth_RV, imgHeight_RV);
             }
           }
 
@@ -3681,7 +3681,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR REGIÓN (%)', margin, chartY_RV2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RV2 + 2, margin + chartWidth_RV2, chartY_RV2 + 2);
-              pdf.addImage(canvasRegionRV.toDataURL('image/png'), 'PNG', margin, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
+              pdf.addImage(canvasRegionRV.toDataURL('image/jpeg', 0.85), 'JPEG', margin, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
             }
 
             if (canvasVehiculoRV && canvasVehiculoRV.width > 0) {
@@ -3691,7 +3691,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR VEHÍCULO (%)', rightX_RV2, chartY_RV2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RV2, chartY_RV2 + 2, rightX_RV2 + chartWidth_RV2, chartY_RV2 + 2);
-              pdf.addImage(canvasVehiculoRV.toDataURL('image/png'), 'PNG', rightX_RV2, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
+              pdf.addImage(canvasVehiculoRV.toDataURL('image/jpeg', 0.85), 'JPEG', rightX_RV2, chartY_RV2 + 5, imgWidth_RV2, imgHeight_RV2);
             }
           }
 
@@ -3858,7 +3858,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR RATING (%)', margin, chartY_RF1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF1 + 2, margin + chartWidth_RF, chartY_RF1 + 2);
-              pdf.addImage(canvasRatingRF.toDataURL('image/png'), 'PNG', margin, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
+              pdf.addImage(canvasRatingRF.toDataURL('image/jpeg', 0.85), 'JPEG', margin, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
             }
 
             if (canvasSectorRF && canvasSectorRF.width > 0) {
@@ -3868,7 +3868,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', rightX_RF, chartY_RF1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RF, chartY_RF1 + 2, rightX_RF + chartWidth_RF, chartY_RF1 + 2);
-              pdf.addImage(canvasSectorRF.toDataURL('image/png'), 'PNG', rightX_RF, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
+              pdf.addImage(canvasSectorRF.toDataURL('image/jpeg', 0.85), 'JPEG', rightX_RF, chartY_RF1 + 5, imgWidth_RF, imgHeight_RF);
             }
           }
 
@@ -3900,7 +3900,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasScatterRF.toDataURL('image/png'), 'PNG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
+              pdf.addImage(canvasScatterRF.toDataURL('image/jpeg', 0.85), 'JPEG', margin, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
             }
 
             if (canvasSubclasRF && canvasSubclasRF.width > 0) {
@@ -3910,7 +3910,7 @@ async function descargarReportePDF(formato = 'A4') {
               pdf.text('DESCOMPOSICIÓN POR SUBCLASIFICACIÓN (%)', rightX_RF2, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RF2, chartY_RF2 + 2, rightX_RF2 + chartWidth_RF2, chartY_RF2 + 2);
-              pdf.addImage(canvasSubclasRF.toDataURL('image/png'), 'PNG', rightX_RF2, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
+              pdf.addImage(canvasSubclasRF.toDataURL('image/jpeg', 0.85), 'JPEG', rightX_RF2, chartY_RF2 + 5, imgWidth_RF2, imgHeight_RF2);
             }
           }
 
