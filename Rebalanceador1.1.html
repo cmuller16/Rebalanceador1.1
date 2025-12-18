@@ -3943,8 +3943,9 @@ async function descargarReportePDF(formato = 'A4') {
             const chartWidth_RF2 = (pageWidth - margin * 3) / 2;
 
             // Scatter plot (izquierdo) - tamaño completo
-            const imgWidth_Scatter = chartWidth_RF2;
+            const scatterRatio = canvasScatterRF.width / canvasScatterRF.height;
             const imgHeight_Scatter = chartWidth_RF2 * 0.90;
+            const imgWidth_Scatter = imgHeight_Scatter * scatterRatio;
 
             // Donut subclasificación (derecho) - escala reducida y cuadrado
             const SCALE_RF2 = 0.7;
