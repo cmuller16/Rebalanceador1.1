@@ -181,7 +181,8 @@
     tbody tr:nth-child(even){ background:rgba(248,249,250,0.3); }
     tbody tr:hover{ background:var(--hover-bg); }
     .left{ text-align:left; } .num{ text-align:right; } .center{ text-align:center; }
-    .row-total{ background:#E2E6EA; font-weight:600; }
+    .row-total{ background:#ffffff; font-weight:600; border-top:2px solid #060E46; border-bottom:2px solid #060E46; }
+    .row-total td{ background:#ffffff; border-top:2px solid #060E46; border-bottom:2px solid #060E46; }
     .row-sub{ background:#E2E6EA; font-weight:700; }
     .row-sub td{ font-weight:700; background:#E2E6EA; }
 
@@ -192,7 +193,7 @@
     .subtab-content{ display:none; } .subtab-content.active{ display:block; }
 
     .chart-wrapper { border:1px solid var(--border-light); border-radius:8px; padding:20px; background:var(--bg-card); min-height:400px; display:flex; flex-direction:column; }
-    .chart-title { font-size:14px; font-weight:600; color:var(--text-primary); margin-bottom:16px; }
+    .chart-title { font-size:14px; font-weight:600; color:#060E46; margin-bottom:16px; }
 
     td.left, .td-nombre { max-width:260px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     /* Excepción: primera columna de tablaAmort no tiene max-width */
@@ -3070,7 +3071,7 @@ async function descargarReportePDF(formato = 'A4') {
             // Título en estilo Lato 26 azul (usando helvetica bold)
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text(titulo, margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3290,7 +3291,7 @@ async function descargarReportePDF(formato = 'A4') {
             // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Resumen Asignación de Activos', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3367,7 +3368,7 @@ async function descargarReportePDF(formato = 'A4') {
             // Gráfico izquierdo: Distribución por Clase de Activo
             if (canvasAAGrouped && canvasAAGrouped.width > 0) {
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DISTRIBUCIÓN POR CLASE DE ACTIVO (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY + 1.5, margin + chartWidth, chartY + 1.5);
@@ -3383,7 +3384,7 @@ async function descargarReportePDF(formato = 'A4') {
               const donutOffsetX = (chartWidth - donutSize) / 2;
 
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DISTRIBUCIÓN POR MONEDA (%)', donutX, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(donutX, chartY + 1.5, donutX + chartWidth, chartY + 1.5);
@@ -3546,7 +3547,7 @@ async function descargarReportePDF(formato = 'A4') {
             // Título
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Descomposición del Portafolio', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3562,7 +3563,7 @@ async function descargarReportePDF(formato = 'A4') {
             // Gráfico AA1 (izquierda)
             if (canvasAA1 && canvasAA1.width > 0) {
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('ASSET ALLOCATION NIVEL 1 (%)', margin, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY + 2, margin + chartWidth, chartY + 2);
@@ -3575,7 +3576,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasMaturity && canvasMaturity.width > 0) {
               const rightX = margin + chartWidth + margin;
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('MATURITY WALL', rightX, chartY);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX, chartY + 2, rightX + chartWidth, chartY + 2);
@@ -3670,7 +3671,7 @@ async function descargarReportePDF(formato = 'A4') {
             // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Descomposición del Portafolio de Renta Variable', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3682,7 +3683,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             if (canvasSectorRV && canvasSectorRV.width > 0) {
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', margin, chartY_RV1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RV1 + 2, margin + chartWidth_RV, chartY_RV1 + 2);
@@ -3692,7 +3693,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasTop10RV && canvasTop10RV.width > 0) {
               const rightX_RV = margin + chartWidth_RV + margin;
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('TOP 10 HOLDINGS (%)', rightX_RV, chartY_RV1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RV, chartY_RV1 + 2, rightX_RV + chartWidth_RV, chartY_RV1 + 2);
@@ -3712,7 +3713,7 @@ async function descargarReportePDF(formato = 'A4') {
             // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Descomposición del Portafolio de Renta Variable Cont.', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3724,7 +3725,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             if (canvasRegionRV && canvasRegionRV.width > 0) {
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR REGIÓN (%)', margin, chartY_RV2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RV2 + 2, margin + chartWidth_RV2, chartY_RV2 + 2);
@@ -3734,7 +3735,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasVehiculoRV && canvasVehiculoRV.width > 0) {
               const rightX_RV2 = margin + chartWidth_RV2 + margin;
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR VEHÍCULO (%)', rightX_RV2, chartY_RV2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RV2, chartY_RV2 + 2, rightX_RV2 + chartWidth_RV2, chartY_RV2 + 2);
@@ -3889,7 +3890,7 @@ async function descargarReportePDF(formato = 'A4') {
             // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Descomposición del Portafolio de Renta Fija', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3901,7 +3902,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             if (canvasRatingRF && canvasRatingRF.width > 0) {
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR RATING (%)', margin, chartY_RF1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF1 + 2, margin + chartWidth_RF, chartY_RF1 + 2);
@@ -3911,7 +3912,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasSectorRF && canvasSectorRF.width > 0) {
               const rightX_RF = margin + chartWidth_RF + margin;
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR SECTOR (%)', rightX_RF, chartY_RF1);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RF, chartY_RF1 + 2, rightX_RF + chartWidth_RF, chartY_RF1 + 2);
@@ -3931,7 +3932,7 @@ async function descargarReportePDF(formato = 'A4') {
             // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', isWidescreen ? 275 : 160, isWidescreen ? 5 : 5, isWidescreen ? 18 : 40, isWidescreen ? 18 : 40);
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(isWidescreen ? 20 : 26);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Descomposición del Portafolio de Renta Fija Cont.', margin, isWidescreen ? 14 : 18);
             pdf.setFont('helvetica', 'normal');
 
@@ -3943,7 +3944,7 @@ async function descargarReportePDF(formato = 'A4') {
 
             if (canvasScatterRF && canvasScatterRF.width > 0) {
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DURACIÓN VS YTW', margin, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(margin, chartY_RF2 + 2, margin + chartWidth_RF2, chartY_RF2 + 2);
@@ -3953,7 +3954,7 @@ async function descargarReportePDF(formato = 'A4') {
             if (canvasSubclasRF && canvasSubclasRF.width > 0) {
               const rightX_RF2 = margin + chartWidth_RF2 + margin;
               pdf.setFontSize(11);
-              pdf.setTextColor(0, 19, 145);
+              pdf.setTextColor(6, 14, 70);
               pdf.text('DESCOMPOSICIÓN POR SUBCLASIFICACIÓN (%)', rightX_RF2, chartY_RF2);
               pdf.setDrawColor(0, 19, 145);
               pdf.line(rightX_RF2, chartY_RF2 + 2, rightX_RF2 + chartWidth_RF2, chartY_RF2 + 2);
@@ -4180,7 +4181,7 @@ async function descargarReportePDF(formato = 'A4') {
           // LOGO REMOVIDO: pdf.addImage(LOGO_AZUL_B64, 'PNG', 275, 5, 18, 18);
           pdf.setFont('helvetica', 'bold');
           pdf.setFontSize(20);
-          pdf.setTextColor(0, 19, 145);
+          pdf.setTextColor(6, 14, 70);
           pdf.text('Disclaimer', margin, 14);
           pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(8);
@@ -4263,7 +4264,7 @@ async function descargarReportePDF(formato = 'A4') {
             // Título
             pdf.setFont('helvetica', 'bold');
             pdf.setFontSize(18);
-            pdf.setTextColor(0, 19, 145);
+            pdf.setTextColor(6, 14, 70);
             pdf.text('Carta Disclaimer - Productos Específicos', margin, 14);
 
             // Fecha
