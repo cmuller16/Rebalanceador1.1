@@ -122,11 +122,6 @@
       font-weight: 600;
     }
 
-    /* Centro de datos pegado abajo */
-    .tab[data-tab="data"] {
-      margin-top: auto; /* Empuja hacia el borde inferior */
-    }
-
     .main-content { overflow-y:auto; padding:32px; background:var(--bg-main); }
     /* Vistas: solo la .active es visible, con padding consistente */
     .view { display:none; padding: 18px; }
@@ -1059,15 +1054,6 @@
               <span>Cronograma de Pagos</span>
             </button>
           </div>
-          
-          <button class="tab" data-tab="data">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <ellipse cx="12" cy="5" rx="9" ry="3"/>
-              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
-              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-            </svg>
-            <span>Centro de Datos</span>
-          </button>
         </div>
       </nav>
     </aside>
@@ -1112,9 +1098,9 @@
               <button title="Cargar CSVs" onclick="cerrarMiniModalCentroData(); openCargarCSVsModal();" style="padding:12px 14px; background:#fff; border:1px solid #e1e4e8; border-radius:6px; cursor:pointer; color:#070E46;">
                 <svg style="width:24px;height:24px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
               </button>
-              <!-- Botón Importar Datos (flecha abajo) -->
+              <!-- Botón Importar Datos (documento con flecha entrando) -->
               <button title="Importar Datos" onclick="cerrarMiniModalCentroData(); document.getElementById('fileImportJSON').click();" style="padding:12px 14px; background:#fff; border:1px solid #e1e4e8; border-radius:6px; cursor:pointer; color:#070E46;">
-                <svg style="width:24px;height:24px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <svg style="width:24px;height:24px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><polyline points="12 12 15 15 12 18"/></svg>
               </button>
             </div>
           </div>
@@ -2285,9 +2271,9 @@
             <button id="btnCargarCSVs" title="Cargar CSVs" style="padding:8px 10px; background:#fff; border:1px solid #e1e4e8; border-radius:6px; cursor:pointer; color:#070E46;">
               <svg style="width:18px;height:18px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
             </button>
-            <!-- Botón Importar Datos (solo ícono, flecha abajo) -->
+            <!-- Botón Importar Datos (documento con flecha entrando) -->
             <button id="btnImportarDatosExt" title="Importar Datos" style="padding:8px 10px; background:#fff; border:1px solid #e1e4e8; border-radius:6px; cursor:pointer; color:#070E46;" onclick="document.getElementById('fileImportJSON').click();">
-              <svg style="width:18px;height:18px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg style="width:18px;height:18px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/><polyline points="12 12 15 15 12 18"/></svg>
             </button>
             <input id="fileImportJSON" type="file" accept=".json,application/json" hidden>
           </div>
