@@ -18780,12 +18780,31 @@ const regionCols = [
       const tablaExistente = document.getElementById('tablaAsignacionExistente');
       const tablaNuevo = document.getElementById('tablaAsignacionNuevo');
 
+      // Pestañas del sidebar que no aplican para cliente nuevo
+      const tabRebalanceo = document.querySelector('.tab[data-tab="hold"]');
+      const tabReporte = document.getElementById('tabReporte');
+      const tabChildren = document.querySelector('.tab-children');
+
       if (esNuevo) {
         // Modo Cliente Nuevo
         if (mascaraExistente) mascaraExistente.style.display = 'none';
         if (mascaraNuevo) mascaraNuevo.style.display = 'block';
         if (tablaExistente) tablaExistente.style.display = 'none';
         if (tablaNuevo) tablaNuevo.style.display = 'block';
+
+        // Ocultar pestañas que no aplican
+        if (tabRebalanceo) tabRebalanceo.style.display = 'none';
+        if (tabReporte) tabReporte.style.display = 'none';
+        if (tabChildren) tabChildren.style.display = 'none';
+
+        // Forzar vista al Dashboard si estamos en otra pestaña
+        const currentActive = document.querySelector('.view.active');
+        if (currentActive && currentActive.id !== 'view-conf') {
+          document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+          document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+          document.getElementById('view-conf')?.classList.add('active');
+          document.querySelector('.tab[data-tab="conf"]')?.classList.add('active');
+        }
 
         // Poblar selector de perfiles
         populatePerfilNuevoSelector();
@@ -18805,6 +18824,11 @@ const regionCols = [
         if (mascaraNuevo) mascaraNuevo.style.display = 'none';
         if (tablaExistente) tablaExistente.style.display = 'block';
         if (tablaNuevo) tablaNuevo.style.display = 'none';
+
+        // Mostrar pestañas nuevamente
+        if (tabRebalanceo) tabRebalanceo.style.display = '';
+        if (tabReporte) tabReporte.style.display = '';
+        if (tabChildren) tabChildren.style.display = '';
       }
     }
 
