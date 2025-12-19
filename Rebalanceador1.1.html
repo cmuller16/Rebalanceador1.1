@@ -17191,6 +17191,7 @@ const regionCols = [
     // ===== Portafolios Modelo (perfil -> pesos por clase) =====
     let MODELOS = {};   // { Perfil: { 'Liquidez':%, 'Renta Fija CP':%, 'Renta Fija MP':%, 'Renta Variable':%, 'Alternativo':% } }
     let MODELOS_PM = {};  // { Perfil: { Clase: { PM: porcentaje absoluto (del total del perfil) } } }
+    let MODELOS_RAW = []; // Filas raw del CSV para Auto-Asignar (con ISIN, CodSubproducto, % por perfil)
     const CLASES_BAL = ["Liquidez","Renta Fija CP","Renta Fija MP","Renta Variable","Alternativo"];
 
     function _pct(x){
@@ -17316,11 +17317,14 @@ const regionCols = [
 
         // NUNCA inferir la clase desde el PM, SIEMPRE usar la del Excel
         return { 
-          ...r, 
+          ...r,
           PM: pm,
           CLASE_TOP: claseTop  // Esta es la clase REAL del Excel
         };
       });
+
+      // Guardar filas raw para Auto-Asignar
+      MODELOS_RAW = enriched;
 
       // Detectores de formato
       const keysSet = new Set(Object.keys(enriched[0]||{}));
@@ -19004,7 +19008,7 @@ const regionCols = [
       }
     }
 
-    // Auto-asignar según el modelo seleccionado (solo USD)
+    // Auto-asignar según el modelo seleccionado - crea portafolio desde CSV
     function autoAsignarSegunModelo() {
       const perfil = document.getElementById('perfilNuevo')?.value;
       if (!perfil) {
@@ -19012,9 +19016,8 @@ const regionCols = [
         return;
       }
 
-      const modelo = MODELOS[perfil];
-      if (!modelo) {
-        alert('No se encontró el modelo para el perfil seleccionado. Asegúrate de cargar el CSV de Portafolio Modelo.');
+      if (!MODELOS_RAW || !MODELOS_RAW.length) {
+        alert('No se encontró el CSV de Portafolio Modelo. Por favor cárgalo primero en Centro de Datos.');
         return;
       }
 
@@ -19026,7 +19029,17 @@ const regionCols = [
         return;
       }
 
-      // Guardar datos en PROPUESTA_NUEVA
+      // Mapear nombre de perfil a columna del CSV (normalizada)
+      const perfilToCol = {
+        'Extra Conservador': 'extraconservador',
+        'Altamente Conservador': 'altamenteconservador',
+        'Conservador': 'conservador',
+        'Moderado': 'moderado',
+        'Agresivo': 'agresivo'
+      };
+      const colPerfil = perfilToCol[perfil] || perfil.toLowerCase().replace(/\s+/g, '');
+
+      // Guardar datos básicos en PROPUESTA_NUEVA
       PROPUESTA_NUEVA.perfil = perfil;
       PROPUESTA_NUEVA.montoUSD = montoUSD;
       PROPUESTA_NUEVA.montoPEN = parseFloat((document.getElementById('montoNuevoPEN')?.value || '0').replace(/,/g, '')) || 0;
@@ -19037,21 +19050,141 @@ const regionCols = [
       PROPUESTA_NUEVA.asesor = document.getElementById('asesorNuevo')?.value || '';
       PROPUESTA_NUEVA.banquero = document.getElementById('banqueroNuevo')?.value || '';
 
-      // Calcular montos por clase según modelo (solo USD - PEN es manual)
-      const CLASES = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
+      // Crear lista de activos desde MODELOS_RAW
+      PROPUESTA_NUEVA.activos = [];
       PROPUESTA_NUEVA.montosPorClase = {};
 
-      CLASES.forEach(clase => {
-        // El modelo tiene valores decimales (ej: 0.05 = 5%)
-        const pctModelo = modelo[clase] || 0;
-        PROPUESTA_NUEVA.montosPorClase[clase] = montoUSD * pctModelo;
+      const CLASES = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
+      CLASES.forEach(c => PROPUESTA_NUEVA.montosPorClase[c] = 0);
+
+      MODELOS_RAW.forEach(row => {
+        // Obtener el % para este perfil (en decimal, ej: 0.05 = 5%)
+        const pctRaw = row[colPerfil];
+        let pct = 0;
+        if (pctRaw !== undefined && pctRaw !== null && pctRaw !== '-' && pctRaw !== '') {
+          pct = parseFloat(String(pctRaw).replace(',', '.')) || 0;
+        }
+
+        if (pct <= 0) return; // Ignorar activos sin asignación para este perfil
+
+        // Calcular monto a invertir
+        const monto = montoUSD * pct;
+
+        // Identificar el activo
+        const producto = (row['producto'] || '').toString().trim().toUpperCase();
+        const isFondo = producto.includes('FONDO') || producto.includes('MUTUO');
+        const isin = (row['isin'] || '').toString().trim();
+        const codSubproducto = (row['codsubproducto'] || '').toString().trim();
+        const subproducto = (row['subproducto'] || '').toString().trim();
+        const instrumento = (row['instrumento'] || subproducto || '').toString().trim();
+        const claseActivo = row['CLASE_TOP'] || (row['claseactivo'] || '').toString().trim();
+        const subclasificacion = (row['subclasificacion'] || row['PM'] || '').toString().trim();
+
+        // Crear objeto de activo
+        const activo = {
+          tipo: isFondo ? 'FONDO' : 'CUENTA_VALOR',
+          producto: producto,
+          isin: isin,
+          codSubproducto: codSubproducto,
+          nombre: instrumento,
+          subproducto: subproducto,
+          claseActivo: claseActivo,
+          subclasificacion: subclasificacion,
+          pctModelo: pct,
+          montoUSD: monto,
+          moneda: 'USD'
+        };
+
+        PROPUESTA_NUEVA.activos.push(activo);
+
+        // Sumar al total por clase
+        const claseCanon = CLASES.find(c => c.toUpperCase() === claseActivo.toUpperCase()) || claseActivo;
+        if (PROPUESTA_NUEVA.montosPorClase[claseCanon] !== undefined) {
+          PROPUESTA_NUEVA.montosPorClase[claseCanon] += monto;
+        }
       });
 
-      // Renderizar la tabla actualizada
+      // Renderizar la tabla de asignación por clase
       renderAsignacionClienteNuevo();
 
-      // Mensaje de confirmación
+      // Renderizar la tabla de holdings con los activos
+      renderHoldingsClienteNuevo();
+
       console.log('Auto-asignación completada:', PROPUESTA_NUEVA);
+    }
+
+    // Renderizar tabla de holdings para Cliente Nuevo
+    function renderHoldingsClienteNuevo() {
+      const activos = PROPUESTA_NUEVA.activos || [];
+      const tb = document.getElementById('holdBodyUSD');
+      if (!tb) return;
+
+      tb.innerHTML = '';
+
+      if (activos.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td class="center muted" colspan="10">Sin activos asignados</td>';
+        tb.appendChild(tr);
+        return;
+      }
+
+      // Agrupar por clase de activo
+      const ORDER = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
+      const byClass = {};
+      ORDER.forEach(c => byClass[c] = []);
+
+      activos.forEach(a => {
+        const clase = ORDER.find(c => c.toUpperCase() === (a.claseActivo || '').toUpperCase()) || 'Alternativo';
+        if (!byClass[clase]) byClass[clase] = [];
+        byClass[clase].push(a);
+      });
+
+      // Calcular total para pesos
+      const totalUSD = activos.reduce((sum, a) => sum + (a.montoUSD || 0), 0);
+
+      ORDER.forEach(clase => {
+        const rows = byClass[clase] || [];
+        if (rows.length === 0) return;
+
+        // Fila de encabezado de clase
+        const trHead = document.createElement('tr');
+        trHead.className = 'group-header';
+        trHead.innerHTML = `<td colspan="10" class="left" style="background:#e8eaf6;font-weight:600;padding:6px 10px;">${clase}</td>`;
+        tb.appendChild(trHead);
+
+        // Filas de activos
+        rows.forEach(a => {
+          const peso = totalUSD > 0 ? ((a.montoUSD / totalUSD) * 100).toFixed(1) : '0.0';
+          const pctModelo = ((a.pctModelo || 0) * 100).toFixed(1);
+          const monto = (a.montoUSD || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="left">${a.subclasificacion || '-'}</td>
+            <td class="left">${a.nombre || a.subproducto || '-'}</td>
+            <td class="center">${a.tipo === 'FONDO' ? a.codSubproducto : a.isin || '-'}</td>
+            <td class="num">${pctModelo}%</td>
+            <td class="num"><strong>${peso}%</strong></td>
+            <td class="num td-rebal"><strong>$${monto}</strong></td>
+            <td class="center" style="width:3px;"></td>
+            <td class="center" style="width:3px;"></td>
+          `;
+          tb.appendChild(tr);
+        });
+      });
+
+      // Fila de total
+      const trTotal = document.createElement('tr');
+      trTotal.className = 'row-total';
+      trTotal.style.cssText = 'font-weight:700;background:#f5f5f5;';
+      const totalStr = totalUSD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      trTotal.innerHTML = `
+        <td class="left" colspan="4">TOTAL</td>
+        <td class="num">100.0%</td>
+        <td class="num td-rebal"><strong>$${totalStr}</strong></td>
+        <td colspan="2"></td>
+      `;
+      tb.appendChild(trTotal);
     }
 
     // Limpiar la propuesta nueva
@@ -19069,18 +19202,23 @@ const regionCols = [
         banquero: '',
         holdings: { USD: [], PEN: [] },
         asignacion: {},
-        montosPorClase: {}
+        montosPorClase: {},
+        activos: []
       };
 
       // Limpiar campos del formulario
       const campos = ['perfilNuevo', 'montoNuevoUSD', 'montoNuevoPEN', 'objetivoNuevo',
-                      'liquidezMinimaNuevo', 'bancaNuevo', 'hubNuevo', 'asesorNuevo', 'banqueroNuevo'];
+                      'liquidezMinimaNuevo', 'bancaNuevo', 'hubNuevo', 'asesorNuevo', 'banqueroNuevo',
+                      'horizonteNuevo', 'flujoAnualNuevo', 'frecuenciaRebalanceoNuevo',
+                      'rentabilidadObjetivoNuevo', 'jurisdiccionFiscalNuevo'];
 
       campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           if (el.tagName === 'SELECT') {
             el.selectedIndex = 0;
+          } else if (id === 'jurisdiccionFiscalNuevo') {
+            el.value = 'Perú'; // Valor por defecto
           } else {
             el.value = '';
           }
@@ -19090,8 +19228,9 @@ const regionCols = [
       // Resetear hub
       actualizarHubsPorBanca();
 
-      // Re-renderizar tabla
+      // Re-renderizar tablas
       renderAsignacionClienteNuevo();
+      renderHoldingsClienteNuevo();
     }
 
     // Event listeners para campos numéricos de Cliente Nuevo
