@@ -18826,6 +18826,9 @@ const regionCols = [
       // Encabezados de tablas Holdings para cambiar "Rebalanceo" a "Compra"
       const thRebalHeaders = document.querySelectorAll('.th-rebal');
 
+      // Encabezados adicionales para Cliente Nuevo
+      const thMontoFinal = document.querySelectorAll('#theadUSD th, #theadPEN th, #theadTotal th');
+
       if (esNuevo) {
         // Modo Cliente Nuevo - agregar clase al body para CSS
         document.body.classList.add('modo-cliente-nuevo');
@@ -18840,6 +18843,18 @@ const regionCols = [
 
         // Cambiar encabezado de columna "Rebalanceo" a "Compra"
         thRebalHeaders.forEach(th => { th.innerHTML = 'Compra'; });
+
+        // Cambiar headers para Cliente Nuevo: "Monto Final" → "Monto Sugerido", "Peso Final" → "% Sugerido"
+        thMontoFinal.forEach(th => {
+          const txt = th.innerHTML;
+          if (txt.includes('Monto') && txt.includes('Final')) {
+            th.innerHTML = 'Monto<br>Sugerido';
+            th.dataset.originalText = txt;
+          } else if (txt.includes('Peso') && txt.includes('Final')) {
+            th.innerHTML = '%<br>Sugerido';
+            th.dataset.originalText = txt;
+          }
+        });
 
         // Ocultar pestañas de Reporte (no aplican para cliente nuevo)
         if (tabReporte) tabReporte.style.display = 'none';
@@ -18871,6 +18886,14 @@ const regionCols = [
 
         // Restaurar encabezado de columna "Rebalanceo"
         thRebalHeaders.forEach(th => { th.innerHTML = 'Rebalanceo'; });
+
+        // Restaurar headers originales: "Monto Sugerido" → "Monto Final", "% Sugerido" → "Peso Final"
+        thMontoFinal.forEach(th => {
+          if (th.dataset.originalText) {
+            th.innerHTML = th.dataset.originalText;
+            delete th.dataset.originalText;
+          }
+        });
 
         // Mostrar pestañas de Reporte nuevamente
         if (tabReporte) tabReporte.style.display = '';
@@ -19162,11 +19185,15 @@ const regionCols = [
         trSub.innerHTML = `
           <td class="left" style="font-weight:600;">${clase}</td>
           <td></td><td></td>
+          <td class="col-rebal"></td>
+          <td class="col-rebal"></td>
+          <td class="col-rebal"></td>
+          <td class="col-rebal"></td>
           <td class="num center">$${subSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</td>
           <td class="num center">${subPesoSug}%</td>
-          <td class="num center">${subPesoFinal}%</td>
-          <td class="num td-rebal"><strong>$${subCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
-          <td colspan="5"></td>
+          <td class="num center"><strong>$${subCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
+          <td></td>
+          <td></td>
         `;
         tb.appendChild(trSub);
 
@@ -19204,17 +19231,21 @@ const regionCols = [
             <td class="left td-nombre">${nombre}</td>
             <td>${vehiculo}</td>
             <td>${subclasificacion}</td>
+            <td class="col-rebal"></td>
+            <td class="col-rebal"></td>
+            <td class="col-rebal"></td>
+            <td class="col-rebal"></td>
             <td class="num center">$${montoSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</td>
             <td class="num center">${pctSugerido}%</td>
-            <td class="num center">${pesoFinal}%</td>
-            <td class="num td-rebal">
+            <td class="num center">
               <input type="text" class="compra-input" data-idx="${a._idx}"
                      inputmode="numeric" autocomplete="off"
                      style="width:100px;text-align:right;padding:4px 6px;"
-                     value="${montoCompra.toLocaleString('en-US', {maximumFractionDigits:0})}"
-                     placeholder="0">
+                     value="$${montoCompra.toLocaleString('en-US', {maximumFractionDigits:0})}"
+                     placeholder="$0">
             </td>
-            <td colspan="5"></td>
+            <td></td>
+            <td></td>
           `;
           tb.appendChild(tr);
         });
@@ -19226,26 +19257,30 @@ const regionCols = [
       trTotal.innerHTML = `
         <td class="left"><strong>Total USD</strong></td>
         <td></td><td></td>
+        <td class="col-rebal"></td>
+        <td class="col-rebal"></td>
+        <td class="col-rebal"></td>
+        <td class="col-rebal"></td>
         <td class="num center"><strong>$${totalSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
         <td class="num center"><strong>100.0%</strong></td>
-        <td class="num center"><strong>100.0%</strong></td>
-        <td class="num td-rebal"><strong>$${totalCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
-        <td colspan="5"></td>
+        <td class="num center"><strong>$${totalCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
+        <td></td>
+        <td></td>
       `;
       tb.appendChild(trTotal);
 
       // Event listeners para inputs de compra
       tb.querySelectorAll('.compra-input').forEach(input => {
         input.addEventListener('input', (e) => {
-          const raw = e.target.value.replace(/,/g, '');
+          const raw = e.target.value.replace(/[$,]/g, '');
           const num = Number(raw);
           if (raw && !isNaN(num)) {
-            e.target.value = num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+            e.target.value = '$' + num.toLocaleString('en-US', { maximumFractionDigits: 0 });
           }
         });
         input.addEventListener('blur', (e) => {
           const idx = parseInt(e.target.dataset.idx);
-          const raw = e.target.value.replace(/,/g, '');
+          const raw = e.target.value.replace(/[$,]/g, '');
           const num = parseFloat(raw) || 0;
           if (PROPUESTA_NUEVA.activos[idx]) {
             PROPUESTA_NUEVA.activos[idx].montoCompra = num;
