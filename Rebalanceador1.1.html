@@ -18958,9 +18958,10 @@ const regionCols = [
         const montoPropuesto = PROPUESTA_NUEVA.montosPorClase?.[clase] ?? montoModelo;
         const delta = montoPropuesto - montoModelo;
 
-        // Min y Max como montos (0% y 100% del total por ahora)
-        const montoMin = 0;
-        const montoMax = montoTotal;
+        // Min y Max usando BANDA del 10% (misma regla que Asset Allocation)
+        const BANDA = 0.10;
+        const montoMin = Math.max(0, montoModelo - montoTotal * BANDA);
+        const montoMax = Math.min(montoTotal, montoModelo + montoTotal * BANDA);
 
         totMin += montoMin;
         totSug += montoModelo;
@@ -18992,9 +18993,9 @@ const regionCols = [
       const elPropTot = document.getElementById('asigNuevoPropTot');
       const elDelTot = document.getElementById('asigNuevoDelTot');
 
-      if (elMinTot) elMinTot.textContent = `$${fmtMonto(totMin)}`;
+      if (elMinTot) elMinTot.textContent = ''; // Min total vacío (como Asset Allocation)
       if (elSugTot) elSugTot.textContent = `$${fmtMonto(totSug)}`;
-      if (elMaxTot) elMaxTot.textContent = `$${fmtMonto(totMax)}`;
+      if (elMaxTot) elMaxTot.textContent = ''; // Max total vacío (como Asset Allocation)
       if (elPropTot) elPropTot.innerHTML = `<strong>$${fmtMonto(totProp)}</strong>`;
       if (elDelTot) {
         elDelTot.textContent = totDelta > 0.5 ? `+$${fmtMonto(totDelta)}` : totDelta < -0.5 ? `-$${fmtMonto(Math.abs(totDelta))}` : '—';
@@ -19116,13 +19117,34 @@ const regionCols = [
             renderAsignacionClienteNuevo();
           }
         });
+
+        // También actualizar al perder foco (blur)
+        el.addEventListener('blur', () => {
+          renderAsignacionClienteNuevo();
+        });
       });
 
-      // Listener para cambio de perfil
+      // Listener para cambio de perfil - auto-actualiza la tabla
       const perfilSel = document.getElementById('perfilNuevo');
       if (perfilSel) {
-        perfilSel.addEventListener('change', renderAsignacionClienteNuevo);
+        perfilSel.addEventListener('change', () => {
+          // Limpiar propuesta previa para que use los valores del modelo
+          PROPUESTA_NUEVA.montosPorClase = {};
+          renderAsignacionClienteNuevo();
+        });
       }
+
+      // También actualizar cuando cambia el monto USD o PEN (campos principales)
+      ['montoNuevoUSD', 'montoNuevoPEN'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.addEventListener('change', () => {
+            // Limpiar propuesta previa para recalcular con nuevo monto
+            PROPUESTA_NUEVA.montosPorClase = {};
+            renderAsignacionClienteNuevo();
+          });
+        }
+      });
     });
 
     // =========================
