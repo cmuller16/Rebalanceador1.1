@@ -1211,6 +1211,33 @@
                 <label>Banquero</label>
                 <input id="banqueroNuevo" type="text" placeholder="Nombre del banquero">
               </div>
+              <!-- IPS Fields -->
+              <div>
+                <label>Horizonte de Inversión (años)</label>
+                <input id="horizonteNuevo" type="number" min="1" max="50" placeholder="Ej: 10" style="text-align:right;">
+              </div>
+              <div>
+                <label>Flujo Anual Requerido (USD)</label>
+                <input id="flujoAnualNuevo" type="text" inputmode="numeric" placeholder="0" style="text-align:right;">
+              </div>
+              <div>
+                <label>Frecuencia de Rebalanceo</label>
+                <select id="frecuenciaRebalanceoNuevo">
+                  <option value="Anual">Anual</option>
+                  <option value="Semestral">Semestral</option>
+                  <option value="Cuatrimestral">Cuatrimestral</option>
+                  <option value="Trimestral">Trimestral</option>
+                </select>
+              </div>
+              <div>
+                <label>Rentabilidad Objetivo</label>
+                <input id="rentabilidadObjetivoNuevo" type="text" placeholder="Ej: 5 a 7%">
+              </div>
+              <div>
+                <label>Jurisdicción Fiscal</label>
+                <input id="jurisdiccionFiscalNuevo" type="text" value="Perú">
+              </div>
+              <div></div> <!-- Spacer para alineación -->
               <div style="display:flex;align-items:flex-end;">
                 <button id="btnAutoAsignar" class="btn-action btn-fill" style="width:100%;" onclick="autoAsignarSegunModelo()">
                   Auto-Asignar Según Modelo
@@ -19067,7 +19094,7 @@ const regionCols = [
 
     // Event listeners para campos numéricos de Cliente Nuevo
     document.addEventListener('DOMContentLoaded', () => {
-      const camposNumericos = ['montoNuevoUSD', 'montoNuevoPEN', 'liquidezMinimaNuevo'];
+      const camposNumericos = ['montoNuevoUSD', 'montoNuevoPEN', 'liquidezMinimaNuevo', 'flujoAnualNuevo'];
 
       camposNumericos.forEach(id => {
         const el = document.getElementById(id);
