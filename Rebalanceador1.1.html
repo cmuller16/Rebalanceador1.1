@@ -1012,7 +1012,7 @@
               <polyline points="7 23 3 19 7 15"/>
               <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
             </svg>
-            <span>Rebalanceo de Portafolio</span>
+            <span id="lblSeccionHoldings">Rebalanceo de Portafolio</span>
           </button>
           
           <!-- Reporte con subpestañas -->
@@ -1084,44 +1084,131 @@
       <!-- ============ Dashboard ============ -->
       <section id="view-conf" class="view active">
 
-        <div class="client-bar">
-          <h2>DATOS DEL CLIENTE</h2>
-          <div>
+        <!-- Toggle Cliente Existente / Nuevo -->
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:12px;gap:12px;">
+          <span id="labelTipoCliente" style="font-size:13px;color:var(--text-secondary);">Cliente Existente</span>
+          <label class="switch" style="margin:0;">
+            <input type="checkbox" id="toggleNuevoCliente" onchange="toggleModoCliente(this.checked)">
+            <span class="slider"></span>
+          </label>
+          <span style="font-size:13px;color:var(--text-secondary);">Nuevo Cliente</span>
+        </div>
+
+        <!-- ===== MÁSCARA CLIENTE EXISTENTE ===== -->
+        <div id="mascaraClienteExistente">
+          <div class="client-bar">
+            <h2>DATOS DEL CLIENTE</h2>
             <div>
-              <label for="codigo">Código</label>
-              <input id="codigo" type="text" maxlength="8" placeholder="00001234" list="codigosCliente" required />
-              <datalist id="codigosCliente"></datalist>
-            </div>
-            <div>
-              <label>Perfil</label>
-              <select id="perfil">
-                <option value="">-- Seleccionar --</option>
-              </select>
-            </div>
-            <div>
-              <label>Banca</label>
-              <input id="banca" type="text" readonly />
-            </div>
-            <div>
-              <label>Banquero</label>
-              <input id="banquero" type="text" readonly />
-            </div>
-            <div>
-              <label>Asesor</label>
-              <input id="asesor" type="text" readonly />
-            </div>
-            <div>
-              <label>Fecha de datos</label>
-              <input id="fechaDatosInput" type="text" readonly />
-            </div>
-            <div>
-              <label>Tipo de Cambio</label>
-              <input id="tipoCambio" type="text" readonly />
+              <div>
+                <label for="codigo">Código</label>
+                <input id="codigo" type="text" maxlength="8" placeholder="00001234" list="codigosCliente" required />
+                <datalist id="codigosCliente"></datalist>
+              </div>
+              <div>
+                <label>Perfil</label>
+                <select id="perfil">
+                  <option value="">-- Seleccionar --</option>
+                </select>
+              </div>
+              <div>
+                <label>Banca</label>
+                <input id="banca" type="text" readonly />
+              </div>
+              <div>
+                <label>Banquero</label>
+                <input id="banquero" type="text" readonly />
+              </div>
+              <div>
+                <label>Asesor</label>
+                <input id="asesor" type="text" readonly />
+              </div>
+              <div>
+                <label>Fecha de datos</label>
+                <input id="fechaDatosInput" type="text" readonly />
+              </div>
+              <div>
+                <label>Tipo de Cambio</label>
+                <input id="tipoCambio" type="text" readonly />
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card" style="min-height:auto;margin-bottom:10px;">
+        <!-- ===== MÁSCARA CLIENTE NUEVO ===== -->
+        <div id="mascaraClienteNuevo" style="display:none;">
+          <div class="client-bar">
+            <h2>DATOS DEL CLIENTE NUEVO</h2>
+            <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:12px;">
+              <div>
+                <label>Perfil de Riesgo</label>
+                <select id="perfilNuevo">
+                  <option value="">-- Seleccionar --</option>
+                </select>
+              </div>
+              <div>
+                <label>Monto Inversión USD</label>
+                <input id="montoNuevoUSD" type="text" inputmode="numeric" placeholder="0" style="text-align:right;">
+              </div>
+              <div>
+                <label>Monto Inversión PEN</label>
+                <input id="montoNuevoPEN" type="text" inputmode="numeric" placeholder="0" style="text-align:right;">
+              </div>
+              <div>
+                <label>Objetivo de Inversión</label>
+                <select id="objetivoNuevo">
+                  <option value="">-- Seleccionar --</option>
+                  <option value="Preservar Capital">Preservar Capital</option>
+                  <option value="Generar Ingresos">Generar Ingresos</option>
+                  <option value="Flexibilidad y Liquidez">Flexibilidad y Liquidez</option>
+                  <option value="Crecimiento de Capital">Crecimiento de Capital</option>
+                </select>
+              </div>
+              <div>
+                <label>Liquidez Mínima (USD)</label>
+                <input id="liquidezMinimaNuevo" type="text" inputmode="numeric" placeholder="0" style="text-align:right;">
+              </div>
+              <div>
+                <label>Banca</label>
+                <select id="bancaNuevo" onchange="actualizarHubsPorBanca()">
+                  <option value="">-- Seleccionar --</option>
+                  <option value="Super Affluent">Super Affluent</option>
+                  <option value="Alto Patrimonio">Alto Patrimonio</option>
+                </select>
+              </div>
+              <div>
+                <label>Hub</label>
+                <select id="hubNuevo">
+                  <option value="">-- Seleccionar Banca primero --</option>
+                </select>
+              </div>
+              <div>
+                <label>Tipo de Cambio</label>
+                <input id="tipoCambioNuevo" type="text" readonly />
+              </div>
+              <div>
+                <label>Asesor de Inversión</label>
+                <input id="asesorNuevo" type="text" placeholder="Nombre del asesor">
+              </div>
+              <div>
+                <label>Banquero</label>
+                <input id="banqueroNuevo" type="text" placeholder="Nombre del banquero">
+              </div>
+              <div style="display:flex;align-items:flex-end;">
+                <button id="btnAutoAsignar" class="btn-action btn-fill" style="width:100%;" onclick="autoAsignarSegunModelo()">
+                  Auto-Asignar Según Modelo
+                </button>
+              </div>
+              <div style="display:flex;align-items:flex-end;">
+                <button id="btnLimpiarPropuesta" class="btn-action" style="width:100%;border:1px solid var(--border-medium);" onclick="limpiarPropuestaNueva()">
+                  Limpiar Todo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabla para Cliente Existente -->
+        <div id="tablaAsignacionExistente" class="card" style="min-height:auto;margin-bottom:10px;">
           <h2>ASIGNACIÓN POR CLASE DE ACTIVO</h2>
           <div class="table-wrapper">
             <table id="tablaGuiaConsolidada">
@@ -1135,6 +1222,36 @@
                 </tr>
               </thead>
               <tbody id="tablaGuiaBodyConsolidada"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Tabla para Cliente Nuevo (estilo Asset Allocation) -->
+        <div id="tablaAsignacionNuevo" class="card" style="min-height:auto;margin-bottom:10px;display:none;">
+          <h2>ASIGNACIÓN POR CLASE DE ACTIVO</h2>
+          <div class="table-wrapper">
+            <table id="tablaAsignacionNuevoTable">
+              <thead>
+                <tr>
+                  <th class="left">Clase</th>
+                  <th class="num">Mín</th>
+                  <th class="num">P. Modelo</th>
+                  <th class="num">Máx</th>
+                  <th class="num">Propuesto</th>
+                  <th class="num">OW/UW</th>
+                </tr>
+              </thead>
+              <tbody id="tablaAsignacionNuevoBody"></tbody>
+              <tfoot>
+                <tr class="row-total">
+                  <td class="left"><strong>Total</strong></td>
+                  <td class="num" id="asigNuevoMinTot"></td>
+                  <td class="num" id="asigNuevoSugTot"></td>
+                  <td class="num" id="asigNuevoMaxTot"></td>
+                  <td class="num" id="asigNuevoPropTot"></td>
+                  <td class="num" id="asigNuevoDelTot"></td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
@@ -3016,9 +3133,14 @@ async function descargarReportePDF(formato = 'A4') {
         
         // Función para crear carátula BBVA
         function crearCaratula() {
-          const codigo = document.getElementById('codigo')?.value || '';
-          const banquero = document.getElementById('banquero')?.value || '';
-          const asesor = document.getElementById('asesor')?.value || '';
+          // Usar valores según modo Cliente Nuevo o Existente
+          const codigo = ES_CLIENTE_NUEVO ? 'Nuevo' : (document.getElementById('codigo')?.value || '');
+          const banquero = ES_CLIENTE_NUEVO
+            ? (document.getElementById('banqueroNuevo')?.value || '')
+            : (document.getElementById('banquero')?.value || '');
+          const asesor = ES_CLIENTE_NUEVO
+            ? (document.getElementById('asesorNuevo')?.value || '')
+            : (document.getElementById('asesor')?.value || '');
           const fecha = new Date();
           const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
           const fechaStr = `Lima, ${meses[fecha.getMonth()]} ${fecha.getFullYear()}`;
@@ -3033,18 +3155,21 @@ async function descargarReportePDF(formato = 'A4') {
             pdf.addImage(LOGO_BLANCO_B64, 'PNG', 15, 12, 45, 45);
           } catch(e) { console.warn('Error logo:', e); }
           
-          // Título principal - Rebalanceo Portafolio
+          // Título principal - Rebalanceo Portafolio o Propuesta de Inversión
+          const tituloPDF = ES_CLIENTE_NUEVO ? 'Propuesta de Inversión' : 'Rebalanceo Portafolio';
+          const tituloLinea1 = ES_CLIENTE_NUEVO ? 'Propuesta de' : 'Rebalanceo';
+          const tituloLinea2 = ES_CLIENTE_NUEVO ? 'Inversión' : 'Portafolio';
           pdf.setTextColor(255, 255, 255);
           pdf.setFont('times', 'bold');
           if (isWidescreen) {
             // 16:9: una sola línea, más arriba, tamaño ajustado
             pdf.setFontSize(42);
-            pdf.text('Rebalanceo Portafolio', 15, 70);
+            pdf.text(tituloPDF, 15, 70);
           } else {
             // A4: dos líneas (original)
             pdf.setFontSize(54);
-            pdf.text('Rebalanceo', 15, 95);
-            pdf.text('Portafolio', 15, 120);
+            pdf.text(tituloLinea1, 15, 95);
+            pdf.text(tituloLinea2, 15, 120);
           }
           
           // Banquero | Asesor
@@ -3782,6 +3907,23 @@ function formatBanquero(fullName) {
     let fechaMaxData = '';
     let LAST_HOLDINGS = { USD:[], PEN:[] };
     let edits = { USD:new Map(), PEN:new Map() };
+
+    // =========================
+    // CLIENTE NUEVO - Estado global
+    // =========================
+    let ES_CLIENTE_NUEVO = false;
+    let PROPUESTA_NUEVA = {
+      montoUSD: 0,
+      montoPEN: 0,
+      perfil: '',
+      objetivo: '',
+      liquidezMinima: 0,
+      banca: '',
+      hub: '',
+      asesor: '',
+      banquero: '',
+      holdings: { USD: [], PEN: [] }  // instrumentos propuestos
+    };
     let CASH = {
       base: { USD:{ accts:new Map(), total:0 }, PEN:{ accts:new Map(), total:0 } },
       aportes: { USD:0, PEN:0 },
@@ -15222,6 +15364,9 @@ const regionCols = [
 
       MODELOS_PM = {};
 
+      // Guardar filas raw para Auto-Asignar según Modelo
+      window.MODELOS_RAW = (raw || []).map(normalizeRowKeys);
+
       const pmRows = (raw||[]).map(normalizeRowKeys);
 
       if (!pmRows.length) {
@@ -16755,6 +16900,477 @@ const regionCols = [
         renderCashMgmtUI(); renderCashBars(); renderHoldingsTables(LAST_HOLDINGS); renderRentaFijaTables(); renderPortafolioBonos();
       }
     });
+
+    // =========================
+    // CLIENTE NUEVO - Funciones principales
+    // =========================
+
+    // Toggle entre modo Cliente Existente y Cliente Nuevo
+    function toggleModoCliente(esNuevo) {
+      ES_CLIENTE_NUEVO = esNuevo;
+
+      // Cambiar máscaras del Dashboard
+      document.getElementById('mascaraClienteExistente').style.display = esNuevo ? 'none' : 'block';
+      document.getElementById('mascaraClienteNuevo').style.display = esNuevo ? 'block' : 'none';
+
+      // Cambiar tablas de asignación
+      document.getElementById('tablaAsignacionExistente').style.display = esNuevo ? 'none' : 'block';
+      document.getElementById('tablaAsignacionNuevo').style.display = esNuevo ? 'block' : 'none';
+
+      // Cambiar título de la sección Holdings
+      const lblHoldings = document.getElementById('lblSeccionHoldings');
+      if (lblHoldings) {
+        lblHoldings.textContent = esNuevo ? 'Generador de Propuesta' : 'Rebalanceo de Portafolio';
+      }
+
+      // Actualizar cabeceras de tablas de holdings
+      actualizarCabecerasHoldings(esNuevo);
+
+      // Poblar selector de perfil en modo nuevo
+      if (esNuevo) {
+        populatePerfilNuevoSelector();
+        // Usar tipo de cambio del sistema
+        const tcInput = document.getElementById('tipoCambio');
+        const tcNuevo = document.getElementById('tipoCambioNuevo');
+        if (tcInput && tcNuevo) {
+          tcNuevo.value = tcInput.value || '3.70';
+        }
+        // Limpiar propuesta
+        limpiarPropuestaNueva();
+      } else {
+        // Restaurar renderizado normal
+        renderHoldingsTables(LAST_HOLDINGS);
+      }
+
+      // Renderizar tabla de asignación para cliente nuevo
+      if (esNuevo) {
+        renderAsignacionClienteNuevo();
+      }
+    }
+
+    // Poblar selector de perfil para cliente nuevo
+    function populatePerfilNuevoSelector() {
+      const sel = document.getElementById('perfilNuevo');
+      if (!sel) return;
+
+      const keep = sel.value || '';
+      sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+
+      const perfiles = Object.keys(MODELOS).sort((a, b) => {
+        const order = ['Extra Conservador', 'Altamente Conservador', 'Conservador', 'Moderado', 'Agresivo'];
+        return order.indexOf(a) - order.indexOf(b);
+      });
+
+      perfiles.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        sel.appendChild(opt);
+      });
+
+      if (keep && perfiles.includes(keep)) sel.value = keep;
+    }
+
+    // Actualizar opciones de Hub según Banca seleccionada
+    function actualizarHubsPorBanca() {
+      const banca = document.getElementById('bancaNuevo')?.value || '';
+      const hubSel = document.getElementById('hubNuevo');
+      if (!hubSel) return;
+
+      hubSel.innerHTML = '';
+
+      if (!banca) {
+        hubSel.innerHTML = '<option value="">-- Seleccionar Banca primero --</option>';
+        return;
+      }
+
+      let hubs = [];
+      if (banca === 'Super Affluent') {
+        hubs = ['La Floresta', 'Sede Central', 'Global Wealth Sur', 'Global Wealth Norte'];
+      } else if (banca === 'Alto Patrimonio') {
+        hubs = ['Pardo y Aliaga', 'El Polo'];
+      }
+
+      hubSel.innerHTML = '<option value="">-- Seleccionar --</option>';
+      hubs.forEach(h => {
+        const opt = document.createElement('option');
+        opt.value = h;
+        opt.textContent = h;
+        hubSel.appendChild(opt);
+      });
+    }
+
+    // Actualizar cabeceras de tablas según modo
+    function actualizarCabecerasHoldings(esNuevo) {
+      const tablas = ['tablaHoldUSD', 'tablaHoldPEN', 'tablaHoldTotal'];
+
+      tablas.forEach(tablaId => {
+        const tabla = document.getElementById(tablaId);
+        if (!tabla) return;
+
+        const thead = tabla.querySelector('thead tr');
+        if (!thead) return;
+
+        if (esNuevo) {
+          // Columnas para Generador de Propuesta
+          thead.innerHTML = `
+            <th class="left" rowspan="2">Nombre</th>
+            <th rowspan="2">Vehículo</th>
+            <th rowspan="2">Subclasificación</th>
+            <th class="center" rowspan="2">$ Sugerido</th>
+            <th class="center" rowspan="2">% Sug</th>
+            <th class="center" rowspan="2">Peso<br>Final</th>
+            <th class="center" rowspan="2">Compra</th>
+            <th class="center" rowspan="2" style="width:3px;"></th>
+            <th class="center" rowspan="2" style="width:3px;">!</th>
+          `;
+        } else {
+          // Columnas para Rebalanceo (original)
+          thead.innerHTML = `
+            <th class="left" rowspan="2">Nombre</th>
+            <th rowspan="2">Vehículo</th>
+            <th rowspan="2">Subclasificación</th>
+            <th class="center" rowspan="2">Fecha<br>Compra</th>
+            <th class="center" rowspan="2">Valor<br>Mercado</th>
+            <th class="center" rowspan="2">Peso<br>Inicial</th>
+            <th class="center" rowspan="2">Monto<br>Prendado</th>
+            <th class="center" rowspan="2">Monto<br>Final</th>
+            <th class="center" rowspan="2">Peso<br>Final</th>
+            <th class="center" rowspan="2">Rebalanceo</th>
+            <th class="center" rowspan="2" style="width:3px;"></th>
+            <th class="center" rowspan="2" style="width:3px;">!</th>
+          `;
+        }
+      });
+
+      // Actualizar colgroup también
+      tablas.forEach(tablaId => {
+        const tabla = document.getElementById(tablaId);
+        if (!tabla) return;
+
+        const colgroup = tabla.querySelector('colgroup');
+        if (!colgroup) return;
+
+        if (esNuevo) {
+          colgroup.innerHTML = `
+            <col style="width:22%"><col style="width:10%"><col style="width:14%"><col style="width:12%"><col style="width:10%"><col style="width:10%"><col style="width:12%"><col style="width:3%"><col style="width:3%">
+          `;
+        } else {
+          colgroup.innerHTML = `
+            <col style="width:18%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:8%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
+          `;
+        }
+      });
+    }
+
+    // Renderizar tabla de asignación para cliente nuevo
+    function renderAsignacionClienteNuevo() {
+      const perfil = document.getElementById('perfilNuevo')?.value || '';
+      const montoUSD = parseFloat((document.getElementById('montoNuevoUSD')?.value || '0').replace(/,/g, '')) || 0;
+      const montoPEN = parseFloat((document.getElementById('montoNuevoPEN')?.value || '0').replace(/,/g, '')) || 0;
+      const tc = parseFloat(document.getElementById('tipoCambioNuevo')?.value) || 3.70;
+
+      const totalDolarizado = montoUSD + (montoPEN / tc);
+      const modelo = getModelForPerfil(perfil);
+
+      const tb = document.getElementById('tablaAsignacionNuevoBody');
+      if (!tb) return;
+      tb.innerHTML = '';
+
+      let totMin = 0, totSug = 0, totMax = 0, totProp = 0, totDel = 0;
+      const BANDA_10 = 0.10;
+
+      CLASES_BAL.forEach(c => {
+        const pctModelo = toNum(modelo[c]) || 0;
+        const sug = totalDolarizado * (pctModelo / 100);
+        const min = Math.max(0, sug - totalDolarizado * BANDA_10);
+        const max = Math.min(totalDolarizado, sug + totalDolarizado * BANDA_10);
+
+        // Calcular propuesto desde holdings de la propuesta
+        const propUSD = (PROPUESTA_NUEVA.holdings.USD || [])
+          .filter(h => canonClassName(h.clase) === c)
+          .reduce((sum, h) => sum + (toNum(h.monto) || 0), 0);
+        const propPEN = (PROPUESTA_NUEVA.holdings.PEN || [])
+          .filter(h => canonClassName(h.clase) === c)
+          .reduce((sum, h) => sum + ((toNum(h.monto) || 0) / tc), 0);
+        const prop = propUSD + propPEN;
+
+        const del = prop - sug;
+
+        totMin += min; totSug += sug; totMax += max;
+        totProp += prop; totDel += del;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td class="left">${c}</td>
+          <td class="num">${min > 0 ? fmtMoney(min, 'USD') : '-'}</td>
+          <td class="num">${fmtMoney(sug, 'USD')}</td>
+          <td class="num">${max > 0 ? fmtMoney(max, 'USD') : '-'}</td>
+          <td class="num">${fmtMoney(prop, 'USD')}</td>
+          <td class="num" style="color:${del >= 0 ? '#001391' : '#9694FF'}">${fmtMoney(del, 'USD')}</td>
+        `;
+        tb.appendChild(tr);
+      });
+
+      // Totales
+      document.getElementById('asigNuevoMinTot').textContent = '';
+      document.getElementById('asigNuevoSugTot').textContent = fmtMoney(totSug, 'USD');
+      document.getElementById('asigNuevoMaxTot').textContent = '';
+      document.getElementById('asigNuevoPropTot').textContent = fmtMoney(totProp, 'USD');
+      document.getElementById('asigNuevoDelTot').textContent = fmtMoney(totDel, 'USD');
+    }
+
+    // Auto-Asignar según Modelo (solo USD)
+    function autoAsignarSegunModelo() {
+      const perfil = document.getElementById('perfilNuevo')?.value;
+      if (!perfil) {
+        alert('Seleccione un Perfil de Riesgo primero');
+        return;
+      }
+
+      const montoUSD = parseFloat((document.getElementById('montoNuevoUSD')?.value || '0').replace(/,/g, '')) || 0;
+      if (montoUSD <= 0) {
+        alert('Ingrese un Monto de Inversión USD mayor a 0');
+        return;
+      }
+
+      // Obtener datos del portafolio modelo desde el CSV cargado
+      const perfilKey = perfil.toLowerCase().replace(/\s+/g, '');
+      const modeloRows = (window.MODELOS_RAW || []).filter(r => {
+        // Verificar que esta fila tiene % para este perfil
+        const pct = toNum(r[perfilKey] || r[perfil] || r[perfil.toLowerCase()]);
+        return pct > 0;
+      });
+
+      if (!modeloRows.length) {
+        alert('No se encontraron instrumentos en el Portafolio Modelo para el perfil ' + perfil);
+        return;
+      }
+
+      // Limpiar holdings USD actuales
+      PROPUESTA_NUEVA.holdings.USD = [];
+
+      // Asignar instrumentos según el modelo
+      modeloRows.forEach(r => {
+        const pctKey = Object.keys(r).find(k => k.toLowerCase().replace(/\s+/g, '') === perfilKey) || perfil;
+        const pct = toNum(r[pctKey]) || 0;
+        if (pct <= 0) return;
+
+        const monto = Math.round(montoUSD * pct * 10) / 10; // 1 decimal
+
+        const holding = {
+          _rid: 'PROP-USD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9),
+          nombre: r['instrumento'] || r['Instrumento'] || r['subproducto'] || r['Subproducto'] || '',
+          vehiculo: r['producto'] || r['Producto'] || '',
+          subclasificacion: r['subclasificacion'] || r['Subclasificacion'] || r['subclasificación'] || '',
+          clase: r['claseactivo'] || r['clase activo'] || r['Clase Activo'] || '',
+          monto: monto,
+          pctSugerido: pct * 100,
+          codSubproducto: r['codsubproducto'] || r['CodSubproducto'] || '',
+          isin: r['isin'] || r['ISIN'] || ''
+        };
+
+        PROPUESTA_NUEVA.holdings.USD.push(holding);
+      });
+
+      // Guardar datos del formulario
+      PROPUESTA_NUEVA.perfil = perfil;
+      PROPUESTA_NUEVA.montoUSD = montoUSD;
+      PROPUESTA_NUEVA.montoPEN = parseFloat((document.getElementById('montoNuevoPEN')?.value || '0').replace(/,/g, '')) || 0;
+      PROPUESTA_NUEVA.objetivo = document.getElementById('objetivoNuevo')?.value || '';
+      PROPUESTA_NUEVA.liquidezMinima = parseFloat((document.getElementById('liquidezMinimaNuevo')?.value || '0').replace(/,/g, '')) || 0;
+      PROPUESTA_NUEVA.banca = document.getElementById('bancaNuevo')?.value || '';
+      PROPUESTA_NUEVA.hub = document.getElementById('hubNuevo')?.value || '';
+      PROPUESTA_NUEVA.asesor = document.getElementById('asesorNuevo')?.value || '';
+      PROPUESTA_NUEVA.banquero = document.getElementById('banqueroNuevo')?.value || '';
+
+      // Renderizar
+      renderAsignacionClienteNuevo();
+      renderPropuestaNuevaHoldings('USD');
+
+      // Actualizar caja disponible
+      renderCashBarsPropuesta();
+    }
+
+    // Limpiar propuesta nueva
+    function limpiarPropuestaNueva() {
+      PROPUESTA_NUEVA = {
+        montoUSD: 0,
+        montoPEN: 0,
+        perfil: '',
+        objetivo: '',
+        liquidezMinima: 0,
+        banca: '',
+        hub: '',
+        asesor: '',
+        banquero: '',
+        holdings: { USD: [], PEN: [] }
+      };
+
+      // Limpiar tablas
+      ['holdBodyUSD', 'holdBodyPEN', 'holdBodyTotal'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+      });
+
+      // Renderizar tabla de asignación vacía
+      renderAsignacionClienteNuevo();
+      renderCashBarsPropuesta();
+    }
+
+    // Renderizar holdings de propuesta nueva
+    function renderPropuestaNuevaHoldings(cur) {
+      if (!ES_CLIENTE_NUEVO) return;
+
+      const bodyId = cur === 'USD' ? 'holdBodyUSD' : (cur === 'PEN' ? 'holdBodyPEN' : 'holdBodyTotal');
+      const tb = document.getElementById(bodyId);
+      if (!tb) return;
+
+      tb.innerHTML = '';
+
+      const holdings = cur === 'TOTAL'
+        ? [...(PROPUESTA_NUEVA.holdings.USD || []), ...(PROPUESTA_NUEVA.holdings.PEN || [])]
+        : (PROPUESTA_NUEVA.holdings[cur] || []);
+
+      if (!holdings.length) {
+        tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:#666;padding:20px;">Sin instrumentos asignados</td></tr>';
+        return;
+      }
+
+      const tc = parseFloat(document.getElementById('tipoCambioNuevo')?.value) || 3.70;
+      const montoTotal = cur === 'TOTAL'
+        ? PROPUESTA_NUEVA.montoUSD + (PROPUESTA_NUEVA.montoPEN / tc)
+        : (cur === 'USD' ? PROPUESTA_NUEVA.montoUSD : PROPUESTA_NUEVA.montoPEN);
+
+      // Agrupar por clase
+      const ORDER = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
+      const grupos = {};
+      holdings.forEach(h => {
+        const clase = canonClassName(h.clase) || 'Otros';
+        if (!grupos[clase]) grupos[clase] = [];
+        grupos[clase].push(h);
+      });
+
+      let totalMonto = 0;
+      let totalCompra = 0;
+
+      ORDER.forEach(cls => {
+        const g = grupos[cls];
+        if (!g || !g.length) return;
+
+        const subMonto = g.reduce((sum, h) => sum + (toNum(h.monto) || 0), 0);
+        const subPeso = montoTotal > 0 ? (subMonto / montoTotal * 100) : 0;
+
+        // Fila de subtotal de clase
+        const trSub = document.createElement('tr');
+        trSub.className = 'row-sub';
+        trSub.innerHTML = `
+          <td class="left">${cls}</td>
+          <td colspan="2"></td>
+          <td class="num center">${fmtMoney(subMonto, cur === 'PEN' ? 'PEN' : 'USD')}</td>
+          <td class="num center">${subPeso.toFixed(1)}%</td>
+          <td class="num center">${subPeso.toFixed(1)}%</td>
+          <td class="num center">${fmtMoney(subMonto, cur === 'PEN' ? 'PEN' : 'USD')}</td>
+          <td></td>
+          <td></td>
+        `;
+        tb.appendChild(trSub);
+
+        // Filas de instrumentos
+        g.forEach(h => {
+          const monto = toNum(h.monto) || 0;
+          const pctSug = h.pctSugerido || (montoTotal > 0 ? (monto / montoTotal * 100) : 0);
+          const pesoFinal = montoTotal > 0 ? (monto / montoTotal * 100) : 0;
+
+          const tr = document.createElement('tr');
+          tr.classList.add('indent-2');
+          tr.innerHTML = `
+            <td class="left td-nombre">${h.nombre || '-'}</td>
+            <td>${h.vehiculo || '-'}</td>
+            <td>${h.subclasificacion || '-'}</td>
+            <td class="num center">${fmtMoney(monto, cur === 'PEN' ? 'PEN' : 'USD')}</td>
+            <td class="num center">${pctSug.toFixed(1)}%</td>
+            <td class="num center">${pesoFinal.toFixed(1)}%</td>
+            <td class="num center">${fmtMoney(monto, cur === 'PEN' ? 'PEN' : 'USD')}</td>
+            <td class="center">
+              <button class="icon-btn btn-eliminar-propuesta" data-cur="${cur}" data-id="${h._rid}" title="Eliminar" aria-label="Eliminar">&#10005;</button>
+            </td>
+            <td class="center"></td>
+          `;
+          tb.appendChild(tr);
+
+          totalMonto += monto;
+          totalCompra += monto;
+        });
+      });
+
+      // Fila total
+      const trTot = document.createElement('tr');
+      trTot.className = 'row-total';
+      trTot.innerHTML = `
+        <td class="left"><strong>Total ${cur}</strong></td>
+        <td></td><td></td>
+        <td class="num center"><strong>${fmtMoney(totalMonto, cur === 'PEN' ? 'PEN' : 'USD')}</strong></td>
+        <td class="num center"><strong>100.0%</strong></td>
+        <td class="num center"><strong>100.0%</strong></td>
+        <td class="num center"><strong>${fmtMoney(totalCompra, cur === 'PEN' ? 'PEN' : 'USD')}</strong></td>
+        <td></td>
+        <td></td>
+      `;
+      tb.appendChild(trTot);
+
+      // Event listeners para eliminar
+      tb.querySelectorAll('.btn-eliminar-propuesta').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const cur = btn.dataset.cur;
+          const id = btn.dataset.id;
+
+          if (cur === 'TOTAL') {
+            // Buscar en ambos
+            PROPUESTA_NUEVA.holdings.USD = PROPUESTA_NUEVA.holdings.USD.filter(h => h._rid !== id);
+            PROPUESTA_NUEVA.holdings.PEN = PROPUESTA_NUEVA.holdings.PEN.filter(h => h._rid !== id);
+          } else {
+            PROPUESTA_NUEVA.holdings[cur] = PROPUESTA_NUEVA.holdings[cur].filter(h => h._rid !== id);
+          }
+
+          renderPropuestaNuevaHoldings(cur);
+          renderAsignacionClienteNuevo();
+          renderCashBarsPropuesta();
+        });
+      });
+    }
+
+    // Renderizar barras de caja para propuesta
+    function renderCashBarsPropuesta() {
+      if (!ES_CLIENTE_NUEVO) return;
+
+      const tc = parseFloat(document.getElementById('tipoCambioNuevo')?.value) || 3.70;
+
+      // Calcular caja disponible = monto ingresado - suma de propuestas
+      const montoUSD = parseFloat((document.getElementById('montoNuevoUSD')?.value || '0').replace(/,/g, '')) || 0;
+      const montoPEN = parseFloat((document.getElementById('montoNuevoPEN')?.value || '0').replace(/,/g, '')) || 0;
+
+      const asignadoUSD = (PROPUESTA_NUEVA.holdings.USD || []).reduce((sum, h) => sum + (toNum(h.monto) || 0), 0);
+      const asignadoPEN = (PROPUESTA_NUEVA.holdings.PEN || []).reduce((sum, h) => sum + (toNum(h.monto) || 0), 0);
+
+      const cajaUSD = montoUSD - asignadoUSD;
+      const cajaPEN = montoPEN - asignadoPEN;
+
+      const elUSD = document.getElementById('cashUSD');
+      const elPEN = document.getElementById('cashPEN');
+
+      if (elUSD) {
+        elUSD.textContent = fmtMoney(cajaUSD, 'USD');
+        elUSD.style.color = cajaUSD >= 0 ? '#16a34a' : '#dc2626';
+      }
+      if (elPEN) {
+        elPEN.textContent = fmtMoney(cajaPEN, 'PEN');
+        elPEN.style.color = cajaPEN >= 0 ? '#16a34a' : '#dc2626';
+      }
+    }
+
+    // Guardar filas del modelo para Auto-Asignar
+    window.MODELOS_RAW = [];
 
     // =========================
     // Recuperar datos de IndexedDB al cargar
