@@ -19065,21 +19065,30 @@ const regionCols = [
       renderAsignacionClienteNuevo();
     }
 
-    // Formatear número con separador de miles
-    function formatearMontoInput(input) {
-      if (!input) return;
-      let val = input.value.replace(/,/g, '').replace(/[^\d.]/g, '');
-      const num = parseFloat(val) || 0;
-      input.value = num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-    }
-
-    // Event listeners para formatear montos al salir del campo
+    // Event listeners para campos numéricos de Cliente Nuevo
     document.addEventListener('DOMContentLoaded', () => {
-      ['montoNuevoUSD', 'montoNuevoPEN', 'liquidezMinimaNuevo'].forEach(id => {
+      const camposNumericos = ['montoNuevoUSD', 'montoNuevoPEN', 'liquidezMinimaNuevo'];
+
+      camposNumericos.forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('blur', () => formatearMontoInput(el));
-        }
+        if (!el) return;
+
+        // Formatear mientras escribe (separador de miles)
+        el.addEventListener('input', () => {
+          const raw = el.value.replace(/,/g, '');
+          const num = Number(raw);
+          if (raw && !isNaN(num)) {
+            el.value = num.toLocaleString('en-US', { maximumFractionDigits: 0, useGrouping: true });
+          }
+        });
+
+        // Actualizar tabla al presionar Enter
+        el.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            renderAsignacionClienteNuevo();
+          }
+        });
       });
 
       // Listener para cambio de perfil
