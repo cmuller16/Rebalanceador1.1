@@ -18954,8 +18954,9 @@ const regionCols = [
         const pctModelo = modelo[clase] || 0; // valor porcentual (ej: 5 para 5%)
         const montoModelo = montoTotal * (pctModelo / 100); // dividir por 100 para convertir a decimal
 
-        // Propuesto: si ya se asignó, usar ese valor; sino usar el del modelo
-        const montoPropuesto = PROPUESTA_NUEVA.montosPorClase?.[clase] ?? montoModelo;
+        // Propuesto: solo muestra lo que realmente se ha asignado (activos seleccionados)
+        // Si no hay activos seleccionados, Propuesto = 0
+        const montoPropuesto = PROPUESTA_NUEVA.montosPorClase?.[clase] ?? 0;
         const delta = montoPropuesto - montoModelo;
 
         // Min y Max usando BANDA del 10% (misma regla que Asset Allocation)
@@ -19124,23 +19125,19 @@ const regionCols = [
         });
       });
 
-      // Listener para cambio de perfil - auto-actualiza la tabla
+      // Listener para cambio de perfil - solo actualiza Min/P.Modelo/Max (NO toca Propuesto)
       const perfilSel = document.getElementById('perfilNuevo');
       if (perfilSel) {
         perfilSel.addEventListener('change', () => {
-          // Limpiar propuesta previa para que use los valores del modelo
-          PROPUESTA_NUEVA.montosPorClase = {};
           renderAsignacionClienteNuevo();
         });
       }
 
-      // También actualizar cuando cambia el monto USD o PEN (campos principales)
+      // Listener para cambio de monto - solo actualiza Min/P.Modelo/Max (NO toca Propuesto)
       ['montoNuevoUSD', 'montoNuevoPEN'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.addEventListener('change', () => {
-            // Limpiar propuesta previa para recalcular con nuevo monto
-            PROPUESTA_NUEVA.montosPorClase = {};
             renderAsignacionClienteNuevo();
           });
         }
