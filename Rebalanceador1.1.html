@@ -18866,11 +18866,11 @@ const regionCols = [
         return;
       }
 
-      // Alto Patrimonio: Hub Lima, Hub Provincias
-      // Super Affluent: Hub Lima, Hub Provincias Norte, Hub Provincias Sur
+      // Super Affluent: La Floresta, Sede Central, Global Wealth Sur, Global Wealth Norte
+      // Alto Patrimonio: Pardo y Aliaga, El Polo
       const hubs = banca === 'Alto Patrimonio'
-        ? ['Hub Lima', 'Hub Provincias']
-        : ['Hub Lima', 'Hub Provincias Norte', 'Hub Provincias Sur'];
+        ? ['Pardo y Aliaga', 'El Polo']
+        : ['La Floresta', 'Sede Central', 'Global Wealth Sur', 'Global Wealth Norte'];
 
       hubSel.innerHTML = '<option value="">-- Seleccionar --</option>';
       hubs.forEach(h => {
@@ -18881,7 +18881,7 @@ const regionCols = [
       });
     }
 
-    // Renderizar tabla de asignación para Cliente Nuevo
+    // Renderizar tabla de asignación para Cliente Nuevo (montos dolarizados)
     function renderAsignacionClienteNuevo() {
       const tbody = document.getElementById('tablaAsignacionNuevoBody');
       if (!tbody) return;
@@ -18889,41 +18889,47 @@ const regionCols = [
       const perfil = document.getElementById('perfilNuevo')?.value || '';
       const modelo = MODELOS[perfil] || {};
 
+      // Obtener montos y tipo de cambio
+      const montoUSD = parseFloat((document.getElementById('montoNuevoUSD')?.value || '0').replace(/,/g, '')) || 0;
+      const montoPEN = parseFloat((document.getElementById('montoNuevoPEN')?.value || '0').replace(/,/g, '')) || 0;
+      const tc = parseFloat(document.getElementById('tipoCambioNuevo')?.value) || parseFloat(document.getElementById('tipoCambio')?.value) || 3.70;
+      const montoTotal = montoUSD + (montoPEN / tc); // Total dolarizado
+
       const CLASES = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
 
-      // Bandas por clase (min, max) - ajustables según necesidad
-      const BANDAS = {
-        'Liquidez':       { min: 0, max: 100 },
-        'Renta Fija CP':  { min: 0, max: 100 },
-        'Renta Fija MP':  { min: 0, max: 100 },
-        'Renta Variable': { min: 0, max: 100 },
-        'Alternativo':    { min: 0, max: 100 }
-      };
+      // Función para formatear montos
+      const fmtMonto = (n) => n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
       let html = '';
       let totMin = 0, totSug = 0, totMax = 0, totProp = 0;
 
       CLASES.forEach(clase => {
-        const sugerido = (modelo[clase] || 0) * 100;
-        const minBand = BANDAS[clase]?.min || 0;
-        const maxBand = BANDAS[clase]?.max || 100;
-        const propuesto = PROPUESTA_NUEVA.asignacion?.[clase] || sugerido;
-        const delta = propuesto - sugerido;
+        // El modelo tiene valores como 0.05 (5%), 0.267 (26.7%), etc.
+        const pctModelo = modelo[clase] || 0; // valor decimal (ej: 0.05)
+        const montoModelo = montoTotal * pctModelo;
 
-        totMin += minBand;
-        totSug += sugerido;
-        totMax += maxBand;
-        totProp += propuesto;
+        // Propuesto: si ya se asignó, usar ese valor; sino usar el del modelo
+        const montoPropuesto = PROPUESTA_NUEVA.montosPorClase?.[clase] ?? montoModelo;
+        const delta = montoPropuesto - montoModelo;
 
-        const deltaClass = delta > 0.01 ? 'style="color:var(--positive);"' : delta < -0.01 ? 'style="color:var(--negative);"' : '';
-        const deltaStr = delta > 0.01 ? `+${delta.toFixed(1)}%` : delta < -0.01 ? `${delta.toFixed(1)}%` : '—';
+        // Min y Max como montos (0% y 100% del total por ahora)
+        const montoMin = 0;
+        const montoMax = montoTotal;
+
+        totMin += montoMin;
+        totSug += montoModelo;
+        totMax += montoMax;
+        totProp += montoPropuesto;
+
+        const deltaClass = delta > 0.5 ? 'style="color:var(--positive);"' : delta < -0.5 ? 'style="color:var(--negative);"' : '';
+        const deltaStr = delta > 0.5 ? `+$${fmtMonto(delta)}` : delta < -0.5 ? `-$${fmtMonto(Math.abs(delta))}` : '—';
 
         html += `<tr>
           <td class="left">${clase}</td>
-          <td class="num">${minBand.toFixed(1)}%</td>
-          <td class="num">${sugerido.toFixed(1)}%</td>
-          <td class="num">${maxBand.toFixed(1)}%</td>
-          <td class="num"><strong>${propuesto.toFixed(1)}%</strong></td>
+          <td class="num">$${fmtMonto(montoMin)}</td>
+          <td class="num">$${fmtMonto(montoModelo)}</td>
+          <td class="num">$${fmtMonto(montoMax)}</td>
+          <td class="num"><strong>$${fmtMonto(montoPropuesto)}</strong></td>
           <td class="num" ${deltaClass}>${deltaStr}</td>
         </tr>`;
       });
@@ -18932,7 +18938,7 @@ const regionCols = [
 
       // Totales en footer
       const totDelta = totProp - totSug;
-      const deltaClass = totDelta > 0.01 ? 'style="color:var(--positive);"' : totDelta < -0.01 ? 'style="color:var(--negative);"' : '';
+      const deltaClass = totDelta > 0.5 ? 'style="color:var(--positive);"' : totDelta < -0.5 ? 'style="color:var(--negative);"' : '';
 
       const elMinTot = document.getElementById('asigNuevoMinTot');
       const elSugTot = document.getElementById('asigNuevoSugTot');
@@ -18940,13 +18946,13 @@ const regionCols = [
       const elPropTot = document.getElementById('asigNuevoPropTot');
       const elDelTot = document.getElementById('asigNuevoDelTot');
 
-      if (elMinTot) elMinTot.textContent = `${totMin.toFixed(1)}%`;
-      if (elSugTot) elSugTot.textContent = `${totSug.toFixed(1)}%`;
-      if (elMaxTot) elMaxTot.textContent = `${totMax.toFixed(1)}%`;
-      if (elPropTot) elPropTot.innerHTML = `<strong>${totProp.toFixed(1)}%</strong>`;
+      if (elMinTot) elMinTot.textContent = `$${fmtMonto(totMin)}`;
+      if (elSugTot) elSugTot.textContent = `$${fmtMonto(totSug)}`;
+      if (elMaxTot) elMaxTot.textContent = `$${fmtMonto(totMax)}`;
+      if (elPropTot) elPropTot.innerHTML = `<strong>$${fmtMonto(totProp)}</strong>`;
       if (elDelTot) {
-        elDelTot.textContent = totDelta > 0.01 ? `+${totDelta.toFixed(1)}%` : totDelta < -0.01 ? `${totDelta.toFixed(1)}%` : '—';
-        elDelTot.style.color = totDelta > 0.01 ? 'var(--positive)' : totDelta < -0.01 ? 'var(--negative)' : '';
+        elDelTot.textContent = totDelta > 0.5 ? `+$${fmtMonto(totDelta)}` : totDelta < -0.5 ? `-$${fmtMonto(Math.abs(totDelta))}` : '—';
+        elDelTot.style.color = totDelta > 0.5 ? 'var(--positive)' : totDelta < -0.5 ? 'var(--negative)' : '';
       }
     }
 
@@ -18983,20 +18989,14 @@ const regionCols = [
       PROPUESTA_NUEVA.asesor = document.getElementById('asesorNuevo')?.value || '';
       PROPUESTA_NUEVA.banquero = document.getElementById('banqueroNuevo')?.value || '';
 
-      // Asignar según modelo
-      PROPUESTA_NUEVA.asignacion = {};
+      // Calcular montos por clase según modelo (solo USD - PEN es manual)
       const CLASES = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
-
-      CLASES.forEach(clase => {
-        const pct = (modelo[clase] || 0) * 100;
-        PROPUESTA_NUEVA.asignacion[clase] = pct;
-      });
-
-      // Calcular montos por clase
       PROPUESTA_NUEVA.montosPorClase = {};
+
       CLASES.forEach(clase => {
-        const pct = PROPUESTA_NUEVA.asignacion[clase] / 100;
-        PROPUESTA_NUEVA.montosPorClase[clase] = montoUSD * pct;
+        // El modelo tiene valores decimales (ej: 0.05 = 5%)
+        const pctModelo = modelo[clase] || 0;
+        PROPUESTA_NUEVA.montosPorClase[clase] = montoUSD * pctModelo;
       });
 
       // Renderizar la tabla actualizada
