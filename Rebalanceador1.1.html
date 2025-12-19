@@ -18950,9 +18950,9 @@ const regionCols = [
       let totMin = 0, totSug = 0, totMax = 0, totProp = 0;
 
       CLASES.forEach(clase => {
-        // El modelo tiene valores como 0.05 (5%), 0.267 (26.7%), etc.
-        const pctModelo = modelo[clase] || 0; // valor decimal (ej: 0.05)
-        const montoModelo = montoTotal * pctModelo;
+        // El modelo tiene valores como 5 (5%), 26.7 (26.7%), etc. - son porcentajes, no decimales
+        const pctModelo = modelo[clase] || 0; // valor porcentual (ej: 5 para 5%)
+        const montoModelo = montoTotal * (pctModelo / 100); // dividir por 100 para convertir a decimal
 
         // Propuesto: si ya se asignó, usar ese valor; sino usar el del modelo
         const montoPropuesto = PROPUESTA_NUEVA.montosPorClase?.[clase] ?? montoModelo;
