@@ -1092,12 +1092,32 @@
             <input type="checkbox" id="toggleNuevoCliente" onchange="toggleModoCliente(this.checked)">
             <span class="slider"></span>
           </label>
-          <button id="btnDataHubDash" title="Centro de Datos" onclick="document.getElementById('modalCargarCSVs')?.classList.add('show');" style="padding:6px 8px; background:#fff; border:1px solid var(--border-medium); border-radius:6px; cursor:pointer; color:#070E46; display:flex; align-items:center;">
+          <button id="btnDataHubDash" title="Centro de Datos" onclick="abrirMiniModalCentroData();" style="padding:6px 8px; background:#fff; border:1px solid var(--border-medium); border-radius:6px; cursor:pointer; color:#070E46; display:flex; align-items:center;">
             <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
           </button>
           <button id="btnDownloadDash" title="Descargar Reporte" onclick="mostrarModalFormato();" style="padding:6px 8px; background:#fff; border:1px solid var(--border-medium); border-radius:6px; cursor:pointer; color:#070E46; display:flex; align-items:center;">
             <svg style="width:18px;height:18px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           </button>
+        </div>
+
+        <!-- Mini-modal Centro de Datos (desde header) -->
+        <div id="miniModalCentroData" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(7,14,70,.32);z-index:10020;">
+          <div style="background:#fff;border:1px solid #e1e4e8;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.15);padding:20px;min-width:200px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+              <h3 style="margin:0;font-size:16px;color:#070E46;">Centro de Datos</h3>
+              <button onclick="cerrarMiniModalCentroData();" style="background:transparent;border:none;font-size:18px;color:#070E46;cursor:pointer;">✕</button>
+            </div>
+            <div style="display:flex;gap:12px;justify-content:center;">
+              <!-- Botón Cargar CSVs (documento) -->
+              <button title="Cargar CSVs" onclick="cerrarMiniModalCentroData(); openCargarCSVsModal();" style="padding:12px 14px; background:#fff; border:1px solid #e1e4e8; border-radius:6px; cursor:pointer; color:#070E46;">
+                <svg style="width:24px;height:24px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 12 15 15"/></svg>
+              </button>
+              <!-- Botón Importar Datos (flecha abajo) -->
+              <button title="Importar Datos" onclick="cerrarMiniModalCentroData(); document.getElementById('fileImportJSON').click();" style="padding:12px 14px; background:#fff; border:1px solid #e1e4e8; border-radius:6px; cursor:pointer; color:#070E46;">
+                <svg style="width:24px;height:24px;vertical-align:middle;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- ===== MÁSCARA CLIENTE EXISTENTE ===== -->
@@ -22575,6 +22595,20 @@ function wirePMChartFilters(){
   document.getElementById('btnCargarCSVs')?.addEventListener('click', openCargarCSVsModal);
   document.getElementById('cargarCSVsClose')?.addEventListener('click', closeCargarCSVsModal);
   document.getElementById('modalCargarCSVs')?.addEventListener('click', (e)=>{ if (e.target.id==='modalCargarCSVs') closeCargarCSVsModal(); });
+
+  // === MINI-MODAL CENTRO DE DATOS (desde header) ===
+  function abrirMiniModalCentroData() {
+    const m = document.getElementById('miniModalCentroData');
+    if (m) m.style.display = 'flex';
+  }
+  function cerrarMiniModalCentroData() {
+    const m = document.getElementById('miniModalCentroData');
+    if (m) m.style.display = 'none';
+  }
+  // Cerrar al hacer clic fuera del contenido
+  document.getElementById('miniModalCentroData')?.addEventListener('click', (e) => {
+    if (e.target.id === 'miniModalCentroData') cerrarMiniModalCentroData();
+  });
 
   // === MODAL DE LÍMITES ===
   document.getElementById('btnLimites')?.addEventListener('click', openLimitesModal);
