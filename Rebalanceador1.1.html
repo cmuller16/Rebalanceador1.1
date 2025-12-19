@@ -19133,63 +19133,69 @@ const regionCols = [
       const byClass = {};
       ORDER.forEach(c => byClass[c] = []);
 
-      activos.forEach(a => {
+      activos.forEach((a, idx) => {
+        a._idx = idx; // Guardar índice para edición
         const clase = ORDER.find(c => c.toUpperCase() === (a.claseActivo || '').toUpperCase()) || 'Alternativo';
         if (!byClass[clase]) byClass[clase] = [];
         byClass[clase].push(a);
       });
 
-      // Calcular total para pesos
-      const totalUSD = activos.reduce((sum, a) => sum + (a.montoUSD || 0), 0);
+      // Calcular total sugerido (del modelo)
+      const totalSugerido = activos.reduce((sum, a) => sum + (a.montoUSD || 0), 0);
+
+      // Calcular total de compras (editado o sugerido)
+      const totalCompra = activos.reduce((sum, a) => sum + (a.montoCompra ?? a.montoUSD ?? 0), 0);
 
       ORDER.forEach(clase => {
         const rows = byClass[clase] || [];
         if (rows.length === 0) return;
 
-        // Fila de encabezado de clase (subtotal)
-        const subTotal = rows.reduce((sum, a) => sum + (a.montoUSD || 0), 0);
-        const subPeso = totalUSD > 0 ? ((subTotal / totalUSD) * 100).toFixed(1) : '0.0';
-        const subTotalStr = subTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        // Subtotales de la clase
+        const subSugerido = rows.reduce((sum, a) => sum + (a.montoUSD || 0), 0);
+        const subCompra = rows.reduce((sum, a) => sum + (a.montoCompra ?? a.montoUSD ?? 0), 0);
+        const subPesoSug = totalSugerido > 0 ? ((subSugerido / totalSugerido) * 100).toFixed(1) : '0.0';
+        const subPesoFinal = totalCompra > 0 ? ((subCompra / totalCompra) * 100).toFixed(1) : '0.0';
 
+        // Fila de subtotal de clase
         const trSub = document.createElement('tr');
         trSub.className = 'row-sub';
         trSub.innerHTML = `
           <td class="left" style="font-weight:600;">${clase}</td>
-          <td colspan="4"></td>
-          <td class="num center">${subPeso}%</td>
-          <td class="num td-rebal"><strong>$${subTotalStr}</strong></td>
+          <td></td><td></td>
+          <td class="num center">$${subSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</td>
+          <td class="num center">${subPesoSug}%</td>
+          <td class="num center">${subPesoFinal}%</td>
+          <td class="num td-rebal"><strong>$${subCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
           <td colspan="5"></td>
         `;
         tb.appendChild(trSub);
 
         // Filas de activos
         rows.forEach(a => {
-          const peso = totalUSD > 0 ? ((a.montoUSD / totalUSD) * 100).toFixed(1) : '0.0';
-          const monto = (a.montoUSD || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+          const montoSugerido = a.montoUSD || 0;
+          const pctSugerido = totalSugerido > 0 ? ((montoSugerido / totalSugerido) * 100).toFixed(1) : '0.0';
+          const montoCompra = a.montoCompra ?? montoSugerido;
+          const pesoFinal = totalCompra > 0 ? ((montoCompra / totalCompra) * 100).toFixed(1) : '0.0';
 
-          // Obtener Nombre: del CSV Instrumento, o lookup en ACT
+          // Obtener Nombre: Prioridad Diccionario de Activos.csv
           let nombre = a.nombre || a.subproducto || '-';
-          if (a.isin && ACT.name_by_isin?.get(a.isin)) {
-            nombre = ACT.name_by_isin.get(a.isin);
-          } else if (a.codSubproducto && ACT.name_by_codprod?.get(a.codSubproducto)) {
-            nombre = ACT.name_by_codprod.get(a.codSubproducto);
+          if (a.isin && ACT.dict_by_isin?.get(a.isin)) {
+            nombre = ACT.dict_by_isin.get(a.isin);
+          } else if (a.codSubproducto && ACT.dict_by_codprod?.get(a.codSubproducto)) {
+            nombre = ACT.dict_by_codprod.get(a.codSubproducto);
+          } else if (a.subproducto && ACT.dict_by_subprod?.get(a.subproducto)) {
+            nombre = ACT.dict_by_subprod.get(a.subproducto);
           }
 
-          // Obtener Vehículo: lookup en ACT por ISIN o subproducto
+          // Obtener Vehículo desde ACT
           let vehiculo = '-';
           if (a.isin && ACT.veh_by_isin?.get(a.isin)) {
             vehiculo = ACT.veh_by_isin.get(a.isin);
           } else if (a.subproducto && ACT.veh_by_subprod_name?.get(a.subproducto)) {
             vehiculo = ACT.veh_by_subprod_name.get(a.subproducto);
-          } else if (a.codSubproducto) {
-            // Buscar en ACTIVOS_RAW por codsubproducto
-            const activo = (window.ACTIVOS_RAW || []).find(r =>
-              String(r.codsubproducto || r.CodSubproducto || '') === String(a.codSubproducto)
-            );
-            if (activo) vehiculo = activo.vehiculo || activo.Vehiculo || '-';
           }
 
-          // Subclasificación: viene del CSV Portafolio Modelo directamente
+          // Subclasificación del CSV Portafolio Modelo
           const subclasificacion = a.subclasificacion || '-';
 
           const tr = document.createElement('tr');
@@ -19198,10 +19204,16 @@ const regionCols = [
             <td class="left td-nombre">${nombre}</td>
             <td>${vehiculo}</td>
             <td>${subclasificacion}</td>
-            <td class="center td-rebal"></td>
-            <td class="center td-rebal"></td>
-            <td class="num center">${peso}%</td>
-            <td class="num td-rebal"><strong>$${monto}</strong></td>
+            <td class="num center">$${montoSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</td>
+            <td class="num center">${pctSugerido}%</td>
+            <td class="num center">${pesoFinal}%</td>
+            <td class="num td-rebal">
+              <input type="text" class="compra-input" data-idx="${a._idx}"
+                     inputmode="numeric" autocomplete="off"
+                     style="width:100px;text-align:right;padding:4px 6px;"
+                     value="${montoCompra.toLocaleString('en-US', {maximumFractionDigits:0})}"
+                     placeholder="0">
+            </td>
             <td colspan="5"></td>
           `;
           tb.appendChild(tr);
@@ -19214,13 +19226,52 @@ const regionCols = [
       trTotal.innerHTML = `
         <td class="left"><strong>Total USD</strong></td>
         <td></td><td></td>
-        <td class="center td-rebal"></td>
-        <td class="center td-rebal"></td>
+        <td class="num center"><strong>$${totalSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
         <td class="num center"><strong>100.0%</strong></td>
-        <td class="num td-rebal"><strong>$${totalUSD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong></td>
+        <td class="num center"><strong>100.0%</strong></td>
+        <td class="num td-rebal"><strong>$${totalCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
         <td colspan="5"></td>
       `;
       tb.appendChild(trTotal);
+
+      // Event listeners para inputs de compra
+      tb.querySelectorAll('.compra-input').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const raw = e.target.value.replace(/,/g, '');
+          const num = Number(raw);
+          if (raw && !isNaN(num)) {
+            e.target.value = num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+          }
+        });
+        input.addEventListener('blur', (e) => {
+          const idx = parseInt(e.target.dataset.idx);
+          const raw = e.target.value.replace(/,/g, '');
+          const num = parseFloat(raw) || 0;
+          if (PROPUESTA_NUEVA.activos[idx]) {
+            PROPUESTA_NUEVA.activos[idx].montoCompra = num;
+          }
+          // Recalcular montosPorClase
+          recalcularMontosPorClase();
+          // Re-renderizar para actualizar pesos
+          renderHoldingsClienteNuevo();
+          renderAsignacionClienteNuevo();
+        });
+      });
+    }
+
+    // Recalcular montosPorClase desde los activos
+    function recalcularMontosPorClase() {
+      const CLASES = ['Liquidez', 'Renta Fija CP', 'Renta Fija MP', 'Renta Variable', 'Alternativo'];
+      PROPUESTA_NUEVA.montosPorClase = {};
+      CLASES.forEach(c => PROPUESTA_NUEVA.montosPorClase[c] = 0);
+
+      (PROPUESTA_NUEVA.activos || []).forEach(a => {
+        const monto = a.montoCompra ?? a.montoUSD ?? 0;
+        const clase = CLASES.find(c => c.toUpperCase() === (a.claseActivo || '').toUpperCase()) || 'Alternativo';
+        if (PROPUESTA_NUEVA.montosPorClase[clase] !== undefined) {
+          PROPUESTA_NUEVA.montosPorClase[clase] += monto;
+        }
+      });
     }
 
     // Limpiar la propuesta nueva
