@@ -693,6 +693,12 @@
       margin-bottom:2px !important;   /* antes 12px */
     }
 
+    /* Ocultar columnas de Rebalanceo cuando es Cliente Nuevo */
+    body.modo-cliente-nuevo .col-rebal,
+    body.modo-cliente-nuevo .td-rebal {
+      display: none !important;
+    }
+
     /* Hover para "Portfolio Mgmt" y "Productos" */
     #btnMgmt.menu-trigger,
     #btnProd.menu-trigger{
@@ -1386,21 +1392,21 @@
           <div id="subview-hold-usd" class="subview active">
             <div class="table-wrapper">
               <table id="tablaHoldUSD">
-                <colgroup>
-                  <col style="width:18%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:8%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
+                <colgroup id="colgroupUSD">
+                  <col style="width:18%"><col style="width:9%"><col style="width:10%"><col class="col-rebal" style="width:6%"><col class="col-rebal" style="width:8%"><col class="col-rebal" style="width:5%"><col class="col-rebal" style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
                 </colgroup>
-                <thead>
+                <thead id="theadUSD">
                   <tr>
                     <th class="left" rowspan="2">Nombre</th>
                     <th rowspan="2">Vehículo</th>
                     <th rowspan="2">Subclasificación</th>
-                    <th class="center" rowspan="2">Fecha<br>Compra</th>
-                    <th class="center" rowspan="2">Valor<br>Mercado</th>
-                    <th class="center" rowspan="2">Peso<br>Inicial</th>
-                    <th class="center" rowspan="2">Monto<br>Prendado</th>
+                    <th class="center col-rebal" rowspan="2">Fecha<br>Compra</th>
+                    <th class="center col-rebal" rowspan="2">Valor<br>Mercado</th>
+                    <th class="center col-rebal" rowspan="2">Peso<br>Inicial</th>
+                    <th class="center col-rebal" rowspan="2">Monto<br>Prendado</th>
                     <th class="center" rowspan="2">Monto<br>Final</th>
                     <th class="center" rowspan="2">Peso<br>Final</th>
-                    <th class="center" rowspan="2">Rebalanceo</th>
+                    <th class="center th-rebal" rowspan="2">Rebalanceo</th>
                     <th class="center" rowspan="2" style="width:3px;"></th>
                     <th class="center" rowspan="2" style="width:3px;">!</th>
                   </tr>
@@ -1414,21 +1420,21 @@
           <div id="subview-hold-pen" class="subview">
             <div class="table-wrapper">
               <table id="tablaHoldPEN">
-                <colgroup>
-                  <col style="width:18%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:8%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
+                <colgroup id="colgroupPEN">
+                  <col style="width:18%"><col style="width:9%"><col style="width:10%"><col class="col-rebal" style="width:6%"><col class="col-rebal" style="width:8%"><col class="col-rebal" style="width:5%"><col class="col-rebal" style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
                 </colgroup>
-                <thead>
+                <thead id="theadPEN">
                   <tr>
                     <th class="left" rowspan="2">Nombre</th>
                     <th rowspan="2">Vehículo</th>
                     <th rowspan="2">Subclasificación</th>
-                    <th class="center" rowspan="2">Fecha<br>Compra</th>
-                    <th class="center" rowspan="2">Valor<br>Mercado</th>
-                    <th class="center" rowspan="2">Peso<br>Inicial</th>
-                    <th class="center" rowspan="2">Monto<br>Prendado</th>
+                    <th class="center col-rebal" rowspan="2">Fecha<br>Compra</th>
+                    <th class="center col-rebal" rowspan="2">Valor<br>Mercado</th>
+                    <th class="center col-rebal" rowspan="2">Peso<br>Inicial</th>
+                    <th class="center col-rebal" rowspan="2">Monto<br>Prendado</th>
                     <th class="center" rowspan="2">Monto<br>Final</th>
                     <th class="center" rowspan="2">Peso<br>Final</th>
-                    <th class="center" rowspan="2">Rebalanceo</th>
+                    <th class="center th-rebal" rowspan="2">Rebalanceo</th>
                     <th class="center" rowspan="2" style="width:3px;"></th>
                     <th class="center" rowspan="2" style="width:3px;">!</th>
                   </tr>
@@ -1440,21 +1446,21 @@
           <div id="subview-hold-total" class="subview">
             <div class="table-wrapper">
               <table id="tablaHoldTotal">
-                <colgroup>
-                  <col style="width:18%"><col style="width:9%"><col style="width:10%"><col style="width:6%"><col style="width:8%"><col style="width:5%"><col style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
+                <colgroup id="colgroupTotal">
+                  <col style="width:18%"><col style="width:9%"><col style="width:10%"><col class="col-rebal" style="width:6%"><col class="col-rebal" style="width:8%"><col class="col-rebal" style="width:5%"><col class="col-rebal" style="width:7%"><col style="width:8%"><col style="width:7%"><col style="width:9%"><col style="width:2%"><col style="width:2%">
                 </colgroup>
-                <thead>
+                <thead id="theadTotal">
                   <tr>
                     <th class="left" rowspan="2">Nombre</th>
                     <th rowspan="2">Vehículo</th>
                     <th rowspan="2">Subclasificación</th>
-                    <th class="center" rowspan="2">Fecha<br>Compra</th>
-                    <th class="center" rowspan="2">Valor<br>Mercado</th>
-                    <th class="center" rowspan="2">Peso<br>Inicial</th>
-                    <th class="center" rowspan="2">Monto<br>Prendado</th>
+                    <th class="center col-rebal" rowspan="2">Fecha<br>Compra</th>
+                    <th class="center col-rebal" rowspan="2">Valor<br>Mercado</th>
+                    <th class="center col-rebal" rowspan="2">Peso<br>Inicial</th>
+                    <th class="center col-rebal" rowspan="2">Monto<br>Prendado</th>
                     <th class="center" rowspan="2">Monto<br>Final</th>
                     <th class="center" rowspan="2">Peso<br>Final</th>
-                    <th class="center" rowspan="2">Rebalanceo</th>
+                    <th class="center th-rebal" rowspan="2">Rebalanceo</th>
                     <th class="center" rowspan="2" style="width:3px;"></th>
                     <th class="center" rowspan="2" style="width:3px;">!</th>
                   </tr>
@@ -7039,14 +7045,14 @@ const regionCols = [
           trSub.innerHTML = `
             <td class="left">${cls}</td>
             <td colspan="2" class="left" style="color:#001391;padding-left:16px;">
-              <span style="font-weight:600;">Monto Sugerido:</span> 
-              <span style="font-weight:700;">${fmtMoney(montoSugerido, currencyForFormat)}</span> 
+              <span style="font-weight:600;">Monto Sugerido:</span>
+              <span style="font-weight:700;">${fmtMoney(montoSugerido, currencyForFormat)}</span>
               <span style="font-weight:600;">(${pctModelo.toFixed(1)}%)</span>
             </td>
-            <td class="center"></td>
-            <td class="num center">${fmtMoney(subValor, currencyForFormat)}</td>
-            <td class="num center">${subPeso===0 ? ' - ' : (subPeso.toFixed(1)+'%')}</td>
-            <td class="center"></td>
+            <td class="center td-rebal"></td>
+            <td class="num center td-rebal">${fmtMoney(subValor, currencyForFormat)}</td>
+            <td class="num center td-rebal">${subPeso===0 ? ' - ' : (subPeso.toFixed(1)+'%')}</td>
+            <td class="center td-rebal"></td>
             <td class="num center">${fmtMoney(subFinal, currencyForFormat)}</td>
             <td class="num center">${subPesoFinal===0 ? ' - ' : (subPesoFinal.toFixed(1)+'%')}</td>
             <td class="num">${fmtMoney(subCV, currencyForFormat)}</td>
@@ -7211,10 +7217,10 @@ const regionCols = [
                 <td class="left td-nombre">${nombreDisplay}</td>
                 <td>${String(r.vehiculo || '')}</td>
                 <td>${subclasificacion}</td>
-                <td class="center">${fechaDisplay}</td>
-                <td class="num center">${fmtMoney(r.valor_mercado, monedaFila)}</td>
-                <td class="num center">${peso===0 ? ' - ' : (peso.toFixed(1)+'%')}</td>
-                <td class="num center">${fmtMoney(r.saldoRetenido || 0, monedaFila)}</td>
+                <td class="center td-rebal">${fechaDisplay}</td>
+                <td class="num center td-rebal">${fmtMoney(r.valor_mercado, monedaFila)}</td>
+                <td class="num center td-rebal">${peso===0 ? ' - ' : (peso.toFixed(1)+'%')}</td>
+                <td class="num center td-rebal">${fmtMoney(r.saldoRetenido || 0, monedaFila)}</td>
                 <td class="num center" data-final="${cur}:${r._rid}">
                   ${fmtMoney(mf, monedaFila)}
                 </td>
@@ -7236,10 +7242,10 @@ const regionCols = [
         trTot.className='row-total';
         trTot.innerHTML = `
           <td class="left"><strong>Total ${cur}</strong></td>
-          <td></td><td></td><td class="center"></td>
-          <td class="num center"><strong>${fmtMoney(totalValor, currencyForFormat)}</strong></td>
-          <td class="num center"><strong>${totPeso===0 ? ' - ' : '100.0%'}</strong></td>
-          <td class="center"></td>
+          <td></td><td></td><td class="center td-rebal"></td>
+          <td class="num center td-rebal"><strong>${fmtMoney(totalValor, currencyForFormat)}</strong></td>
+          <td class="num center td-rebal"><strong>${totPeso===0 ? ' - ' : '100.0%'}</strong></td>
+          <td class="center td-rebal"></td>
           <td class="num center"><strong>${fmtMoney(totalMontoFinal, currencyForFormat)}</strong></td>
           <td class="num center"><strong>${totPesoFinal===0 ? ' - ' : '100.0%'}</strong></td>
           <td class="num"><strong>${fmtMoney(totalCompraVenta, currencyForFormat)}</strong></td>
@@ -18786,8 +18792,13 @@ const regionCols = [
       const tabReporte = document.getElementById('tabReporte');
       const tabChildren = document.querySelector('.tab-children');
 
+      // Encabezados de tablas Holdings para cambiar "Rebalanceo" a "Compra"
+      const thRebalHeaders = document.querySelectorAll('.th-rebal');
+
       if (esNuevo) {
-        // Modo Cliente Nuevo
+        // Modo Cliente Nuevo - agregar clase al body para CSS
+        document.body.classList.add('modo-cliente-nuevo');
+
         if (mascaraExistente) mascaraExistente.style.display = 'none';
         if (mascaraNuevo) mascaraNuevo.style.display = 'block';
         if (tablaExistente) tablaExistente.style.display = 'none';
@@ -18795,6 +18806,9 @@ const regionCols = [
 
         // Cambiar texto de "Rebalanceo de Portafolio" a "Generador de Propuesta"
         if (tabRebalanceoText) tabRebalanceoText.textContent = 'Generador de Propuesta';
+
+        // Cambiar encabezado de columna "Rebalanceo" a "Compra"
+        thRebalHeaders.forEach(th => { th.innerHTML = 'Compra'; });
 
         // Ocultar pestañas de Reporte (no aplican para cliente nuevo)
         if (tabReporte) tabReporte.style.display = 'none';
@@ -18813,7 +18827,9 @@ const regionCols = [
         // Renderizar tabla vacía
         renderAsignacionClienteNuevo();
       } else {
-        // Modo Cliente Existente
+        // Modo Cliente Existente - quitar clase del body
+        document.body.classList.remove('modo-cliente-nuevo');
+
         if (mascaraExistente) mascaraExistente.style.display = 'block';
         if (mascaraNuevo) mascaraNuevo.style.display = 'none';
         if (tablaExistente) tablaExistente.style.display = 'block';
@@ -18821,6 +18837,9 @@ const regionCols = [
 
         // Restaurar texto original
         if (tabRebalanceoText) tabRebalanceoText.textContent = 'Rebalanceo de Portafolio';
+
+        // Restaurar encabezado de columna "Rebalanceo"
+        thRebalHeaders.forEach(th => { th.innerHTML = 'Rebalanceo'; });
 
         // Mostrar pestañas de Reporte nuevamente
         if (tabReporte) tabReporte.style.display = '';
