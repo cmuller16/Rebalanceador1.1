@@ -19123,7 +19123,7 @@ const regionCols = [
 
       if (activos.length === 0) {
         const tr = document.createElement('tr');
-        tr.innerHTML = '<td class="center muted" colspan="10">Sin activos asignados</td>';
+        tr.innerHTML = '<td class="center muted" colspan="12">Sin activos asignados. Haz clic en "Auto-Asignar Según Modelo".</td>';
         tb.appendChild(tr);
         return;
       }
@@ -19146,28 +19146,63 @@ const regionCols = [
         const rows = byClass[clase] || [];
         if (rows.length === 0) return;
 
-        // Fila de encabezado de clase
-        const trHead = document.createElement('tr');
-        trHead.className = 'group-header';
-        trHead.innerHTML = `<td colspan="10" class="left" style="background:#e8eaf6;font-weight:600;padding:6px 10px;">${clase}</td>`;
-        tb.appendChild(trHead);
+        // Fila de encabezado de clase (subtotal)
+        const subTotal = rows.reduce((sum, a) => sum + (a.montoUSD || 0), 0);
+        const subPeso = totalUSD > 0 ? ((subTotal / totalUSD) * 100).toFixed(1) : '0.0';
+        const subTotalStr = subTotal.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+        const trSub = document.createElement('tr');
+        trSub.className = 'row-sub';
+        trSub.innerHTML = `
+          <td class="left" style="font-weight:600;">${clase}</td>
+          <td colspan="4"></td>
+          <td class="num center">${subPeso}%</td>
+          <td class="num td-rebal"><strong>$${subTotalStr}</strong></td>
+          <td colspan="5"></td>
+        `;
+        tb.appendChild(trSub);
 
         // Filas de activos
         rows.forEach(a => {
           const peso = totalUSD > 0 ? ((a.montoUSD / totalUSD) * 100).toFixed(1) : '0.0';
-          const pctModelo = ((a.pctModelo || 0) * 100).toFixed(1);
           const monto = (a.montoUSD || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
+          // Obtener Nombre: del CSV Instrumento, o lookup en ACT
+          let nombre = a.nombre || a.subproducto || '-';
+          if (a.isin && ACT.name_by_isin?.get(a.isin)) {
+            nombre = ACT.name_by_isin.get(a.isin);
+          } else if (a.codSubproducto && ACT.name_by_codprod?.get(a.codSubproducto)) {
+            nombre = ACT.name_by_codprod.get(a.codSubproducto);
+          }
+
+          // Obtener Vehículo: lookup en ACT por ISIN o subproducto
+          let vehiculo = '-';
+          if (a.isin && ACT.veh_by_isin?.get(a.isin)) {
+            vehiculo = ACT.veh_by_isin.get(a.isin);
+          } else if (a.subproducto && ACT.veh_by_subprod_name?.get(a.subproducto)) {
+            vehiculo = ACT.veh_by_subprod_name.get(a.subproducto);
+          } else if (a.codSubproducto) {
+            // Buscar en ACTIVOS_RAW por codsubproducto
+            const activo = (window.ACTIVOS_RAW || []).find(r =>
+              String(r.codsubproducto || r.CodSubproducto || '') === String(a.codSubproducto)
+            );
+            if (activo) vehiculo = activo.vehiculo || activo.Vehiculo || '-';
+          }
+
+          // Subclasificación: viene del CSV Portafolio Modelo directamente
+          const subclasificacion = a.subclasificacion || '-';
+
           const tr = document.createElement('tr');
+          tr.classList.add('indent-2');
           tr.innerHTML = `
-            <td class="left">${a.subclasificacion || '-'}</td>
-            <td class="left">${a.nombre || a.subproducto || '-'}</td>
-            <td class="center">${a.tipo === 'FONDO' ? a.codSubproducto : a.isin || '-'}</td>
-            <td class="num">${pctModelo}%</td>
-            <td class="num"><strong>${peso}%</strong></td>
+            <td class="left td-nombre">${nombre}</td>
+            <td>${vehiculo}</td>
+            <td>${subclasificacion}</td>
+            <td class="center td-rebal"></td>
+            <td class="center td-rebal"></td>
+            <td class="num center">${peso}%</td>
             <td class="num td-rebal"><strong>$${monto}</strong></td>
-            <td class="center" style="width:3px;"></td>
-            <td class="center" style="width:3px;"></td>
+            <td colspan="5"></td>
           `;
           tb.appendChild(tr);
         });
@@ -19176,13 +19211,14 @@ const regionCols = [
       // Fila de total
       const trTotal = document.createElement('tr');
       trTotal.className = 'row-total';
-      trTotal.style.cssText = 'font-weight:700;background:#f5f5f5;';
-      const totalStr = totalUSD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
       trTotal.innerHTML = `
-        <td class="left" colspan="4">TOTAL</td>
-        <td class="num">100.0%</td>
-        <td class="num td-rebal"><strong>$${totalStr}</strong></td>
-        <td colspan="2"></td>
+        <td class="left"><strong>Total USD</strong></td>
+        <td></td><td></td>
+        <td class="center td-rebal"></td>
+        <td class="center td-rebal"></td>
+        <td class="num center"><strong>100.0%</strong></td>
+        <td class="num td-rebal"><strong>$${totalUSD.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</strong></td>
+        <td colspan="5"></td>
       `;
       tb.appendChild(trTotal);
     }
