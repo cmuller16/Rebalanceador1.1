@@ -19152,6 +19152,9 @@ const regionCols = [
       // Renderizar la tabla de holdings con los activos
       renderHoldingsClienteNuevo();
 
+      // Evaluar límites de concentración
+      evaluarLimitesClienteNuevo();
+
       console.log('Auto-asignación completada:', PROPUESTA_NUEVA);
     }
 
@@ -19264,7 +19267,10 @@ const regionCols = [
                      placeholder="$0">
             </td>
             <td class="num center">${pesoFinal}%</td>
-            <td></td>
+            <td class="center">
+              <button class="btn-eliminar-activo" data-idx="${a._idx}" title="Eliminar activo"
+                      style="background:transparent;border:none;color:#c00;font-size:16px;cursor:pointer;padding:2px 6px;">✕</button>
+            </td>
           `;
           tb.appendChild(tr);
         });
@@ -19309,6 +19315,26 @@ const regionCols = [
           // Re-renderizar para actualizar pesos
           renderHoldingsClienteNuevo();
           renderAsignacionClienteNuevo();
+          // Evaluar límites de concentración
+          evaluarLimitesClienteNuevo();
+        });
+      });
+
+      // Event listeners para botones de eliminar activo
+      tb.querySelectorAll('.btn-eliminar-activo').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const idx = parseInt(e.target.dataset.idx);
+          if (PROPUESTA_NUEVA.activos[idx]) {
+            // Eliminar el activo del array
+            PROPUESTA_NUEVA.activos.splice(idx, 1);
+            // Recalcular montosPorClase
+            recalcularMontosPorClase();
+            // Re-renderizar
+            renderHoldingsClienteNuevo();
+            renderAsignacionClienteNuevo();
+            // Evaluar límites de concentración
+            evaluarLimitesClienteNuevo();
+          }
         });
       });
     }
@@ -19324,6 +19350,179 @@ const regionCols = [
         const clase = CLASES.find(c => c.toUpperCase() === (a.claseActivo || '').toUpperCase()) || 'Alternativo';
         if (PROPUESTA_NUEVA.montosPorClase[clase] !== undefined) {
           PROPUESTA_NUEVA.montosPorClase[clase] += monto;
+        }
+      });
+    }
+
+    // Evaluar límites de concentración para Cliente Nuevo
+    function evaluarLimitesClienteNuevo() {
+      if (!window.LIMITS || !LIMITS.length) {
+        window.LIMITS_RESULTS_NUEVO = [];
+        return;
+      }
+
+      const activos = PROPUESTA_NUEVA.activos || [];
+      if (activos.length === 0) {
+        window.LIMITS_RESULTS_NUEVO = [];
+        return;
+      }
+
+      // Obtener perfil del cliente nuevo
+      const perfil = PROPUESTA_NUEVA.perfil || document.getElementById('perfilNuevo')?.value || 'Moderado';
+
+      // Calcular total del portafolio
+      const totalCartera = activos.reduce((sum, a) => sum + (a.montoCompra ?? a.montoUSD ?? 0), 0);
+      if (totalCartera <= 0) {
+        window.LIMITS_RESULTS_NUEVO = [];
+        return;
+      }
+
+      // Enriquecer activos para evaluación de límites
+      const allRows = activos.map(a => {
+        const monto = a.montoCompra ?? a.montoUSD ?? 0;
+        const peso = (monto / totalCartera) * 100;
+
+        // Obtener nombre desde diccionario
+        let nombre = a.nombre || a.subproducto || '-';
+        if (a.isin && ACT.dict_by_isin?.get(a.isin)) {
+          nombre = ACT.dict_by_isin.get(a.isin);
+        } else if (a.codSubproducto && ACT.dict_by_codprod?.get(a.codSubproducto)) {
+          nombre = ACT.dict_by_codprod.get(a.codSubproducto);
+        }
+
+        // Obtener vehículo
+        let vehiculo = a.tipo || '-';
+        if (a.isin && ACT.veh_by_isin?.get(a.isin)) {
+          vehiculo = ACT.veh_by_isin.get(a.isin);
+        } else if (a.subproducto && ACT.veh_by_subprod_name?.get(a.subproducto)) {
+          vehiculo = ACT.veh_by_subprod_name.get(a.subproducto);
+        }
+
+        return {
+          inst: nombre,
+          cur: 'USD',
+          clase: normTxt(a.claseActivo || ''),
+          veh: normTxt(vehiculo),
+          peso: peso,
+          grupo: normTxt(a.grupoProducto || ''),
+          geo: '',
+          ighy: '',
+          rating: '',
+          sector: '',
+          _codSub: a.codSubproducto || '',
+          _idx: a._idx
+        };
+      });
+
+      // Evaluar cada límite
+      const results = [];
+
+      LIMITS.forEach((L, i) => {
+        const thr = L.thr[perfil];
+        if (thr == null) return;
+
+        const threshold = thr > 1 ? thr : thr * 100;
+
+        if (L.tipo === 'I') {
+          // Límite Individual
+          const targets = allRows.filter(r => matchesLimit(L.filters, r) && !isException(L, r));
+          let maxW = 0;
+          const violators = [];
+
+          targets.forEach(r => {
+            if (r.peso > maxW) maxW = r.peso;
+            if (r.peso > threshold + 1e-9) {
+              violators.push({
+                inst: r.inst,
+                peso: parseFloat(r.peso.toFixed(2)),
+                _idx: r._idx
+              });
+            }
+          });
+
+          results.push({
+            i,
+            name: L.name,
+            tipo: 'I',
+            valor: parseFloat(maxW.toFixed(2)),
+            limite: parseFloat(threshold.toFixed(2)),
+            ok: violators.length === 0,
+            violators
+          });
+        } else {
+          // Límite Sumatorio (S)
+          const sum = allRows
+            .filter(r => matchesLimit(L.filters, r) && !isException(L, r))
+            .reduce((s, r) => s + r.peso, 0);
+
+          results.push({
+            i,
+            name: L.name,
+            tipo: 'S',
+            valor: parseFloat(sum.toFixed(2)),
+            limite: parseFloat(threshold.toFixed(2)),
+            ok: sum <= threshold + 1e-9
+          });
+        }
+      });
+
+      window.LIMITS_RESULTS_NUEVO = results;
+
+      // Actualizar indicadores visuales en la tabla
+      actualizarIndicadoresLimitesNuevo();
+    }
+
+    // Actualizar indicadores visuales de límites en la tabla de Cliente Nuevo
+    function actualizarIndicadoresLimitesNuevo() {
+      const violados = (window.LIMITS_RESULTS_NUEVO || []).filter(r => !r.ok);
+      if (violados.length === 0) return;
+
+      // Crear mapa de violaciones por índice de activo
+      const violacionesPorIdx = new Map();
+
+      violados.forEach(lim => {
+        if (lim.tipo === 'I' && lim.violators) {
+          lim.violators.forEach(v => {
+            if (v._idx !== undefined) {
+              if (!violacionesPorIdx.has(v._idx)) {
+                violacionesPorIdx.set(v._idx, []);
+              }
+              violacionesPorIdx.get(v._idx).push({
+                nombre: lim.name,
+                tipo: lim.tipo,
+                limite: lim.limite,
+                valor: v.peso
+              });
+            }
+          });
+        }
+      });
+
+      // Actualizar filas con indicadores
+      const tb = document.getElementById('holdBodyUSD');
+      if (!tb) return;
+
+      tb.querySelectorAll('.btn-eliminar-activo').forEach(btn => {
+        const idx = parseInt(btn.dataset.idx);
+        const td = btn.closest('td');
+        if (!td) return;
+
+        // Remover indicador existente
+        const existingIndicator = td.querySelector('.limite-warning');
+        if (existingIndicator) existingIndicator.remove();
+
+        if (violacionesPorIdx.has(idx)) {
+          const violaciones = violacionesPorIdx.get(idx);
+          const indicator = document.createElement('span');
+          indicator.className = 'limite-warning';
+          indicator.innerHTML = '⚠️';
+          indicator.style.cssText = 'cursor:pointer;margin-right:6px;';
+          indicator.title = violaciones.map(v => `${v.nombre}: ${v.valor.toFixed(1)}% > ${v.limite}%`).join('\n');
+          indicator.addEventListener('click', () => {
+            const nombre = PROPUESTA_NUEVA.activos[idx]?.nombre || 'Activo';
+            openExcesoConcentracionModal(nombre, 'USD', violaciones);
+          });
+          td.insertBefore(indicator, btn);
         }
       });
     }
