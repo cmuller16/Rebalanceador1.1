@@ -18856,6 +18856,16 @@ const regionCols = [
           }
         });
 
+        // Cambiar header de columna vacía (col 11) a "% Peso"
+        document.querySelectorAll('#theadUSD th, #theadPEN th, #theadTotal th').forEach(th => {
+          if (th.style.width === '3px' && th.innerHTML.trim() === '') {
+            th.innerHTML = '%<br>Peso';
+            th.style.width = '';
+            th.dataset.originalText = '';
+            th.dataset.originalWidth = '3px';
+          }
+        });
+
         // Ocultar pestañas de Reporte (no aplican para cliente nuevo)
         if (tabReporte) tabReporte.style.display = 'none';
         if (tabChildren) tabChildren.style.display = 'none';
@@ -18889,9 +18899,18 @@ const regionCols = [
 
         // Restaurar headers originales: "Monto Sugerido" → "Monto Final", "% Sugerido" → "Peso Final"
         thMontoFinal.forEach(th => {
-          if (th.dataset.originalText) {
+          if (th.dataset.originalText !== undefined) {
             th.innerHTML = th.dataset.originalText;
             delete th.dataset.originalText;
+          }
+        });
+
+        // Restaurar header "% Peso" a columna vacía
+        document.querySelectorAll('#theadUSD th, #theadPEN th, #theadTotal th').forEach(th => {
+          if (th.dataset.originalWidth === '3px') {
+            th.innerHTML = '';
+            th.style.width = '3px';
+            delete th.dataset.originalWidth;
           }
         });
 
@@ -19192,7 +19211,7 @@ const regionCols = [
           <td class="num center">$${subSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</td>
           <td class="num center">${subPesoSug}%</td>
           <td class="num center"><strong>$${subCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
-          <td></td>
+          <td class="num center"><strong>${subPesoFinal}%</strong></td>
           <td></td>
         `;
         tb.appendChild(trSub);
@@ -19244,7 +19263,7 @@ const regionCols = [
                      value="$${montoCompra.toLocaleString('en-US', {maximumFractionDigits:0})}"
                      placeholder="$0">
             </td>
-            <td></td>
+            <td class="num center">${pesoFinal}%</td>
             <td></td>
           `;
           tb.appendChild(tr);
@@ -19264,7 +19283,7 @@ const regionCols = [
         <td class="num center"><strong>$${totalSugerido.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
         <td class="num center"><strong>100.0%</strong></td>
         <td class="num center"><strong>$${totalCompra.toLocaleString('en-US', {maximumFractionDigits:0})}</strong></td>
-        <td></td>
+        <td class="num center"><strong>100.0%</strong></td>
         <td></td>
       `;
       tb.appendChild(trTotal);
